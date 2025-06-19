@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useMobilePerformance();
 
   return (
-    <div className="min-h-screen bg-[#4a4a4a] relative">
+    <div className="min-h-screen bg-[#4a4a4a] relative flex flex-col">
       {/* Fixed Status Bar - stays at top */}
       <StatusBar />
       
@@ -27,10 +27,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Main scrollable content with proper padding for fixed elements */}
       <main 
-        className="w-full relative"
+        className="flex-1 w-full relative overflow-y-auto"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
-          paddingBottom: 'max(56px, calc(56px + env(safe-area-inset-bottom)))',
+          paddingBottom: 'calc(56px + env(safe-area-inset-bottom))',
           minHeight: '100vh'
         }}
       >
@@ -40,7 +40,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Footer - only show on desktop and not on profile pages */}
       {!isProfilePage && <Footer />}
       
-      {/* Bottom Navigation - show on all mobile devices - positioned outside main */}
+      {/* Bottom Navigation - fixed at bottom of viewport */}
       <BottomNavBar />
       
       {/* PWA Install Prompt - only show in browser mode */}
