@@ -1,0 +1,86 @@
+{
+  "name": "Flora Distro - Premium Cannabis Delivery",
+  "short_name": "Flora Distro",
+  "description": "Premium cannabis delivery - Real gas, to your door. Same-day shipping available.",
+  "version": "1.0.2",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "id": "com.floradistro.app",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/hero-image.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Flora Distro Homepage"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop Flower",
+      "short_name": "Flower",
+      "description": "Browse premium cannabis flower",
+      "url": "/flower",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Shop Vapes",
+      "short_name": "Vapes",
+      "description": "Browse vape products",
+      "url": "/vape",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Cart",
+      "short_name": "Cart",
+      "description": "View your shopping cart",
+      "url": "/cart",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["shopping", "lifestyle"],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": "",
+  "lang": "en-US",
+  "dir": "ltr"
+} 
