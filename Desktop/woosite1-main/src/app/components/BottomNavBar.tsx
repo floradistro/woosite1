@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
-import { useEffect } from 'react';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
@@ -12,35 +11,6 @@ export default function BottomNavBar() {
   const { user } = useAuth();
   
   const itemCount = items.reduce((total: number, item: any) => total + item.quantity, 0);
-
-  // Ensure navigation bar stays fixed
-  useEffect(() => {
-    const ensureFixedPosition = () => {
-      const nav = document.querySelector('.bottom-nav-bar') as HTMLElement;
-      if (nav) {
-        nav.style.position = 'fixed';
-        nav.style.bottom = '0';
-        nav.style.left = '0';
-        nav.style.right = '0';
-        nav.style.zIndex = '9999';
-      }
-    };
-
-    // Run immediately
-    ensureFixedPosition();
-    
-    // Run periodically to ensure positioning is maintained
-    const interval = setInterval(ensureFixedPosition, 1000);
-    
-    // Run on scroll to catch any issues
-    const handleScroll = () => ensureFixedPosition();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   const navItems = [
     {
@@ -104,27 +74,27 @@ export default function BottomNavBar() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-[9999] bottom-nav-bar bg-white/95 backdrop-blur-md border-t border-gray-200 md:hidden"
+      className="fixed bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50 md:hidden"
       style={{
-        paddingBottom: 'env(safe-area-inset-bottom)',
-        position: 'fixed',
-        bottom: '0',
-        left: '0',
-        right: '0',
-        zIndex: '9999'
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+        height: 'calc(56px + max(8px, env(safe-area-inset-bottom)))'
       }}
     >
-      <div className="flex items-center justify-around h-14">
+      <div className="flex items-center justify-around h-14 px-2">
         {navItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-              isActive(item.href) ? 'text-black' : 'text-gray-400'
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 rounded-lg mx-1 ${
+              isActive(item.href) 
+                ? 'text-black bg-gray-100/50' 
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
             }`}
           >
-            {item.icon}
-            <span className="text-[10px] mt-0.5">{item.name}</span>
+            <div className="flex flex-col items-center justify-center">
+              {item.icon}
+              <span className="text-[10px] mt-0.5 font-medium">{item.name}</span>
+            </div>
           </Link>
         ))}
       </div>

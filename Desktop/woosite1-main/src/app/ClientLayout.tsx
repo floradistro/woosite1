@@ -27,10 +27,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Main scrollable content with proper padding for fixed elements */}
       <main 
-        className="w-full relative"
+        className="w-full relative pb-20 md:pb-0"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
-          paddingBottom: 'calc(56px + env(safe-area-inset-bottom))',
           minHeight: '100vh'
         }}
       >
@@ -40,7 +39,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Footer - only show on desktop and not on profile pages */}
       {!isProfilePage && <Footer />}
       
-      {/* Bottom Navigation - fixed at bottom of viewport */}
+      {/* Bottom Navigation - show on all mobile devices - positioned outside main */}
       <BottomNavBar />
       
       {/* PWA Install Prompt - only show in browser mode */}
