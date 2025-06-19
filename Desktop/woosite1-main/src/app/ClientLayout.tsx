@@ -30,20 +30,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         className="w-full"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
-          paddingBottom: isPWA ? 'calc(83px + env(safe-area-inset-bottom))' : '0',
-          minHeight: isPWA 
-            ? 'calc(100vh - env(safe-area-inset-top) - 83px - env(safe-area-inset-bottom))' 
-            : 'auto'
+          paddingBottom: 'max(56px, calc(56px + env(safe-area-inset-bottom)))',
+          minHeight: '100vh'
         }}
       >
         {children}
       </main>
       
-      {/* Footer - only show in browser mode and not on profile pages */}
-      {!isPWA && !isProfilePage && <Footer />}
+      {/* Footer - only show on desktop and not on profile pages */}
+      {!isProfilePage && <Footer />}
       
-      {/* Bottom Navigation - only show in PWA mode */}
-      {isPWA && <BottomNavBar />}
+      {/* Bottom Navigation - show on all mobile devices */}
+      <BottomNavBar />
       
       {/* PWA Install Prompt - only show in browser mode */}
       {!isPWA && <PWAInstallPrompt />}

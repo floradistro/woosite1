@@ -58,7 +58,7 @@ function HeaderContent() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // PWA Detection
-  const { isPWA, safeAreaTop, isIOS, headerHeight } = usePWA();
+  const { isPWA } = usePWA();
 
   // AI Search states
   const [isSearchOpen, setIsSearchOpen] = useState(false);

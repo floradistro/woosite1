@@ -24,15 +24,7 @@ const ProductShowcase = dynamic(() => import('@/components/ProductShowcase'), {
   ssr: true
 });
 
-const FloatingCTA = dynamic(() => import('@/components/FloatingCTA'), {
-  ssr: false
-});
-
 const ExitIntent = dynamic(() => import('@/components/ExitIntent'), {
-  ssr: false
-});
-
-const MobileCTA = dynamic(() => import('@/components/MobileCTA'), {
   ssr: false
 });
 
@@ -152,8 +144,6 @@ export default function Home() {
       </main>
       
       {/* Floating Components */}
-      <FloatingCTA />
-      <MobileCTA />
       <ScrollToTop />
       <ExitIntent />
     </div>
