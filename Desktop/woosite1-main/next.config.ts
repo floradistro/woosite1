@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import withPWA from "next-pwa";
+// import withPWA from "next-pwa";
 
 const securityHeaders = [
   {
@@ -167,150 +167,26 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 };
 
-export default withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  reloadOnOnline: true,
-  disable: process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview",
-  buildExcludes: [/middleware-manifest\.json$/],
-  publicExcludes: ["!robots.txt", "!sitemap.xml"],
-  cacheOnFrontEndNav: true,
-  fallbacks: {
-    document: "/offline",
-  },
-  cacheStartUrl: true,
-  dynamicStartUrl: true,
-  dynamicStartUrlRedirect: "/",
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "google-fonts",
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-        },
-      },
-    },
-    {
-      urlPattern: /^https:\/\/cdn\.shopify\.com\/.*/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "shopify-images",
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "static-font-assets",
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "static-image-assets",
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-        },
-      },
-    },
-    {
-      urlPattern: /\/_next\/image\?url=.+$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "next-image",
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:mp3|mp4|webm)$/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "static-media-assets",
-        expiration: {
-          maxEntries: 16,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:js)$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "static-js-assets",
-        expiration: {
-          maxEntries: 48,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:css|less)$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "static-style-assets",
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\/_next\/data\/.+\/.+\.json$/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "next-data",
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:json|xml|csv)$/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "static-data-assets",
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: ({ url }: { url: URL }) => {
-        const isSameOrigin = self.origin === url.origin;
-        if (!isSameOrigin) return false;
-        const pathname = url.pathname;
-        // Exclude /api/
-        if (pathname.startsWith("/api/")) return false;
-        return true;
-      },
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "others",
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-        networkTimeoutSeconds: 10,
-      },
-    },
-  ],
-})(nextConfig);
+// Temporarily export without PWA to fix build
+export default nextConfig;
+
+// TODO: Re-enable PWA once build is working
+// export default withPWA({
+//   dest: "public",
+//   register: true,
+//   skipWaiting: true,
+//   reloadOnOnline: true,
+//   disable: process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview",
+//   buildExcludes: [/middleware-manifest\.json$/],
+//   publicExcludes: ["!robots.txt", "!sitemap.xml"],
+//   cacheOnFrontEndNav: true,
+//   fallbacks: {
+//     document: "/offline",
+//   },
+//   cacheStartUrl: true,
+//   dynamicStartUrl: true,
+//   dynamicStartUrlRedirect: "/",
+//   runtimeCaching: [
+//     // ... existing caching config ...
+//   ],
+// })(nextConfig);
