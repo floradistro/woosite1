@@ -35,6 +35,17 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Explicitly tell Next.js to use src directory
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  // Configure Next.js to look for app directory in src
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      '@react-three/fiber',
+      '@react-three/drei',
+      'three'
+    ],
+    optimizeCss: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -67,16 +78,6 @@ const nextConfig: NextConfig = {
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-  },
-  experimental: {
-    optimizePackageImports: [
-      'lucide-react',
-      'framer-motion',
-      '@react-three/fiber',
-      '@react-three/drei',
-      'three'
-    ],
-    optimizeCss: true,
   },
   async headers() {
     return [
