@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useMobilePerformance();
 
   return (
-    <div className="min-h-screen bg-[#4a4a4a] relative flex flex-col">
+    <div className="min-h-screen bg-[#4a4a4a] relative">
       {/* Fixed Status Bar - stays at top */}
       <StatusBar />
       
@@ -27,7 +27,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Main scrollable content with proper padding for fixed elements */}
       <main 
-        className="flex-1 w-full relative overflow-y-auto"
+        className="w-full relative"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
           paddingBottom: 'calc(56px + env(safe-area-inset-bottom))',

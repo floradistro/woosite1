@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { useEffect } from 'react';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
@@ -11,6 +12,35 @@ export default function BottomNavBar() {
   const { user } = useAuth();
   
   const itemCount = items.reduce((total: number, item: any) => total + item.quantity, 0);
+
+  // Ensure navigation bar stays fixed
+  useEffect(() => {
+    const ensureFixedPosition = () => {
+      const nav = document.querySelector('.bottom-nav-bar') as HTMLElement;
+      if (nav) {
+        nav.style.position = 'fixed';
+        nav.style.bottom = '0';
+        nav.style.left = '0';
+        nav.style.right = '0';
+        nav.style.zIndex = '9999';
+      }
+    };
+
+    // Run immediately
+    ensureFixedPosition();
+    
+    // Run periodically to ensure positioning is maintained
+    const interval = setInterval(ensureFixedPosition, 1000);
+    
+    // Run on scroll to catch any issues
+    const handleScroll = () => ensureFixedPosition();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const navItems = [
     {
@@ -74,9 +104,14 @@ export default function BottomNavBar() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-[9999] bottom-nav-bar bg-white border-t border-gray-200 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-[9999] bottom-nav-bar bg-white/95 backdrop-blur-md border-t border-gray-200 md:hidden"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        zIndex: '9999'
       }}
     >
       <div className="flex items-center justify-around h-14">
