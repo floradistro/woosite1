@@ -74,10 +74,7 @@ export default function BottomNavBar() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-200 md:hidden"
-      style={{
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      }}
+      className="bottom-nav-bar bg-white border-t border-gray-200 md:hidden"
     >
       <div className="flex items-center justify-around h-14">
         {navItems.map((item) => (

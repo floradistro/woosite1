@@ -386,6 +386,16 @@ textarea:focus-visible {
 }
 
 /* Bottom navigation safety */
+.bottom-nav-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  z-index: 9999 !important;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 nav[class*="bottom-0"] {
   position: fixed;
   bottom: 0;
