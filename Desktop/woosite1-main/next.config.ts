@@ -172,7 +172,7 @@ export default withPWA({
   register: true,
   skipWaiting: true,
   reloadOnOnline: true,
-  disable: process.env.NODE_ENV === "development",
+  disable: process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview",
   buildExcludes: [/middleware-manifest\.json$/],
   publicExcludes: ["!robots.txt", "!sitemap.xml"],
   cacheOnFrontEndNav: true,
