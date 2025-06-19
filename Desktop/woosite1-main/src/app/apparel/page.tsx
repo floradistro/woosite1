@@ -184,7 +184,7 @@ function ApparelCollectionContent() {
       </section>
 
       {/* Filter Bar */}
-      <section className="sticky top-0 z-40 bg-[#4a4a4a]/95 backdrop-blur-sm border-b border-white/10">
+              <section className="sticky top-0 z-30 bg-[#4a4a4a]/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">

@@ -55,7 +55,7 @@ export default function FilterBar({
   };
 
   return (
-    <section className="sticky top-0 z-40 bg-[#4a4a4a]/95 backdrop-blur-md border-y border-white/10">
+    <section className="sticky top-0 z-30 bg-[#4a4a4a]/95 backdrop-blur-md border-y border-white/10">
       <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between gap-2 md:gap-4">
           {/* Left side - Format toggle */}

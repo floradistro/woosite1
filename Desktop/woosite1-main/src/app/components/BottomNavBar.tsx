@@ -73,24 +73,7 @@ export default function BottomNavBar() {
   };
 
   return (
-    <div
-      className="md:hidden"
-      style={{
-        position: 'fixed',
-        bottom: '0',
-        left: '0',
-        right: '0',
-        zIndex: '9999',
-        width: '100vw',
-        height: 'calc(56px + env(safe-area-inset-bottom, 8px))',
-        paddingBottom: 'env(safe-area-inset-bottom, 8px)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(229, 231, 235, 1)',
-        transform: 'translateZ(0)', // Force hardware acceleration
-        willChange: 'transform'
-      }}
-    >
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden z-[100] pb-safe">
       <div className="flex items-center justify-around h-14 px-2">
         {navItems.map((item) => (
           <Link
@@ -109,6 +92,6 @@ export default function BottomNavBar() {
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   );
 }

@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useMobilePerformance();
 
   return (
-    <div className="min-h-screen bg-[#4a4a4a]" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div className="min-h-screen bg-[#4a4a4a] relative">
       {/* Fixed Status Bar - stays at top */}
       <StatusBar />
       
@@ -30,10 +30,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         className="w-full pb-20 md:pb-0"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
-          minHeight: '100vh',
-          position: 'relative',
-          overflow: 'auto',
-          height: '100vh'
+          minHeight: '100vh'
         }}
       >
         {children}
@@ -42,7 +39,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Footer - only show on desktop and not on profile pages */}
       {!isProfilePage && <Footer />}
       
-      {/* Bottom Navigation - show on all mobile devices - positioned outside main */}
+      {/* Bottom Navigation - show on all mobile devices */}
       <BottomNavBar />
       
       {/* PWA Install Prompt - only show in browser mode */}

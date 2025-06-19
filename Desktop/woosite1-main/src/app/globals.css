@@ -242,6 +242,14 @@
   .will-change-auto {
     will-change: auto;
   }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+
+  .z-100 {
+    z-index: 100;
+  }
 }
 
 /* Luxury Typography Scales */
