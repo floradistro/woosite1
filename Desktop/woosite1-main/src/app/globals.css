@@ -392,8 +392,23 @@ textarea:focus-visible {
   left: 0 !important;
   right: 0 !important;
   width: 100vw !important;
-  z-index: 50 !important;
+  z-index: 9999 !important;
   padding-bottom: env(safe-area-inset-bottom);
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Ensure body doesn't interfere with fixed positioning */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Prevent any parent containers from affecting fixed positioning */
+* {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 /* Remove all the old conflicting PWA styles below this line */

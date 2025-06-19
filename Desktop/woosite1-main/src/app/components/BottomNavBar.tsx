@@ -73,11 +73,22 @@ export default function BottomNavBar() {
   };
 
   return (
-    <nav 
-      className="fixed bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50 md:hidden"
+    <div
+      className="md:hidden"
       style={{
-        paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
-        height: 'calc(56px + max(8px, env(safe-area-inset-bottom)))'
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        zIndex: '9999',
+        width: '100vw',
+        height: 'calc(56px + env(safe-area-inset-bottom, 8px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 8px)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(229, 231, 235, 1)',
+        transform: 'translateZ(0)', // Force hardware acceleration
+        willChange: 'transform'
       }}
     >
       <div className="flex items-center justify-around h-14 px-2">
@@ -98,6 +109,6 @@ export default function BottomNavBar() {
           </Link>
         ))}
       </div>
-    </nav>
+    </div>
   );
 }

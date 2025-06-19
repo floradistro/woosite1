@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   useMobilePerformance();
 
   return (
-    <div className="min-h-screen bg-[#4a4a4a] relative">
+    <div className="min-h-screen bg-[#4a4a4a]" style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Fixed Status Bar - stays at top */}
       <StatusBar />
       
@@ -27,10 +27,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Main scrollable content with proper padding for fixed elements */}
       <main 
-        className="w-full relative pb-20 md:pb-0"
+        className="w-full pb-20 md:pb-0"
         style={{
           paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
-          minHeight: '100vh'
+          minHeight: '100vh',
+          position: 'relative',
+          overflow: 'auto',
+          height: '100vh'
         }}
       >
         {children}
