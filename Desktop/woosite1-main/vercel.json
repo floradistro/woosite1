@@ -1,4 +1,7 @@
 {
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "functions": {
     "src/app/api/sitemap/route.ts": {
       "maxDuration": 10
