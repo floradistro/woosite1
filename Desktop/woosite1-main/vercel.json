@@ -3,10 +3,7 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "functions": {
-    "src/app/api/sitemap/route.ts": {
-      "maxDuration": 10
-    },
-    "src/app/api/robots/route.ts": {
+    "src/app/api/health/route.ts": {
       "maxDuration": 10
     }
   },
@@ -52,16 +49,6 @@
           "value": "1; mode=block"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/api/robots"
     }
   ]
 } 
