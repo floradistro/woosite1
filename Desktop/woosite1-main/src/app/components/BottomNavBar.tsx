@@ -4,11 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { useEffect, useState } from 'react';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
   const { items } = useCart();
   const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const itemCount = items.reduce((total: number, item: any) => total + item.quantity, 0);
 
@@ -72,32 +78,76 @@ export default function BottomNavBar() {
     return pathname.startsWith(href);
   };
 
+  if (!mounted) return null;
+
   return (
-    <nav 
-      className="bottom-nav-fixed md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200"
+    <div 
+      className="md:hidden"
       style={{
+        position: 'fixed',
+        bottom: '0px',
+        left: '0px',
+        right: '0px',
+        width: '100vw',
         height: '64px',
-        paddingBottom: 'env(safe-area-inset-bottom, 8px)'
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid #e5e7eb',
+        zIndex: 999999,
+        paddingBottom: 'env(safe-area-inset-bottom, 8px)',
+        transform: 'translate3d(0, 0, 0)',
+        willChange: 'transform'
       }}
     >
-      <div className="flex items-center justify-around h-14 px-2">
+      <div 
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          height: '56px',
+          padding: '0 8px'
+        }}
+      >
         {navItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 rounded-lg mx-1 ${
-              isActive(item.href) 
-                ? 'text-black bg-gray-100/50' 
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
-            }`}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: '1',
+              height: '100%',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              margin: '0 4px',
+              transition: 'all 0.2s ease',
+              backgroundColor: isActive(item.href) ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+              color: isActive(item.href) ? '#000000' : '#6b7280'
+            }}
+            onMouseEnter={(e) => {
+              if (!isActive(item.href)) {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.025)';
+                e.currentTarget.style.color = '#374151';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive(item.href)) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#6b7280';
+              }
+            }}
           >
-            <div className="flex flex-col items-center justify-center">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               {item.icon}
-              <span className="text-[10px] mt-0.5 font-medium">{item.name}</span>
+              <span style={{ fontSize: '10px', marginTop: '2px', fontWeight: '500' }}>
+                {item.name}
+              </span>
             </div>
           </Link>
         ))}
       </div>
-    </nav>
+    </div>
   );
 }
