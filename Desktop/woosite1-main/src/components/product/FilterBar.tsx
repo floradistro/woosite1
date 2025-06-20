@@ -129,32 +129,27 @@ const FilterBar: React.FC<FilterBarProps> = ({
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}
-          <div className="hidden lg:flex items-center justify-between px-4 py-3">
+          <div className="hidden lg:flex items-center justify-between px-4 py-1">
             {/* Left side filters */}
-            <div className="flex items-center gap-3 flex-1">
-              {/* Format Toggle - only show if secondary format exists */}
-              {formats?.secondary && (
-                <div className="flex items-center bg-[#2a2a2a] rounded-lg p-1">
-                  <button
-                    onClick={() => onFormatChange(formats.primary)}
-                    className={`px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
-                      format === formats.primary
-                        ? 'bg-emerald-500 text-white'
-                        : 'text-white/70 hover:text-white'
+            <div className="flex items-center gap-2 flex-1">
+              {/* Pre-Roll Toggle - only show for flower collection */}
+              {formats?.secondary && formats.primary === 'flower' && (
+                <div className="flex items-center gap-5">
+                  <span className="text-red-400 text-lg font-medium">Need pre rolls?</span>
+                  <div 
+                    className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${
+                      format === formats.secondary ? 'bg-emerald-500' : 'bg-gray-600'
                     }`}
+                    style={{ width: '51px', height: '31px' }}
+                    onClick={() => onFormatChange(format === formats.secondary ? formats.primary : formats.secondary!)}
                   >
-                    {formats.primary.charAt(0).toUpperCase() + formats.primary.slice(1)}
-                  </button>
-                  <button
-                    onClick={() => onFormatChange(formats.secondary!)}
-                    className={`px-3 py-1.5 text-sm rounded-md transition-all duration-200 ${
-                      format === formats.secondary
-                        ? 'bg-emerald-500 text-white'
-                        : 'text-white/70 hover:text-white'
-                    }`}
-                  >
-                    {formats.secondary!.charAt(0).toUpperCase() + formats.secondary!.slice(1).replace('-', ' ')}
-                  </button>
+                    <span
+                      className={`inline-block transform rounded-full bg-white transition-transform duration-200 ${
+                        format === formats.secondary ? 'translate-x-5' : 'translate-x-1'
+                      }`}
+                      style={{ width: '27px', height: '27px' }}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -163,7 +158,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-3 py-2 pr-8 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>
@@ -178,7 +173,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterCategory}
                   onChange={(e) => onCategoryChange(e.target.value as any)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-3 py-2 pr-8 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="all">All Types</option>
                   <option value="indica">Indica</option>
@@ -193,7 +188,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterVibe}
                   onChange={(e) => onVibeChange(e.target.value as any)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-3 py-2 pr-8 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="all">All Vibes</option>
                   <option value="relax">Relax</option>
@@ -209,7 +204,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <select
                     value={secondaryFilter}
                     onChange={(e) => onSecondaryChange(e.target.value as any)}
-                    className="appearance-none bg-[#2a2a2a] text-white text-sm px-3 py-2 pr-8 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   >
                     <option value="all">All {getSecondaryLabel()}</option>
                     {getSecondaryOptions().slice(1).map(option => (
@@ -240,36 +235,31 @@ const FilterBar: React.FC<FilterBarProps> = ({
           </div>
 
           {/* Mobile Filter Bar */}
-          <div className="lg:hidden px-4 py-3">
+          <div className="lg:hidden px-4 py-1">
             <div className="flex items-center justify-between">
               {/* Left: Product count */}
               <div className="text-white/60 text-sm">
                 {productCount} of {totalCount}
               </div>
 
-              {/* Center: Format toggle (if exists) */}
-              {formats?.secondary && (
-                <div className="flex items-center bg-[#2a2a2a] rounded-lg p-0.5">
-                  <button
-                    onClick={() => onFormatChange(formats.primary)}
-                    className={`px-2 py-1 text-xs rounded transition-all duration-200 ${
-                      format === formats.primary
-                        ? 'bg-emerald-500 text-white'
-                        : 'text-white/70'
+              {/* Center: Pre-Roll toggle (if flower collection) */}
+              {formats?.secondary && formats.primary === 'flower' && (
+                <div className="flex items-center gap-3">
+                  <span className="text-red-400 text-base font-medium">Need pre rolls?</span>
+                  <div 
+                    className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${
+                      format === formats.secondary ? 'bg-emerald-500' : 'bg-gray-600'
                     }`}
+                    style={{ width: '51px', height: '31px' }}
+                    onClick={() => onFormatChange(format === formats.secondary ? formats.primary : formats.secondary!)}
                   >
-                    {formats.primary.charAt(0).toUpperCase() + formats.primary.slice(1)}
-                  </button>
-                  <button
-                    onClick={() => onFormatChange(formats.secondary!)}
-                    className={`px-2 py-1 text-xs rounded transition-all duration-200 ${
-                      format === formats.secondary
-                        ? 'bg-emerald-500 text-white'
-                        : 'text-white/70'
-                    }`}
-                  >
-                    {formats.secondary!.charAt(0).toUpperCase() + formats.secondary!.slice(1).replace('-', ' ')}
-                  </button>
+                    <span
+                      className={`inline-block transform rounded-full bg-white transition-transform duration-200 ${
+                        format === formats.secondary ? 'translate-x-5' : 'translate-x-1'
+                      }`}
+                      style={{ width: '27px', height: '27px' }}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -314,14 +304,14 @@ const FilterBar: React.FC<FilterBarProps> = ({
             </div>
 
             {/* Filters */}
-            <div className="p-4 space-y-4 overflow-y-auto max-h-[60vh]">
+            <div className="p-4 space-y-3 overflow-y-auto max-h-[60vh]">
               {/* Sort */}
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-2">Sort by</label>
                 <select
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-3 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>
@@ -336,7 +326,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterCategory}
                   onChange={(e) => onCategoryChange(e.target.value as any)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-3 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="all">All Types</option>
                   <option value="indica">Indica</option>
@@ -351,7 +341,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterVibe}
                   onChange={(e) => onVibeChange(e.target.value as any)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-3 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="all">All Vibes</option>
                   <option value="relax">Relax</option>
@@ -367,7 +357,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <select
                     value={secondaryFilter}
                     onChange={(e) => onSecondaryChange(e.target.value as any)}
-                    className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-3 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   >
                     <option value="all">All {getSecondaryLabel()}</option>
                     {getSecondaryOptions().slice(1).map(option => (

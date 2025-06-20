@@ -56,8 +56,8 @@ export default function FilterBar({
 
   return (
     <section className="sticky top-0 z-30 bg-[#4a4a4a]/95 backdrop-blur-md border-y border-white/10">
-      <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4">
-        <div className="flex items-center justify-between gap-2 md:gap-4">
+      <div className="max-w-7xl mx-auto px-3 md:px-6 py-1 md:py-1">
+        <div className="flex items-center justify-between gap-2 md:gap-3">
           {/* Left side - Results count */}
           <div className="flex items-center gap-2 md:gap-6">
             {/* Results count - Hidden on mobile, visible on desktop */}
@@ -74,7 +74,7 @@ export default function FilterBar({
             </span>
             <button
               onClick={triggerFilterDropdown}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 text-xs"
+              className="flex items-center gap-1 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 text-xs"
             >
               <span>Filter</span>
               {activeFilterCount > 0 && (
@@ -91,7 +91,7 @@ export default function FilterBar({
             <div className="flex items-center gap-2">
               <button
                 onClick={triggerFilterDropdown}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+                className="flex items-center gap-2 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
               >
                 <Filter className="w-4 h-4" />
                 <span>Filter</span>
@@ -117,7 +117,7 @@ export default function FilterBar({
               <select
                 value={sortBy}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="appearance-none px-4 py-2 pr-10 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="appearance-none px-2 py-1 pr-6 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 {SORT_OPTIONS.map(option => (
                   <option key={option.value} value={option.value} className="bg-[#2a2a2a]">

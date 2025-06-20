@@ -208,8 +208,8 @@ export default function WholesalePage() {
           <h2 className="text-3xl font-light mb-4 text-center tracking-wide">✅ Application Form</h2>
           
           {/* Add urgency banner */}
-          <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 p-4 rounded-lg mb-8 text-center">
-            <p className="text-red-500 font-medium">
+          <div className="bg-gradient-to-r from-black via-gray-900 to-black border border-white/20 py-2 px-4 rounded-lg mb-8 text-center">
+            <p className="text-white font-medium">
               Don't miss out, apply for a seat at our table
             </p>
           </div>
@@ -338,8 +338,8 @@ export default function WholesalePage() {
           </form>
           
           {/* Moved from value prop section to bottom */}
-          <div className="bg-gradient-to-r from-yellow-900/10 via-orange-900/10 to-red-900/10 backdrop-blur-sm border border-yellow-600/30 p-6 rounded-lg mt-12">
-            <p className="text-yellow-400/90 font-light text-center text-xl">
+          <div className="bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-sm border border-white/20 py-2 px-6 rounded-lg mt-12">
+            <p className="text-white font-light text-center text-xl">
               From here, you're visible.
             </p>
           </div>
