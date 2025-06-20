@@ -22,15 +22,27 @@ export default function HeroSection({ timeUntilDeadline }: HeroSectionProps) {
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center space-y-1 md:space-y-2 animate-fadeInUp max-w-sm md:max-w-none">
             <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light tracking-wide transform hover:scale-105 transition-transform duration-200 uppercase">
-              <span className="font-graffiti animate-subtle-pulse inline-flex items-center gap-2 md:gap-4 whitespace-nowrap">
+              <span 
+                className="font-graffiti animate-subtle-pulse inline-flex items-center gap-2 md:gap-4 whitespace-nowrap"
+                style={{
+                  textShadow: `
+                    0 5px 15px rgba(0,0,0,0.8),
+                    0 10px 30px rgba(0,0,0,0.6),
+                    0 15px 45px rgba(0,0,0,0.4)
+                  `
+                }}
+              >
                 <span>flora</span>
                 <Image 
                   src="/logo.png" 
                   alt="Logo" 
                   width={80} 
                   height={80} 
-                  className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain flex-shrink-0 self-center"
-                  style={{ verticalAlign: 'middle' }}
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain flex-shrink-0 self-center drop-shadow-2xl"
+                  style={{ 
+                    verticalAlign: 'middle',
+                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))'
+                  }}
                 />
                 <span>distro</span>
               </span>

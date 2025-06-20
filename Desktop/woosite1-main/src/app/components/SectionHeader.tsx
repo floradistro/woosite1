@@ -75,7 +75,8 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
                 style={{
                   textShadow: `
                     0 5px 15px rgba(0,0,0,0.8),
-                    0 10px 30px rgba(0,0,0,0.4)
+                    0 10px 30px rgba(0,0,0,0.6),
+                    0 15px 45px rgba(0,0,0,0.4)
                   `
                 }}
               >
@@ -85,8 +86,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
                   alt="Logo" 
                   width={60} 
                   height={60} 
-                  className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain flex-shrink-0 self-center"
-                  style={{ verticalAlign: 'middle' }}
+                  className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain flex-shrink-0 self-center drop-shadow-2xl"
+                  style={{ 
+                    verticalAlign: 'middle',
+                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))'
+                  }}
                 />
                 <span>Distro</span>
               </span>

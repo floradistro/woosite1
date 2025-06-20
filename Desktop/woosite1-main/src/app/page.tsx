@@ -9,7 +9,6 @@ import { FLOWER_PRODUCTS } from '@/app/flower/constants';
 
 // Import sections
 import HeroSection from './components/HeroSection';
-import UrgencyBanner from './components/UrgencyBanner';
 import Section from './components/Section';
 import THCAExplanationSection from './components/THCAExplanationSection';
 import ReviewsSection from './components/ReviewsSection';
@@ -102,11 +101,6 @@ export default function Home() {
     <div className="min-h-screen bg-[#4a4a4a] text-white font-light">
       <main>
         <HeroSection timeUntilDeadline={timeUntilDeadline} />
-        
-        <UrgencyBanner 
-          timeUntilDeadline={timeUntilDeadline} 
-          shouldHidePopups={shouldHidePopups} 
-        />
         
         {/* Only difference section */}
         <Section className="relative bg-[#464646] overflow-hidden -mt-px">
