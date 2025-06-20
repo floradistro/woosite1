@@ -56,7 +56,6 @@ export default function ProductShowcase({ products, title, subtitle }: ProductSh
   const [expandedProducts, setExpandedProducts] = useState<Set<number>>(() => 
     new Set(products.map(product => product.id))
   );
-  const [imageQuickView, setImageQuickView] = useState<FeaturedProduct | null>(null);
 
   // Update expandedProducts when products change
   useEffect(() => {
@@ -210,37 +209,6 @@ export default function ProductShowcase({ products, title, subtitle }: ProductSh
                         quality={85}
                         priority={product.id === 1}
                       />
-                      
-                      {/* Quick view overlay */}
-                      {featuredProduct && (
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Small magnified fisheye view - bottom right corner */}
-                      {isImageLoaded && featuredProduct && (
-                        <div className="absolute bottom-1 right-1 w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg">
-                          <div 
-                            className="w-full h-full rounded-full overflow-hidden"
-                            style={{
-                              backgroundImage: `url(${product.image})`,
-                              backgroundSize: '400%',
-                              backgroundPosition: 'center center',
-                              backgroundRepeat: 'no-repeat',
-                              filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
-                            }}
-                          >
-                          </div>
-                          {/* Subtle lens effect */}
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Product Info */}
@@ -402,49 +370,6 @@ export default function ProductShowcase({ products, title, subtitle }: ProductSh
           })}
         </div>
       </div>
-
-      {/* Image Quick View Modal */}
-      {imageQuickView && (
-        <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setImageQuickView(null)}
-        >
-          <div className="relative max-w-2xl max-h-[80vh] w-full h-full">
-            <button
-              onClick={() => setImageQuickView(null)}
-              className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors duration-300 z-20 bg-black/60 backdrop-blur-sm rounded-full p-2"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            
-            <div 
-              className="relative w-full h-full rounded-lg overflow-hidden bg-white/5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={imageQuickView.image}
-                alt={imageQuickView.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 80vw"
-                className="object-contain select-none"
-                quality={95}
-                draggable={false}
-              />
-            </div>
-            
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <h3 className="text-white font-extralight text-xl mb-1">
-                {imageQuickView.title}
-              </h3>
-              {imageQuickView.lineage && (
-                <p className="text-white/70 text-sm italic">{imageQuickView.lineage}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 } 
