@@ -3,6 +3,21 @@ import Image from 'next/image';
 import { ProductType } from '@/app/components/ProductCollectionConfig';
 import QuickViewModal from '@/app/components/QuickViewModal';
 
+interface QuickViewProduct {
+  id: number;
+  title: string;
+  description?: string;
+  price: number;
+  image: string;
+  category: string;
+  vibe: string;
+  thc: number;
+  nose?: string | string[];
+  lineage?: string;
+  terpenes?: string[];
+  spotlight?: string;
+}
+
 export interface BaseFeaturedProduct {
   id: number;
   title: string;
@@ -400,10 +415,13 @@ export default function DenseView<T extends BaseFeaturedProduct>({
     setQuickViewProduct(null);
   };
 
-  const handleQuickViewAddToCart = (product: T, weight: string) => {
-    // Create a mock event for the existing onAddToCart function
-    const mockEvent = { stopPropagation: () => {} } as React.MouseEvent;
-    onAddToCart(product, mockEvent);
+  const handleQuickViewAddToCart = (product: QuickViewProduct, weight: string) => {
+    // Find the original product by ID and create a mock event
+    const originalProduct = products.find(p => p.id === product.id);
+    if (originalProduct) {
+      const mockEvent = { stopPropagation: () => {} } as React.MouseEvent;
+      onAddToCart(originalProduct, mockEvent);
+    }
   };
 
   return (
@@ -563,7 +581,20 @@ export default function DenseView<T extends BaseFeaturedProduct>({
 
       {/* Quick View Modal */}
       <QuickViewModal
-        product={quickViewProduct}
+        product={quickViewProduct ? {
+          id: quickViewProduct.id,
+          title: quickViewProduct.title,
+          description: quickViewProduct.description,
+          price: quickViewProduct.price,
+          image: quickViewProduct.image,
+          category: quickViewProduct.category,
+          vibe: quickViewProduct.vibe,
+          thc: quickViewProduct.thc,
+          nose: quickViewProduct.nose,
+          lineage: quickViewProduct.lineage,
+          terpenes: quickViewProduct.terpenes,
+          spotlight: quickViewProduct.spotlight,
+        } : null}
         isOpen={isQuickViewOpen}
         onClose={handleQuickViewClose}
         onAddToCart={handleQuickViewAddToCart}
