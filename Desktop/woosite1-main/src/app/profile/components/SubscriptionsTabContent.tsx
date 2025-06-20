@@ -158,7 +158,7 @@ export default function SubscriptionsTabContent({
                     </button>
                     <button
                       onClick={() => onSubscriptionAction('modify', subscription.id)}
-                      className={`px-3 py-1.5 ${isMobile ? 'text-sm' : 'text-xs'} bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors`}
+                      className={`px-3 py-1.5 ${isMobile ? 'text-sm' : 'text-xs'} bg-black hover:bg-gray-900 text-white rounded-lg transition-colors`}
                     >
                       Modify
                     </button>

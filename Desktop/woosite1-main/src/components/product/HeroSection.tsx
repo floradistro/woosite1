@@ -90,7 +90,7 @@ export default function HeroSection({
       </section>
 
       {/* Quality Banner */}
-      <div className="bg-gradient-to-r from-black via-gray-900 to-black py-2 text-center z-40">
+      <div className="bg-black py-2 text-center z-40">
         <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 px-4">
           {qualityBadges.map((badge, index) => (
             <React.Fragment key={index}>

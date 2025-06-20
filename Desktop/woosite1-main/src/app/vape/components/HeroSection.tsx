@@ -65,7 +65,7 @@ export default function HeroSection({ format }: HeroSectionProps) {
       </section>
 
       {/* Quality Banner */}
-      <div className="bg-gradient-to-r from-black via-gray-900 to-black py-2 text-center z-40">
+      <div className="bg-black py-2 text-center z-40">
         <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 px-4">
           <span className="text-white font-medium text-sm md:text-base">
             ✓ {format === 'cartridge' ? 'Pure Extract' : 'Pre-Charged'}

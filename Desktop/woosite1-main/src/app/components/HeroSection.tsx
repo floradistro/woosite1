@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { buttonStyles } from '@/styles/shared';
 
 interface HeroSectionProps {
@@ -21,7 +22,18 @@ export default function HeroSection({ timeUntilDeadline }: HeroSectionProps) {
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center space-y-1 md:space-y-2 animate-fadeInUp max-w-sm md:max-w-none">
             <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light tracking-wide transform hover:scale-105 transition-transform duration-200 uppercase">
-              <span className="font-graffiti animate-subtle-pulse">flora distro</span>
+              <span className="font-graffiti animate-subtle-pulse inline-flex items-center gap-2 md:gap-4 whitespace-nowrap">
+                <span>flora</span>
+                <Image 
+                  src="/logo.png" 
+                  alt="Logo" 
+                  width={80} 
+                  height={80} 
+                  className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain flex-shrink-0 self-center"
+                  style={{ verticalAlign: 'middle' }}
+                />
+                <span>distro</span>
+              </span>
             </h1>
             <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide max-w-xs md:max-w-2xl mx-auto drop-shadow-lg opacity-0 animate-fadeInUp" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
               Real Cannabis Anywhere

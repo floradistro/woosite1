@@ -1081,7 +1081,7 @@ function HeaderContent() {
                             <Link
                               href="/checkout"
                               onClick={() => setIsCartOpen(false)}
-                              className="block bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-md text-sm font-medium transition-all"
+                              className="block bg-black hover:bg-gray-900 text-white text-center py-2 px-3 rounded-md text-sm font-medium transition-all"
                             >
                               Checkout
                             </Link>

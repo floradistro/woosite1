@@ -350,7 +350,7 @@ export default function SubscriptionsPage() {
                   </div>
 
                   {/* Subscribe Button */}
-                  <button className="w-full group relative inline-flex items-center justify-center gap-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500 text-white rounded-lg font-medium text-xs transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-0 select-none overflow-hidden">
+                  <button className="w-full group relative inline-flex items-center justify-center gap-1 px-4 py-2.5 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-xs transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-0 select-none overflow-hidden">
                     <span className="relative z-10">SUBSCRIBE NOW</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </button>

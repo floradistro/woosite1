@@ -190,10 +190,10 @@ function ApparelCollectionContent() {
             <div className="flex items-center gap-6">
               {/* Category Filter */}
               <div className="relative">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200"
-                >
+                                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 rounded-lg transition-all duration-200 text-white"
+                  >
                   <Filter className="w-4 h-4" />
                   <span className="font-medium">
                     {filterCategory === 'all' ? 'All Categories' : 
@@ -212,7 +212,7 @@ function ApparelCollectionContent() {
                             setShowFilters(false);
                           }}
                           className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${
-                            filterCategory === 'all' ? 'bg-emerald-500/20 text-emerald-300' : 'hover:bg-white/10'
+                            filterCategory === 'all' ? 'bg-black text-white' : 'hover:bg-white/10'
                           }`}
                         >
                           All Categories
@@ -225,7 +225,7 @@ function ApparelCollectionContent() {
                               setShowFilters(false);
                             }}
                             className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${
-                              filterCategory === option.value ? option.color : 'hover:bg-white/10'
+                              filterCategory === option.value ? 'bg-black text-white' : 'hover:bg-white/10'
                             }`}
                           >
                             {option.label}
@@ -248,7 +248,7 @@ function ApparelCollectionContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="bg-black hover:bg-gray-900 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value} className="bg-[#3a3a3a] text-white">
@@ -284,7 +284,7 @@ function ApparelCollectionContent() {
                   >
                     {/* Featured Badge */}
                     {product.featured && (
-                      <div className="absolute top-2 left-2 z-20 bg-emerald-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                      <div className="absolute top-2 left-2 z-20 bg-black text-white text-xs font-medium px-2 py-1 rounded-full">
                         Featured
                       </div>
                     )}
@@ -343,7 +343,7 @@ function ApparelCollectionContent() {
                                 }}
                                 className={`px-2 py-1 text-xs rounded border transition-all duration-200 ${
                                   selectedSize === size
-                                    ? 'bg-emerald-500 border-emerald-500 text-white'
+                                    ? 'bg-black border-black text-white'
                                     : 'border-white/30 text-white/70 hover:border-white/50'
                                 }`}
                               >
@@ -367,7 +367,7 @@ function ApparelCollectionContent() {
                               }}
                               className={`px-2 py-1 text-xs rounded border transition-all duration-200 ${
                                 selectedColor === color
-                                  ? 'bg-emerald-500 border-emerald-500 text-white'
+                                  ? 'bg-black border-black text-white'
                                   : 'border-white/30 text-white/70 hover:border-white/50'
                               }`}
                             >
@@ -380,7 +380,7 @@ function ApparelCollectionContent() {
                       {/* Add to Cart Button */}
                       <button
                         onClick={(e) => handleAddToCart(product, e)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all duration-300 font-medium"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 rounded-lg transition-all duration-300 font-medium"
                       >
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart

@@ -208,7 +208,7 @@ export default function ProfileTabContent({ user, isMobile }: ProfileTabContentP
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className={`px-4 py-2 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
+            className={`px-4 py-2 bg-black hover:bg-gray-900 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
           >
             Edit Profile
           </button>
@@ -216,13 +216,13 @@ export default function ProfileTabContent({ user, isMobile }: ProfileTabContentP
           <div className="flex gap-2">
             <button
               onClick={handleCancel}
-              className={`px-4 py-2 bg-gradient-to-r from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
+              className={`px-4 py-2 bg-white/10 hover:bg-white/20 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className={`px-4 py-2 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
+              className={`px-4 py-2 bg-black hover:bg-gray-900 text-white ${isMobile ? 'text-base' : 'text-sm'} rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95`}
             >
               Save Changes
             </button>

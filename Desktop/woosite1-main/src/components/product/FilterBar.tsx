@@ -138,7 +138,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <span className="text-red-400 text-lg font-medium">Need pre rolls?</span>
                   <div 
                     className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${
-                      format === formats.secondary ? 'bg-emerald-500' : 'bg-gray-600'
+                      format === formats.secondary ? 'bg-green-600' : 'bg-gray-600'
                     }`}
                     style={{ width: '51px', height: '31px' }}
                     onClick={() => onFormatChange(format === formats.secondary ? formats.primary : formats.secondary!)}
@@ -158,7 +158,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-black text-white text-sm px-2 py-1 pr-6 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>
@@ -173,7 +173,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterCategory}
                   onChange={(e) => onCategoryChange(e.target.value as any)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-black text-white text-sm px-2 py-1 pr-6 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="all">All Types</option>
                   <option value="indica">Indica</option>
@@ -188,7 +188,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterVibe}
                   onChange={(e) => onVibeChange(e.target.value as any)}
-                  className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="appearance-none bg-black text-white text-sm px-2 py-1 pr-6 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="all">All Vibes</option>
                   <option value="relax">Relax</option>
@@ -204,7 +204,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <select
                     value={secondaryFilter}
                     onChange={(e) => onSecondaryChange(e.target.value as any)}
-                    className="appearance-none bg-[#2a2a2a] text-white text-sm px-2 py-1 pr-6 rounded-lg border border-white/10 hover:border-emerald-500/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className="appearance-none bg-black text-white text-sm px-2 py-1 pr-6 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     <option value="all">All {getSecondaryLabel()}</option>
                     {getSecondaryOptions().slice(1).map(option => (
@@ -221,7 +221,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {activeFilters > 0 && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
+                  className="text-white/70 hover:text-white text-sm font-medium transition-colors"
                 >
                   Clear ({activeFilters})
                 </button>
@@ -248,7 +248,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <span className="text-red-400 text-base font-medium">Need pre rolls?</span>
                   <div 
                     className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${
-                      format === formats.secondary ? 'bg-emerald-500' : 'bg-gray-600'
+                      format === formats.secondary ? 'bg-green-600' : 'bg-gray-600'
                     }`}
                     style={{ width: '51px', height: '31px' }}
                     onClick={() => onFormatChange(format === formats.secondary ? formats.primary : formats.secondary!)}
@@ -266,12 +266,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {/* Right: Filter button */}
               <button
                 onClick={() => setIsMobileFiltersOpen(true)}
-                className="flex items-center gap-2 bg-[#2a2a2a] hover:bg-[#333] px-3 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-black hover:bg-gray-900 px-3 py-2 rounded-lg transition-colors text-white"
               >
                 <Filter className="w-4 h-4" />
                 <span className="text-sm">Filter</span>
                 {activeFilters > 0 && (
-                  <span className="bg-emerald-500 text-black text-xs px-1.5 py-0.5 rounded-full font-medium">
+                  <span className="bg-white text-black text-xs px-1.5 py-0.5 rounded-full font-medium">
                     {activeFilters}
                   </span>
                 )}
@@ -311,7 +311,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-black text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>
@@ -326,7 +326,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterCategory}
                   onChange={(e) => onCategoryChange(e.target.value as any)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-black text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="all">All Types</option>
                   <option value="indica">Indica</option>
@@ -341,7 +341,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 <select
                   value={filterVibe}
                   onChange={(e) => onVibeChange(e.target.value as any)}
-                  className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full appearance-none bg-black text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   <option value="all">All Vibes</option>
                   <option value="relax">Relax</option>
@@ -357,7 +357,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                   <select
                     value={secondaryFilter}
                     onChange={(e) => onSecondaryChange(e.target.value as any)}
-                    className="w-full appearance-none bg-[#3a3a3a] text-white px-3 py-2 rounded-lg border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                    className="w-full appearance-none bg-black text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     <option value="all">All {getSecondaryLabel()}</option>
                     {getSecondaryOptions().slice(1).map(option => (
@@ -385,7 +385,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               )}
               <button
                 onClick={() => setIsMobileFiltersOpen(false)}
-                className="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors font-medium"
+                className="flex-1 py-3 px-4 bg-black hover:bg-gray-900 text-white rounded-lg transition-colors font-medium"
               >
                 Apply Filters
               </button>

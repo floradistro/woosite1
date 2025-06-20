@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface SectionHeaderProps {
   title: string | React.ReactNode;
@@ -70,17 +71,24 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           >
             <h2 className="font-graffiti text-2xl md:text-4xl lg:text-5xl text-white mb-4 md:mb-6 leading-tight tracking-wider">
               <span 
-                className="relative inline-block"
+                className="relative inline-flex items-center gap-1 md:gap-2 whitespace-nowrap"
                 style={{
                   textShadow: `
-                    0 0 30px rgba(255,255,255,0.3),
                     0 5px 15px rgba(0,0,0,0.8),
                     0 10px 30px rgba(0,0,0,0.4)
-                  `,
-                  filter: 'drop-shadow(0 0 20px rgba(16, 185, 129, 0.3))'
+                  `
                 }}
               >
-                Flora Distro
+                <span>Flora</span>
+                <Image 
+                  src="/logo.png" 
+                  alt="Logo" 
+                  width={60} 
+                  height={60} 
+                  className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain flex-shrink-0 self-center"
+                  style={{ verticalAlign: 'middle' }}
+                />
+                <span>Distro</span>
               </span>
             </h2>
           </div>

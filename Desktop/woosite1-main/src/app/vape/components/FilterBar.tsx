@@ -74,11 +74,11 @@ export default function FilterBar({
             </span>
             <button
               onClick={triggerFilterDropdown}
-              className="flex items-center gap-1 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 text-xs"
+              className="flex items-center gap-1 px-2 py-1 bg-black hover:bg-gray-900 rounded-lg transition-all duration-300 text-xs text-white"
             >
               <span>Filter</span>
               {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 bg-emerald-500 text-black text-xs rounded-full font-medium">
+                <span className="px-1.5 py-0.5 bg-white text-black text-xs rounded-full font-medium">
                   {activeFilterCount}
                 </span>
               )}
@@ -91,12 +91,12 @@ export default function FilterBar({
             <div className="flex items-center gap-2">
               <button
                 onClick={triggerFilterDropdown}
-                className="flex items-center gap-2 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+                className="flex items-center gap-2 px-2 py-1 bg-black hover:bg-gray-900 rounded-lg transition-all duration-300 text-white"
               >
                 <Filter className="w-4 h-4" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
-                  <span className="px-2 py-0.5 bg-emerald-500 text-black text-xs rounded-full font-medium">
+                  <span className="px-2 py-0.5 bg-white text-black text-xs rounded-full font-medium">
                     {activeFilterCount}
                   </span>
                 )}
@@ -117,7 +117,7 @@ export default function FilterBar({
               <select
                 value={sortBy}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="appearance-none px-2 py-1 pr-6 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="appearance-none px-2 py-1 pr-6 bg-black hover:bg-gray-900 text-white rounded-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-600"
               >
                 {SORT_OPTIONS.map(option => (
                   <option key={option.value} value={option.value} className="bg-[#2a2a2a]">
@@ -125,7 +125,7 @@ export default function FilterBar({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-white" />
             </div>
           </div>
         </div>
