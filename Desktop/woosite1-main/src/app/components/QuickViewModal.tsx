@@ -82,19 +82,12 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
       const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
       setScrollPosition(currentScrollY);
       
-      // Prevent scrolling
+      // Prevent scrolling but don't fix position
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${currentScrollY}px`;
-      document.body.style.width = '100%';
-      
       setImageLoaded(false);
     } else {
       // Restore scrolling and position
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
       
       // Restore scroll position
       window.scrollTo(0, scrollPosition);
@@ -103,9 +96,6 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
     return () => {
       // Cleanup on unmount
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
     };
   }, [isOpen, scrollPosition]);
 
@@ -203,7 +193,17 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
 
   return (
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
       onClick={onClose}
     >
       <div className="relative max-w-2xl max-h-[80vh] w-full h-full">
