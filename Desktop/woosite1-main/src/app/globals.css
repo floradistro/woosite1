@@ -408,15 +408,34 @@ textarea:focus-visible {
 }
 
 /* Ensure body doesn't interfere with fixed positioning */
-body {
+html, body {
   position: relative;
   overflow-x: hidden;
+  height: 100%;
 }
 
-/* Prevent any parent containers from affecting fixed positioning */
-* {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
+/* Ensure fixed positioning works properly */
+body {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Force hardware acceleration for fixed elements */
+.fixed {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Ensure bottom navigation stays fixed to viewport */
+.bottom-nav-fixed {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10000 !important;
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
 }
 
 /* Remove all the old conflicting PWA styles below this line */
