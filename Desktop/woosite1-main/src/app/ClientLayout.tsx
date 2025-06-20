@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Footer from "./Footer";
 import Header from "./components/Header";
-
 import BottomNavBar from "./components/BottomNavBar";
 import { useMobilePerformance } from "@/hooks/useMobilePerformance";
 
@@ -21,9 +20,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Header */}
       <Header />
       
-      {/* Main scrollable content with proper padding for fixed elements */}
+      {/* Main scrollable content */}
       <main 
-        className="w-full pb-20 md:pb-0"
+        className="w-full"
         style={{
           minHeight: '100vh'
         }}
