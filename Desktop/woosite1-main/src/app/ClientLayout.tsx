@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Footer from "./Footer";
 import Header from "./components/Header";
-import BottomNavBar from "./components/BottomNavBar";
 import { useMobilePerformance } from "@/hooks/useMobilePerformance";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -32,9 +31,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Footer - only show on desktop and not on profile pages */}
       {!isProfilePage && <Footer />}
-      
-      {/* Bottom Navigation - render last to ensure it's on top */}
-      <BottomNavBar />
     </div>
   );
 } 
