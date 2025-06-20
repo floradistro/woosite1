@@ -78,11 +78,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Flora Distro'
-  },
+
   openGraph: {
     title: "Flora Distro - Premium Cannabis Delivery",
     description: "Premium farm-direct cannabis. No middlemen, just fire. Same-day shipping available.",
@@ -124,7 +120,6 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  manifest: "/manifest.json",
 };
 
 export const viewport = {
@@ -132,7 +127,6 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#10b981' },
     { media: '(prefers-color-scheme: dark)', color: '#4a4a4a' }

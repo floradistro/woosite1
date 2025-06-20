@@ -8,7 +8,7 @@ import { User, Filter, ChevronDown } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { usePWA } from "../../hooks/usePWA";
+
 
 type FilterType = 'category' | 'vibe' | 'nose';
 
@@ -57,8 +57,7 @@ function HeaderContent() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // PWA Detection
-  const { isPWA } = usePWA();
+
 
   // AI Search states
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -581,9 +580,8 @@ function HeaderContent() {
 
   return (
     <>
-      {/* PWA Mode - Don't render anything */}
-      {isPWA ? null : (
-        /* Regular Browser Mode - Show full header */
+      {/* Regular Browser Mode - Show full header */}
+      {(
         <header 
           className="relative top-0 left-0 right-0 z-[100] w-full"
           style={{ ...headerStyles }}

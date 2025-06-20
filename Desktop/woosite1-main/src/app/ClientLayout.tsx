@@ -5,14 +5,11 @@ import Footer from "./Footer";
 import Header from "./components/Header";
 import StatusBar from "./components/StatusBar";
 import BottomNavBar from "./components/BottomNavBar";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { useMobilePerformance } from "@/hooks/useMobilePerformance";
-import { usePWA } from "@/hooks/usePWA";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isProfilePage = pathname?.startsWith('/profile');
-  const { isPWA } = usePWA();
   
   // Initialize mobile performance optimizations
   useMobilePerformance();
@@ -22,14 +19,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Fixed Status Bar - stays at top */}
       <StatusBar />
       
-      {/* Header - only show in browser mode */}
-      {!isPWA && <Header />}
+      {/* Header */}
+      <Header />
       
       {/* Main scrollable content with proper padding for fixed elements */}
       <main 
         className="w-full pb-20 md:pb-0"
         style={{
-          paddingTop: isPWA ? 'env(safe-area-inset-top)' : '0',
           minHeight: '100vh'
         }}
       >
@@ -38,9 +34,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Footer - only show on desktop and not on profile pages */}
       {!isProfilePage && <Footer />}
-      
-      {/* PWA Install Prompt - only show in browser mode */}
-      {!isPWA && <PWAInstallPrompt />}
       
       {/* Bottom Navigation - render last to ensure it's on top */}
       <BottomNavBar />
