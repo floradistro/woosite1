@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function BottomNavBar() {
   const pathname = usePathname();
@@ -80,23 +81,22 @@ export default function BottomNavBar() {
 
   if (!mounted) return null;
 
-  return (
-    <div 
+  const navContent = (
+    <nav 
       className="md:hidden"
       style={{
         position: 'fixed',
-        bottom: '0px',
-        left: '0px',
-        right: '0px',
-        width: '100vw',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        width: '100%',
         height: '64px',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         borderTop: '1px solid #e5e7eb',
         zIndex: 999999,
-        paddingBottom: 'env(safe-area-inset-bottom, 8px)',
-        transform: 'translate3d(0, 0, 0)',
-        willChange: 'transform'
+        paddingBottom: 'env(safe-area-inset-bottom, 8px)'
       }}
     >
       <div 
@@ -126,18 +126,6 @@ export default function BottomNavBar() {
               backgroundColor: isActive(item.href) ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
               color: isActive(item.href) ? '#000000' : '#6b7280'
             }}
-            onMouseEnter={(e) => {
-              if (!isActive(item.href)) {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.025)';
-                e.currentTarget.style.color = '#374151';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive(item.href)) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#6b7280';
-              }
-            }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               {item.icon}
@@ -148,6 +136,9 @@ export default function BottomNavBar() {
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   );
+
+  // Use portal to render outside component tree
+  return createPortal(navContent, document.body);
 }

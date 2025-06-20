@@ -107,9 +107,6 @@
     background-color: var(--color-primary-bg);
     color: var(--color-text-primary);
     min-height: 100vh;
-    contain: layout style paint;
-    transform: translateZ(0);
-    will-change: scroll-position;
   }
 
   /* Mobile touch targets */
@@ -199,8 +196,6 @@
   }
 
   .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
