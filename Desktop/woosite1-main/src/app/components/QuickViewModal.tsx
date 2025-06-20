@@ -25,8 +25,6 @@ interface QuickViewModalProps {
   onAddToCart: (product: QuickViewProduct, weight: string) => void;
 }
 
-
-
 export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }: QuickViewModalProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMagnifying, setIsMagnifying] = useState(false);

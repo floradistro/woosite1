@@ -358,6 +358,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
   const [expandedProducts, setExpandedProducts] = React.useState<Set<number>>(new Set());
   const [quickViewProduct, setQuickViewProduct] = useState<T | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [savedScrollPosition, setSavedScrollPosition] = useState<number>(0);
   const productRefs = useRef<{[key: number]: HTMLDivElement | null}>({});
   const isMobile = useMobileDetection();
   
@@ -405,6 +406,10 @@ export default function DenseView<T extends BaseFeaturedProduct>({
     if (e) {
       e.stopPropagation();
     }
+    // Save current scroll position before opening modal - use more robust method
+    const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    setSavedScrollPosition(currentScrollY);
+    
     // Open quick view instead of navigating
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
@@ -413,6 +418,20 @@ export default function DenseView<T extends BaseFeaturedProduct>({
   const handleQuickViewClose = () => {
     setIsQuickViewOpen(false);
     setQuickViewProduct(null);
+    
+    // Use requestAnimationFrame to ensure the modal is fully closed before restoring scroll
+    requestAnimationFrame(() => {
+      // Additional delay to ensure DOM has updated and body overflow is reset
+      setTimeout(() => {
+        // Only restore scroll if we have a valid saved position
+        if (savedScrollPosition >= 0) {
+          window.scrollTo({
+            top: savedScrollPosition,
+            behavior: 'instant'
+          });
+        }
+      }, 10);
+    });
   };
 
   const handleQuickViewAddToCart = (product: QuickViewProduct, weight: string) => {
