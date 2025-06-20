@@ -33,7 +33,6 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -78,26 +77,16 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
 
   useEffect(() => {
     if (isOpen) {
-      // Store current scroll position
-      const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-      setScrollPosition(currentScrollY);
-      
-      // Prevent scrolling but don't fix position
       document.body.style.overflow = 'hidden';
       setImageLoaded(false);
     } else {
-      // Restore scrolling and position
-      document.body.style.overflow = '';
-      
-      // Restore scroll position
-      window.scrollTo(0, scrollPosition);
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      // Cleanup on unmount
-      document.body.style.overflow = '';
+      document.body.style.overflow = 'unset';
     };
-  }, [isOpen, scrollPosition]);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -193,17 +182,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
 
   return (
     <div 
-      className="fixed bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div className="relative max-w-2xl max-h-[80vh] w-full h-full">
