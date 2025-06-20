@@ -33,6 +33,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -77,16 +78,36 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
 
   useEffect(() => {
     if (isOpen) {
+      // Store current scroll position
+      const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+      setScrollPosition(currentScrollY);
+      
+      // Prevent scrolling
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${currentScrollY}px`;
+      document.body.style.width = '100%';
+      
       setImageLoaded(false);
     } else {
-      document.body.style.overflow = 'unset';
+      // Restore scrolling and position
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollPosition);
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
+      // Cleanup on unmount
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
     };
-  }, [isOpen]);
+  }, [isOpen, scrollPosition]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
