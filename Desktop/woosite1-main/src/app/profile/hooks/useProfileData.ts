@@ -204,7 +204,7 @@ export function useProfileData() {
 
   // Actions
   const handleAddCard = () => {
-    console.log('Add card functionality to be implemented');
+    // Add card functionality to be implemented
   };
 
   const handleDeleteCard = (id: string) => {
@@ -222,13 +222,13 @@ export function useProfileData() {
 
   const handleRewardRedeem = (rewardId: string, pointsCost: number) => {
     if (rewardsData.points >= pointsCost) {
-      console.log(`Redeeming reward ${rewardId} for ${pointsCost} points`);
+      // Redeeming reward functionality to be implemented
       // Implementation would update points and add to history
     }
   };
 
   const handleSubscriptionAction = (action: string, subscriptionId: string) => {
-    console.log(`${action} subscription ${subscriptionId}`);
+    // Subscription action functionality to be implemented
     // Implementation would handle subscription modifications
   };
 

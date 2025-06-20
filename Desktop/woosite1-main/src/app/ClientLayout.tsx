@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Footer from "./Footer";
 import Header from "./components/Header";
-import StatusBar from "./components/StatusBar";
+
 import BottomNavBar from "./components/BottomNavBar";
 import { useMobilePerformance } from "@/hooks/useMobilePerformance";
 
@@ -16,8 +16,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-[#4a4a4a] relative">
-      {/* Fixed Status Bar - stays at top */}
-      <StatusBar />
+
       
       {/* Header */}
       <Header />

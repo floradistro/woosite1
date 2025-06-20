@@ -1,5 +1,5 @@
 import { FeaturedProduct, FilterState } from './constants';
-import { useState, useEffect } from 'react';
+// Utility functions only - hooks moved to custom hook files
 
 // Utility functions for edibles page
 export const generateHandle = (title: string): string => 
@@ -73,26 +73,10 @@ export const isMobile = () => {
   return isMobile;
 };
 
-// Hook version for React components
-export const useIsMobile = (breakpoint = 768): boolean => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
-
-    // Set initial value
-    checkMobile();
-
-    // Add event listener
-    window.addEventListener('resize', checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile);
-  }, [breakpoint]);
-
-  return isMobile;
+// Check if device is mobile (utility function)
+export const isMobileDevice = (breakpoint = 768): boolean => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth <= breakpoint;
 };
 
 // Check mobile breakpoint

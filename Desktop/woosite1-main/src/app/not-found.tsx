@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in React 17+
 import Link from 'next/link';
 
 export default function NotFound() {

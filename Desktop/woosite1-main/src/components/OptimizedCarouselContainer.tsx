@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, memo, useEffect } from 'react';
+import { useRef, useCallback, memo, useEffect } from 'react';
 import { throttle } from '@/utils/performance';
 import CarouselArrow from '@/app/components/CarouselArrow';
 

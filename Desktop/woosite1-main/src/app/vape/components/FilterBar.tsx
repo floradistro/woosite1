@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in React 17+
 import { Filter, ChevronDown } from 'lucide-react';
 import { type ProductFormat } from '../constants';
 
