@@ -13,11 +13,6 @@ const sfPro = localFont({
       style: 'normal',
     },
     {
-      path: '../../public/fonts/SF-Pro-Display-Thin.otf',
-      weight: '200',
-      style: 'normal',
-    },
-    {
       path: '../../public/fonts/SF-Pro-Display-Light.otf',
       weight: '300',
       style: 'normal',
@@ -40,16 +35,6 @@ const sfPro = localFont({
     {
       path: '../../public/fonts/SF-Pro-Display-Bold.otf',
       weight: '700',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/SF-Pro-Display-Heavy.otf',
-      weight: '800',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/SF-Pro-Display-Black.otf',
-      weight: '900',
       style: 'normal',
     },
   ],
@@ -78,24 +63,12 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Flora Distro'
-  },
+
   openGraph: {
     title: "Flora Distro - Premium Cannabis Delivery",
     description: "Premium farm-direct cannabis. No middlemen, just fire. Same-day shipping available.",
     url: "https://floradistro.com",
     siteName: "Flora Distro",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Flora Distro - Premium Cannabis",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
@@ -103,7 +76,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Flora Distro - Premium Cannabis Delivery",
     description: "Real gas, to your door. Same-day shipping available.",
-    images: ["/twitter-image.jpg"],
     creator: "@floradistro",
   },
   robots: {
@@ -121,10 +93,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
   },
-  manifest: "/manifest.json",
 };
 
 export const viewport = {
@@ -132,7 +101,6 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#10b981' },
     { media: '(prefers-color-scheme: dark)', color: '#4a4a4a' }

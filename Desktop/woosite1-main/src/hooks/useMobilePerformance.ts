@@ -128,9 +128,7 @@ export const useMobilePerformance = () => {
         performance.measure(metricName, startMark, endMark);
         
         const measure = performance.getEntriesByName(metricName)[0];
-        if (measure && process.env.NODE_ENV === 'development') {
-          console.log(`${metricName}: ${measure.duration.toFixed(2)}ms`);
-        }
+        // Performance measurement completed
         
         // Clean up marks
         performance.clearMarks(startMark);

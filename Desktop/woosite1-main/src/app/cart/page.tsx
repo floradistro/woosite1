@@ -17,9 +17,9 @@ export default function CartPage() {
           <p className="text-white/60 mb-6">Add some products to get started</p>
           <Link 
             href="/flower"
-            className="inline-flex items-center px-6 py-3 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors"
           >
-            Start Shopping
+            Continue Shopping
           </Link>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function CartPage() {
           
           <Link
             href="/checkout"
-            className="w-full bg-emerald-500 text-white py-3 rounded-lg font-medium hover:bg-emerald-600 transition-colors flex items-center justify-center"
+            className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-900 transition-colors flex items-center justify-center"
           >
             Proceed to Checkout
           </Link>

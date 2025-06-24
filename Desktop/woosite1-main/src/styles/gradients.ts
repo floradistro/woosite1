@@ -1,8 +1,8 @@
 // Common gradient styles used throughout the application
 export const gradients = {
   // Button gradients
-  emerald: 'bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500',
-  yellow: 'bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 hover:from-yellow-300 hover:via-orange-300 hover:to-red-300',
+  emerald: 'bg-black hover:bg-gray-900',
+  yellow: 'bg-black hover:bg-gray-900',
   white: 'bg-gradient-to-r from-white to-white/95 hover:from-white hover:to-white',
   
   // Card gradients

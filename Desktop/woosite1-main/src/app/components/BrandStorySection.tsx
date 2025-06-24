@@ -9,21 +9,7 @@ import { buttonStyles, textStyles, animationStyles } from '@/styles/shared';
 export default function BrandStorySection() {
   return (
     <Section className="relative bg-[#3a3a3a] overflow-hidden -mt-px">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <Image
-          src="/IMG_2941.png"
-          alt="Flora Distro History"
-          fill
-          className="object-cover object-center opacity-40"
-          priority={false}
-          quality={85}
-        />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
-      </div>
-      
-      <div className="relative z-10 py-8 px-8">
+      <div className="relative py-8 px-8">
         <div className="max-w-4xl mx-auto text-center">
           
           {/* Section Header */}

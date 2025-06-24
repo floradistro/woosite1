@@ -216,9 +216,7 @@ export const measureIntersectionPerformance = () => {
       performance.measure('intersection-observer', startMark, endMark);
       
       const measure = performance.getEntriesByName('intersection-observer')[0];
-      if (measure) {
-        console.log(`Intersection Observer: ${measure.duration.toFixed(2)}ms`);
-      }
+      // Performance measurement completed
       
       // Clean up marks
       performance.clearMarks(startMark);

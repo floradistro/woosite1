@@ -8,7 +8,7 @@ import { User, Filter, ChevronDown } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { usePWA } from "../../hooks/usePWA";
+
 
 type FilterType = 'category' | 'vibe' | 'nose';
 
@@ -57,8 +57,7 @@ function HeaderContent() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // PWA Detection
-  const { isPWA, safeAreaTop, isIOS, headerHeight } = usePWA();
+
 
   // AI Search states
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -573,17 +572,16 @@ function HeaderContent() {
     
     return {
       background: isTransparent ? 'rgba(74, 74, 74, 0.8)' : '#4a4a4a',
-      boxShadow: (isTransparent || isProfilePage) ? 'none' : '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
       backdropFilter: isTransparent ? 'blur(10px)' : 'none',
-      borderBottom: (isTransparent || isProfilePage) ? 'none' : 'none'
+      borderBottom: 'none'
     };
   }, [pathname, isShopMenuOpen, isConciergeOpen, isCartOpen, showUserMenu, isMobileMenuOpen]);
 
   return (
     <>
-      {/* PWA Mode - Don't render anything */}
-      {isPWA ? null : (
-        /* Regular Browser Mode - Show full header */
+      {/* Regular Browser Mode - Show full header */}
+      {(
         <header 
           className="relative top-0 left-0 right-0 z-[100] w-full"
           style={{ ...headerStyles }}
@@ -591,36 +589,74 @@ function HeaderContent() {
         >
           <div className="w-full flex flex-col">
             {/* Main Header Bar */}
-            <div className={`w-full flex items-center justify-between px-6 gap-4`}>
+            <div className={`w-full flex items-center justify-between px-4 md:px-6 py-1 md:py-2 gap-2 md:gap-4`}>
               {/* Logo */}
-              <Link href="/" className="flex items-center shrink-0" onClick={() => {
+              <Link href="/" className="flex items-center shrink-0 p-1 md:p-2" onClick={() => {
                 setIsMobileMenuOpen(false);
                 router.push('/');
               }}>
                 <Image 
                   src="/logo.png" 
                   alt="flora distro" 
-                  width={32} 
-                  height={32} 
-                  className="w-8 h-8 md:w-9 md:h-9" 
+                  width={24} 
+                  height={24} 
+                  className="w-6 h-6 md:w-6 md:h-6" 
                   priority 
                   quality={90}
                 />
               </Link>
 
               {/* Desktop Nav Menu */}
-              <nav className="hidden md:flex items-center gap-5 ml-6">
-                {/* Concierge (functional) */}
+              <nav className="hidden md:flex items-center gap-6 ml-6">
+                <Link
+                  href="/flower"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Flower
+                </Link>
+                <Link
+                  href="/flower?format=preroll"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Pre-Roll
+                </Link>
+                <Link
+                  href="/vape"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Vape
+                </Link>
+                <Link
+                  href="/wax"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Wax
+                </Link>
+                <Link
+                  href="/edible"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Edible
+                </Link>
+                <Link
+                  href="/moonwater"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Moonwater
+                </Link>
+                <Link
+                  href="/apparel"
+                  className="text-xs font-normal text-white/90 hover:text-white transition-colors"
+                >
+                  Apparel
+                </Link>
+                
+                {/* Concierge */}
                 <button
                   onClick={() => {
                     // Close other dropdowns
-                    setIsShopMenuOpen(false);
                     setIsCartOpen(false);
                     // Clear any pending timeouts
-                    if (shopHoverTimeout) {
-                      clearTimeout(shopHoverTimeout);
-                      setShopHoverTimeout(null);
-                    }
                     if (cartHoverTimeout) {
                       clearTimeout(cartHoverTimeout);
                       setCartHoverTimeout(null);
@@ -628,7 +664,7 @@ function HeaderContent() {
                     // Toggle concierge
                     setIsConciergeOpen(!isConciergeOpen);
                   }}
-                  className={`flex items-center gap-2 transition-colors text-sm font-medium relative ${
+                  className={`flex items-center gap-2 transition-colors text-xs font-normal relative ${
                     isConciergeOpen 
                       ? 'text-emerald-400' 
                       : 'text-white/90 hover:text-white'
@@ -638,187 +674,58 @@ function HeaderContent() {
                   {isConciergeOpen && <span className="w-2 h-2 bg-emerald-400 rounded-full absolute -left-3"></span>}
                   Concierge
                 </button>
+              </nav>
 
-                {/* Shop (functional dropdown) */}
+              {/* Right Side: Cart */}
+              <div className="hidden md:flex items-center gap-5 ml-auto">
+                {/* Cart Icon (functional dropdown) */}
                 <div 
-                  ref={shopMenuRef}
-                  onMouseEnter={handleShopMouseEnter}
-                  onMouseLeave={handleShopMouseLeave}
+                  ref={cartRef}
+                  onMouseEnter={handleCartMouseEnter}
+                  onMouseLeave={handleCartMouseLeave}
                   className="relative"
                 >
                   <button
                     onClick={() => {
                       // Close other dropdowns
                       setIsConciergeOpen(false);
-                      setIsCartOpen(false);
-                      // Clear any pending timeouts
-                      if (cartHoverTimeout) {
-                        clearTimeout(cartHoverTimeout);
-                        setCartHoverTimeout(null);
-                      }
-                      // Toggle shop menu
-                      setIsShopMenuOpen(!isShopMenuOpen);
-                    }}
-                    onMouseEnter={handleShopMouseEnter}
-                    className={`flex items-center gap-2 transition-colors text-sm font-medium relative ${
-                      isShopMenuOpen 
-                        ? 'text-emerald-400' 
-                        : 'text-white/90 hover:text-white'
-                    }`}
-                    type="button"
-                  >
-                    Shop
-                  </button>
-                </div>
-              </nav>
-
-              {/* Right Side: Cart and User Menu */}
-              <div className="hidden md:flex items-center gap-5 ml-auto">
-                {/* User Menu */}
-                <div className="relative" ref={userMenuRef}>
-                  <button 
-                    onClick={() => {
-                      // Close other dropdowns
-                      setIsConciergeOpen(false);
                       setIsShopMenuOpen(false);
-                      setIsCartOpen(false);
                       // Clear any pending timeouts
                       if (shopHoverTimeout) {
                         clearTimeout(shopHoverTimeout);
                         setShopHoverTimeout(null);
                       }
-                      if (cartHoverTimeout) {
-                        clearTimeout(cartHoverTimeout);
-                        setCartHoverTimeout(null);
-                      }
-                      // Toggle user menu
-                      setShowUserMenu(!showUserMenu);
+                      // Toggle cart
+                      setIsCartOpen(!isCartOpen);
                     }}
-                    className="relative text-white/90 hover:text-white transition-colors p-1.5 flex items-center gap-2"
+                    onMouseEnter={handleCartMouseEnter}
+                    className="relative text-white/90 hover:text-white transition-colors p-1"
                   >
-                    <User className="w-4 h-4" />
-                    {isAuthenticated && (
-                      <span className="text-sm font-medium hidden lg:block">
-                        {user?.name?.split(' ')[0] || 'Account'}
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="1.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="transition-colors"
+                    >
+                      <path d="M6 9h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z"></path>
+                      <path d="M9 9V7a3 3 0 0 1 6 0v2"></path>
+                    </svg>
+                    {cartItemsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 text-white text-xs font-bold">
+                        {cartItemsCount}
                       </span>
                     )}
                   </button>
-
-                  {/* User Dropdown Menu */}
-                  <AnimatePresence>
-                    {showUserMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-                        className="absolute right-0 top-full mt-2 w-48 bg-[#4a4a4a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
-                      >
-                        {isAuthenticated ? (
-                          <div className="py-2">
-                            <div className="px-4 py-2 border-b border-white/10">
-                              <div className="text-white/90 text-sm font-medium">
-                                {user?.name || 'Account'}
-                              </div>
-                              <div className="text-white/50 text-xs">
-                                {user?.email}
-                              </div>
-                            </div>
-                            <Link 
-                              href="/profile" 
-                              onClick={() => setShowUserMenu(false)}
-                              className="block px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition text-sm"
-                            >
-                              Profile
-                            </Link>
-                            <Link 
-                              href="/orders" 
-                              onClick={() => setShowUserMenu(false)}
-                              className="block px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition text-sm"
-                            >
-                              Orders
-                            </Link>
-                            <div className="border-t border-white/10 mt-1 pt-1">
-                              <button
-                                onClick={() => {
-                                  logout();
-                                  setShowUserMenu(false);
-                                }}
-                                className="block w-full text-left px-4 py-2 text-white/50 hover:text-red-400 hover:bg-white/5 transition text-sm"
-                              >
-                                Sign Out
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="py-2">
-                            <button
-                              onClick={() => {
-                                router.push('/auth/signin');
-                                setShowUserMenu(false);
-                              }}
-                              className="block w-full text-left px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition text-sm"
-                            >
-                              Sign In
-                            </button>
-                            <Link 
-                              href="/auth/signin" 
-                              onClick={() => setShowUserMenu(false)}
-                              className="block px-4 py-2 text-white/50 hover:text-white/70 hover:bg-white/5 transition text-sm"
-                            >
-                              Create Account
-                            </Link>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
-
-                {/* Cart Icon (interactive with count and hover states) */}
-                <button 
-                  onClick={() => {
-                    // Close other dropdowns
-                    setIsConciergeOpen(false);
-                    setIsShopMenuOpen(false);
-                    setShowUserMenu(false);
-                    // Clear any pending timeouts
-                    if (shopHoverTimeout) {
-                      clearTimeout(shopHoverTimeout);
-                      setShopHoverTimeout(null);
-                    }
-                    // Toggle cart
-                    setIsCartOpen(!isCartOpen);
-                  }}
-                  onMouseEnter={handleCartMouseEnter}
-                  onMouseLeave={handleCartMouseLeave}
-                  className="relative text-white/90 hover:text-white transition-colors p-1.5"
-                >
-                  <svg 
-                    width="18" 
-                    height="18" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className="transition-colors"
-                  >
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                  </svg>
-                  {cartItemsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 text-white text-xs font-bold">
-                      {cartItemsCount}
-                    </span>
-                  )}
-                </button>
               </div>
 
               {/* Mobile Cart and Menu */}
-              <div className="md:hidden flex items-center gap-2">
+              <div className="md:hidden flex items-center gap-1">
                 {/* Mobile Cart Icon */}
                 <button 
                   onClick={() => {
@@ -838,39 +745,14 @@ function HeaderContent() {
                     strokeLinejoin="round"
                     className="transition-colors"
                   >
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    <path d="M6 9h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z"></path>
+                    <path d="M9 9V7a3 3 0 0 1 6 0v2"></path>
                   </svg>
                   {cartItemsCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                       {cartItemsCount}
                     </span>
                   )}
-                </button>
-
-                {/* Mobile Profile Icon */}
-                <button 
-                  onClick={() => {
-                    closeAllModals();
-                    router.push('/profile');
-                  }}
-                  className="text-white/90 hover:text-white transition-colors p-2 flex items-center justify-center"
-                >
-                  <svg 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="1.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className="transition-colors"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
                 </button>
 
                 {/* Mobile Menu Button */}
@@ -1071,123 +953,7 @@ function HeaderContent() {
               )}
             </AnimatePresence>
             
-            {/* Premium Shop Menu */}
-            <AnimatePresence>
-              {isShopMenuOpen && (
-                <motion.div
-                  ref={shopMenuRef}
-                  onMouseEnter={handleShopMouseEnter}
-                  onMouseLeave={handleShopMouseLeave}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ 
-                    duration: 0.3,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }}
-                  className="w-full overflow-hidden"
-                  style={{
-                    background: '#4a4a4a',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                >
-                  <div className="w-full max-w-7xl mx-auto px-8 py-6">
-                    <div className="grid grid-cols-4 gap-16">
-                      {/* Collections */}
-                      <div>
-                        <h3 className="text-white font-medium text-sm mb-4">Collections</h3>
-                        <div className="space-y-2">
-                          <Link href="/flower" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Flower
-                          </Link>
-                          <Link href="/flower?format=preroll" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Pre-Roll
-                          </Link>
-                          <Link href="/vape" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Vape
-                          </Link>
-                          <Link href="/wax" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Wax
-                          </Link>
-                          <Link href="/edible" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Edible
-                          </Link>
-                          <Link href="/moonwater" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Moonwater
-                          </Link>
-                          <Link href="/apparel" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Apparel
-                          </Link>
-                        </div>
-                      </div>
 
-                      {/* Subscriptions */}
-                      <div>
-                        <h3 className="text-white font-medium text-sm mb-4">Subscriptions</h3>
-                        <div className="space-y-2">
-                          <Link href="/subscriptions" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Drop Club
-                          </Link>
-                          <Link href="/subscriptions" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Vault Vape Club
-                          </Link>
-                          <Link href="/subscriptions" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Edible Essentials
-                          </Link>
-                          <Link href="/subscriptions" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Real Flower Club
-                          </Link>
-                          <Link href="/subscriptions" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Full-Spectrum Bundle
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Best Sellers */}
-                      <div>
-                        <h3 className="text-white font-medium text-sm mb-4">Best Sellers</h3>
-                        <div className="space-y-2">
-                          <Link href="/shop?featured=best-sellers" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Top Flower
-                          </Link>
-                          <Link href="/shop?featured=best-sellers" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Popular Vapes
-                          </Link>
-                          <Link href="/shop?featured=best-sellers" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Trending Edibles
-                          </Link>
-                          <Link href="/shop?featured=best-sellers" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Customer Favorites
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Quick Links */}
-                      <div>
-                        <h3 className="text-white font-medium text-sm mb-4">Quick Links</h3>
-                        <div className="space-y-2">
-                          <Link href="/shop?featured=new-arrivals" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            New Arrivals
-                          </Link>
-                          <Link href="/shop?featured=deals" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Daily Deals
-                          </Link>
-                          <Link href="/shop?vibe=energize" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Energize
-                          </Link>
-                          <Link href="/shop?vibe=relax" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Relax
-                          </Link>
-                          <Link href="/shop?vibe=balance" onClick={() => setIsShopMenuOpen(false)} className="block text-white/70 hover:text-white transition text-sm">
-                            Balance
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             
             {/* Premium Cart Experience */}
             <AnimatePresence>
@@ -1215,31 +981,31 @@ function HeaderContent() {
                         <div className="md:col-span-1">
                           <h3 className="text-white font-medium text-sm mb-4">Your Cart</h3>
                           <div className="space-y-2">
-                            <div className="text-white/70 text-2xl font-bold">Cart is empty</div>
+                            <div className="text-white/70 text-sm">Cart is empty</div>
                           </div>
                         </div>
                         
                         <div className="md:col-span-1">
                           <h3 className="text-white font-medium text-sm mb-4">Quick Start</h3>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             <Link 
                               href="/shop" 
                               onClick={() => setIsCartOpen(false)} 
-                              className="block w-full bg-white/10 hover:bg-white/20 text-white text-center py-3 px-4 rounded-full font-medium transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/40"
+                              className="block text-white/70 hover:text-white transition text-sm"
                             >
                               Browse Products
                             </Link>
                             <Link 
                               href="/shop?featured=best-sellers" 
                               onClick={() => setIsCartOpen(false)} 
-                              className="block text-white/70 hover:text-white transition text-sm text-center py-2"
+                              className="block text-white/70 hover:text-white transition text-sm"
                             >
                               Best Sellers
                             </Link>
                             <Link 
                               href="/shop?featured=new-arrivals" 
                               onClick={() => setIsCartOpen(false)} 
-                              className="block text-white/70 hover:text-white transition text-sm text-center py-2"
+                              className="block text-white/70 hover:text-white transition text-sm"
                             >
                               New Arrivals
                             </Link>
@@ -1247,7 +1013,7 @@ function HeaderContent() {
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16">
                         {/* Cart Items */}
                         <div className="md:col-span-2">
                           <h3 className="text-white font-medium text-sm mb-4">Cart Items ({cartItemsCount})</h3>
@@ -1262,76 +1028,27 @@ function HeaderContent() {
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                                      className="text-white/70 hover:text-white transition text-sm"
+                                      className="text-white/70 hover:text-white transition text-sm w-5 h-5 flex items-center justify-center"
                                     >
                                       −
                                     </button>
                                     <span className="text-white text-sm min-w-[1rem] text-center">{item.quantity}</span>
                                     <button
                                       onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                                      className="text-white/70 hover:text-white transition text-sm"
+                                      className="text-white/70 hover:text-white transition text-sm w-5 h-5 flex items-center justify-center"
                                     >
                                       +
                                     </button>
                                   </div>
                                   <button
                                     onClick={() => handleRemoveFromCart(item.id)}
-                                    className="text-white/50 hover:text-red-400 transition text-sm"
+                                    className="text-white/50 hover:text-red-400 transition text-xs"
                                   >
                                     Remove
                                   </button>
                                 </div>
                               </div>
                             ))}
-                          </div>
-                          
-                          {/* Delivery Summary */}
-                          <div className="mt-6 pt-4 border-t border-white/10">
-                            <h4 className="text-white font-medium text-sm mb-3">Delivery Summary</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                              {/* Delivery Address */}
-                              <div className="flex items-center gap-2">
-                                <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div className="flex-1">
-                                  <div className="text-white font-medium">Mooresville 28117</div>
-                                  <button className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
-                                    Change address
-                                  </button>
-                                </div>
-                              </div>
-                              
-                              {/* Delivery Speed */}
-                              <div className="flex items-center gap-2">
-                                <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                <div className="flex-1">
-                                  <div className="text-emerald-400 font-medium">Same-day delivery</div>
-                                  <div className="text-white/60 text-xs">Order by 2PM</div>
-                                </div>
-                              </div>
-                              
-                              {/* Payment Method */}
-                              {isAuthenticated && defaultPaymentMethod && (
-                                <div className="flex items-center gap-2">
-                                  <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                  </svg>
-                                  <div className="flex-1">
-                                    <div className="text-white font-medium flex items-center gap-1">
-                                      {getCardIcon(defaultPaymentMethod.type)}
-                                      •••• {defaultPaymentMethod.lastFour}
-                                    </div>
-                                    <button className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
-                                      Change payment
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
                           </div>
                         </div>
 
@@ -1345,7 +1062,7 @@ function HeaderContent() {
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-white/70">Tax</span>
-                              <span className="text-white">Calculated at checkout</span>
+                              <span className="text-white text-xs">Calculated at checkout</span>
                             </div>
                             <div className="border-t border-white/10 pt-2 mt-3">
                               <div className="flex justify-between text-sm">
@@ -1359,49 +1076,103 @@ function HeaderContent() {
                         {/* Actions */}
                         <div className="md:col-span-1">
                           <h3 className="text-white font-medium text-sm mb-4">Actions</h3>
-                          <div className="space-y-3">
-                            {/* Primary Checkout Button */}
-                            <button
-                              onClick={() => {
-                                router.push('/checkout');
-                                setIsCartOpen(false);
-                              }}
-                              className="w-full bg-black hover:bg-gray-900 text-white text-center py-3 px-4 rounded-full font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-black/25"
+                          <div className="space-y-2">
+                            {/* Primary Checkout Link */}
+                            <Link
+                              href="/checkout"
+                              onClick={() => setIsCartOpen(false)}
+                              className="block bg-black hover:bg-gray-900 text-white text-center py-2 px-3 rounded-md text-sm font-medium transition-all"
                             >
                               Checkout
-                            </button>
+                            </Link>
                             
-                            {/* Continue Shopping Button */}
+                            {/* Continue Shopping Link */}
                             <Link 
                               href="/shop" 
                               onClick={() => setIsCartOpen(false)} 
-                              className="block w-full bg-white/10 hover:bg-white/20 text-white text-center py-3 px-4 rounded-full font-medium transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/40"
+                              className="block text-white/70 hover:text-white transition text-sm"
                             >
                               Continue Shopping
                             </Link>
 
                             {/* Secondary Actions */}
-                            <div className="pt-2 border-t border-white/10 space-y-2">
-                              {isAuthenticated && defaultPaymentMethod && (
-                                <button
-                                  onClick={handleOneClickCheckout}
-                                  disabled={isOneClickProcessing}
-                                  className="block w-full text-center py-2 text-white/70 hover:text-white transition text-sm font-medium"
-                                >
-                                  {isOneClickProcessing ? 'Processing...' : '1-Click Checkout'}
-                                </button>
-                              )}
+                            {isAuthenticated && defaultPaymentMethod && (
                               <button
-                                onClick={handleClearCart}
-                                className="block w-full text-center py-2 text-red-400 hover:text-red-300 transition text-sm font-medium"
+                                onClick={handleOneClickCheckout}
+                                disabled={isOneClickProcessing}
+                                className="block text-white/70 hover:text-white transition text-sm"
                               >
-                                Clear Cart
+                                {isOneClickProcessing ? 'Processing...' : '1-Click Checkout'}
                               </button>
-                            </div>
+                            )}
+                            <button
+                              onClick={handleClearCart}
+                              className="block text-white/50 hover:text-red-400 transition text-sm"
+                            >
+                              Clear Cart
+                            </button>
                           </div>
                         </div>
                       </div>
                     )}
+                    
+                    {/* User Account Section - Always visible at bottom */}
+                    <div className="mt-6 pt-4 border-t border-white/10">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16">
+                        <div className="md:col-span-4">
+                          <h3 className="text-white font-medium text-sm mb-4">Account</h3>
+                          <div className="flex items-center gap-6">
+                            {isAuthenticated ? (
+                              <>
+                                <div className="text-white/70 text-sm">
+                                  {user?.name || 'Account'}
+                                </div>
+                                <Link 
+                                  href="/profile" 
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="text-white/70 hover:text-white transition text-sm"
+                                >
+                                  Profile
+                                </Link>
+                                <Link 
+                                  href="/orders" 
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="text-white/70 hover:text-white transition text-sm"
+                                >
+                                  Orders
+                                </Link>
+                                <button
+                                  onClick={() => {
+                                    logout();
+                                    setIsCartOpen(false);
+                                  }}
+                                  className="text-white/50 hover:text-red-400 transition text-sm"
+                                >
+                                  Sign Out
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <Link
+                                  href="/auth/signin"
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="text-white/70 hover:text-white transition text-sm"
+                                >
+                                  Sign In
+                                </Link>
+                                <Link 
+                                  href="/auth/signin" 
+                                  onClick={() => setIsCartOpen(false)}
+                                  className="text-white/50 hover:text-white/70 transition text-sm"
+                                >
+                                  Create Account
+                                </Link>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               )}

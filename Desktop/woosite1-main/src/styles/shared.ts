@@ -10,9 +10,9 @@ export const sectionStyles = {
 
 // Button styles
 export const buttonStyles = {
-  primary: "group relative inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500 text-white rounded-lg font-bold text-base md:text-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-0 select-none overflow-hidden",
+  primary: "group relative inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-black hover:bg-gray-900 text-white rounded-lg font-bold text-base md:text-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-0 select-none overflow-hidden",
   secondary: "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-white/95 hover:from-white hover:to-white text-black rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-0 select-none",
-  accent: "group inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 hover:from-yellow-300 hover:via-orange-300 hover:to-red-300 text-black font-bold text-lg rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-0 select-none",
+  accent: "group inline-flex items-center gap-3 px-10 py-4 bg-black hover:bg-gray-900 text-white font-bold text-lg rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-0 select-none",
   ghost: "text-white/70 hover:text-white transition-colors duration-300 underline underline-offset-4 decoration-white/30 hover:decoration-white/60",
 };
 

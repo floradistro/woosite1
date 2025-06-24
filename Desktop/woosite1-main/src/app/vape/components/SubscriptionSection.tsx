@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in React 17+
 import Link from 'next/link';
 
 export default function SubscriptionSection() {
@@ -17,7 +17,7 @@ export default function SubscriptionSection() {
           {/* CTA Button */}
           <Link 
             href="/subscriptions"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-lg font-medium text-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-0 select-none shadow-xl hover:shadow-2xl mb-4"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-0 select-none shadow-xl hover:shadow-2xl mb-4"
           >
             Join the Club
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

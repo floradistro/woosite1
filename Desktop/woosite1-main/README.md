@@ -1,1 +1,1 @@
-# Flora Distro - PWA Ready
+# Flora Distro

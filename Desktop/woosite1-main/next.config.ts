@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
-// import withPWA from "next-pwa";
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const securityHeaders = [
   {
@@ -158,26 +160,4 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 };
 
-// Temporarily export without PWA to fix build
-export default nextConfig;
-
-// TODO: Re-enable PWA once build is working
-// export default withPWA({
-//   dest: "public",
-//   register: true,
-//   skipWaiting: true,
-//   reloadOnOnline: true,
-//   disable: process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview",
-//   buildExcludes: [/middleware-manifest\.json$/],
-//   publicExcludes: ["!robots.txt", "!sitemap.xml"],
-//   cacheOnFrontEndNav: true,
-//   fallbacks: {
-//     document: "/offline",
-//   },
-//   cacheStartUrl: true,
-//   dynamicStartUrl: true,
-//   dynamicStartUrlRedirect: "/",
-//   runtimeCaching: [
-//     // ... existing caching config ...
-//   ],
-// })(nextConfig);
+export default withBundleAnalyzer(nextConfig);

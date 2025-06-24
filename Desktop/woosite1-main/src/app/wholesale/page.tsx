@@ -208,8 +208,8 @@ export default function WholesalePage() {
           <h2 className="text-3xl font-light mb-4 text-center tracking-wide">✅ Application Form</h2>
           
           {/* Add urgency banner */}
-          <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 p-4 rounded-lg mb-8 text-center">
-            <p className="text-red-500 font-medium">
+          <div className="bg-black border border-white/20 py-2 px-4 rounded-lg mb-8 text-center">
+            <p className="text-white font-medium">
               Don't miss out, apply for a seat at our table
             </p>
           </div>
@@ -329,7 +329,7 @@ export default function WholesalePage() {
               disabled={!formData.understood}
               className={`w-full py-4 rounded-lg font-medium tracking-wide transition-all duration-300 ${
                 formData.understood
-                  ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:via-green-400 hover:to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95'
+                  ? 'bg-black hover:bg-gray-900 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95'
                   : 'bg-white/5 text-white/30 cursor-not-allowed'
               }`}
             >
@@ -338,8 +338,8 @@ export default function WholesalePage() {
           </form>
           
           {/* Moved from value prop section to bottom */}
-          <div className="bg-gradient-to-r from-yellow-900/10 via-orange-900/10 to-red-900/10 backdrop-blur-sm border border-yellow-600/30 p-6 rounded-lg mt-12">
-            <p className="text-yellow-400/90 font-light text-center text-xl">
+          <div className="bg-black backdrop-blur-sm border border-white/20 py-2 px-6 rounded-lg mt-12">
+            <p className="text-white font-light text-center text-xl">
               From here, you're visible.
             </p>
           </div>
