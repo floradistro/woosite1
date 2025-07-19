@@ -30,7 +30,7 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.floradistro.com"
+    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.floradistro.com https://*.supabase.co; worker-src 'self' blob: https://unpkg.com"
   }
 ];
 
@@ -68,6 +68,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.pexels.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
         pathname: '/**',
       },
     ],
@@ -146,11 +151,23 @@ const nextConfig: NextConfig = {
       };
     }
     
-    // Tree shake unused modules
+    // Configure PDF.js worker
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': './src',
     };
+
+    // Handle PDF.js worker files
+    config.module.rules.push({
+      test: /\.worker\.(js|ts)$/,
+      use: {
+        loader: 'worker-loader',
+        options: {
+          name: 'static/[hash].worker.js',
+          publicPath: '/_next/',
+        },
+      },
+    });
     
     return config;
   },
