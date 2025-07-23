@@ -9,9 +9,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const storeUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
-    const consumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
-    const consumerSecret = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
+    const storeUrl = process.env.WOOCOMMERCE_STORE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
+    const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
+    const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
 
     if (!storeUrl || !consumerKey || !consumerSecret) {
       return NextResponse.json({ 
