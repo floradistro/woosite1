@@ -80,6 +80,102 @@ export interface FilterState {
   flavor: string[];
 }
 
+// Transform WooCommerce products to moonwater format
+export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
+  try {
+    console.log('=== FETCHING MOONWATER PRODUCTS ===');
+    
+    // Use the optimized multi-category fetch
+    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    const moonwaterCategories = ['moonwater', 'beverage', 'beverages', 'drink', 'drinks'];
+    
+    let moonwaterProducts = await wooCommerceAPI.getProductsByCategories(moonwaterCategories);
+    console.log(`Found ${moonwaterProducts.length} products from moonwater categories`);
+    
+    // If no products found, try category ID 1378 (based on original code)
+    if (moonwaterProducts.length === 0) {
+      console.log('Trying category ID 1378...');
+      moonwaterProducts = await wooCommerceAPI.getProducts({ category: '1378', per_page: 100, status: 'publish' });
+      console.log(`Found ${moonwaterProducts.length} products from category ID 1378`);
+    }
+    
+    if (moonwaterProducts.length === 0) {
+      console.log('No moonwater products found in any category');
+      return [];
+    }
+    
+    // Transform WooCommerce products to our format
+    return moonwaterProducts.map((product, index) => {
+      const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
+      const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      
+      // Extract category from categories or tags (default to hybrid for beverages)
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (categories.includes('indica') || tags.includes('indica')) return 'indica';
+        if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
+        return 'hybrid'; // Default for beverages
+      };
+
+      // Extract vibe from tags (default to balance for beverages)
+      const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
+        if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
+        return 'balance'; // Default for beverages
+      };
+
+      // Extract THC dosage from description
+      const getThc = (): number => {
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)\s*mg/i);
+        return match ? parseFloat(match[1]) : 10.0; // Default 10mg for beverages
+      };
+
+      // Extract flavor from product info
+      const getFlavor = (): Array<'citrus' | 'berry' | 'tropical' | 'herbal' | 'mint'> => {
+        const title = product.name?.toLowerCase() || '';
+        const description = product.short_description?.toLowerCase() || product.description?.toLowerCase() || '';
+        const allText = `${title} ${description} ${tags.join(' ')}`;
+        
+        const flavors: Array<'citrus' | 'berry' | 'tropical' | 'herbal' | 'mint'> = [];
+        
+        if (allText.includes('berry') || allText.includes('berries')) flavors.push('berry');
+        if (allText.includes('citrus') || allText.includes('lemon') || allText.includes('lime')) flavors.push('citrus');
+        if (allText.includes('tropical') || allText.includes('mango') || allText.includes('pineapple')) flavors.push('tropical');
+        if (allText.includes('herbal') || allText.includes('ginger') || allText.includes('tea')) flavors.push('herbal');
+        if (allText.includes('mint') || allText.includes('menthol')) flavors.push('mint');
+        
+        return flavors.length > 0 ? flavors : ['citrus']; // Default to citrus array
+      };
+
+      return {
+        id: product.id,
+        title: product.name?.toLowerCase() || 'moonwater beverage',
+        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium thc beverage',
+        price: parseFloat(product.price) || 12.99,
+        image: product.images?.[0]?.src || '/icons/Moonwater.png',
+        category: getCategory(),
+        vibe: getVibe(),
+        thc: getThc(),
+        flavor: getFlavor(),
+        spotlight: `refreshing ${getFlavor()[0]} moonwater with ${getThc()}mg thc`,
+        featured: index < 4,
+        lineage: 'premium cannabis extract',
+        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool'] : 
+                 getCategory() === 'sativa' ? ['limonene', 'pinene'] : 
+                 ['limonene', 'myrcene']
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error fetching moonwater products:', error);
+    return [];
+  }
+}
+
+// For backward compatibility during transition
+export const MOONWATER_PRODUCTS: FeaturedProduct[] = [];
+
+// Legacy code commented out - no longer needed
+/*
 // Import products from inventory
 import { products as inventoryProducts } from '../../data/products';
 
@@ -89,18 +185,19 @@ export const MOONWATER_PRODUCTS: FeaturedProduct[] = inventoryProducts
     product.type === 'Moonwater' || 
     product.tags.some(tag => tag.toLowerCase().includes('beverage'))
   )
-  .map((product, index) => ({
-    id: index + 1,
+  .map(product => ({
+    id: product.id,
     title: product.title.toLowerCase(),
-    description: product.body.replace(/<[^>]*>/g, ''), // Remove HTML tags
-    price: product.variantPrice,
-    image: product.imageSrc,
-    category: 'hybrid' as const, // Default for beverages
-    vibe: 'balance' as const, // Default for beverages  
-    thc: 5, // Default THC for beverages (5mg)
-    flavor: ['citrus'] as Array<'citrus' | 'berry' | 'tropical' | 'herbal' | 'mint'>, // Default flavor
-    spotlight: `refreshing ${product.title.toLowerCase()} with natural hemp-derived delta-9 thc`,
-    featured: true,
-    lineage: 'hemp-derived delta-9 thc infusion',
+    description: product.description.toLowerCase(),
+    price: product.price,
+    image: product.image,
+    category: 'hybrid' as const,
+    vibe: 'balance' as const,
+    thc: 5, // Default THC for beverages
+    flavor: ['citrus'], // Default flavor
+    spotlight: `refreshing ${product.title.toLowerCase()} with balanced effects`,
+    featured: product.id <= 2,
+    lineage: 'premium hemp extract',
     terpenes: ['limonene', 'myrcene', 'pinene']
-  })); 
+  }));
+*/ 

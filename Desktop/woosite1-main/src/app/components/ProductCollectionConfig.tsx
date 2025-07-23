@@ -1,4 +1,4 @@
-export type ProductType = 'flower' | 'edible' | 'vape' | 'wax' | 'moonwater' | 'subscriptions';
+export type ProductType = 'flower' | 'edible' | 'vape' | 'wax' | 'concentrate' | 'moonwater' | 'subscriptions';
 
 export type FilterType = 'all' | 'indica' | 'sativa' | 'hybrid';
 export type VibeType = 'all' | 'relax' | 'energize' | 'balance';
@@ -522,6 +522,124 @@ export const waxConfig: ProductCollectionConfig = {
   loadingText: 'Loading concentrate collection...'
 };
 
+// Configuration for Concentrates (same as wax but with concentrate terminology)
+export const concentrateConfig: ProductCollectionConfig = {
+  productType: 'concentrate',
+  formats: {
+    primary: 'concentrate',
+    secondary: 'live-resin'
+  },
+  pricing: {
+    primary: { '1g': 45, '2g': 85, '3.5g': 150 }, // WEIGHT_PRICING for concentrates
+    secondary: { '0.5g': 30, '1g': 55, '2g': 100 } // GRAM_PRICING for live resin
+  },
+  filters: {
+    secondaryFilterName: 'texture',
+    secondaryFilterOptions: ['all', 'shatter', 'budder', 'sauce', 'diamonds', 'rosin']
+  },
+  content: {
+    hero: {
+      primary: {
+        title: "Dab Different.",
+        subtitle: "Premium Cannabis Concentrates",
+        description: "Solventless extracts and premium concentrates. Pure potency, clean melts.",
+        features: ["Solventless", "Pure potency"],
+        qualityBadges: ["Premium", "Clean melts"]
+      },
+      secondary: {
+        title: "Terps Preserved.",
+        subtitle: "Live Resin Collection",
+        description: "Flash-frozen at harvest for maximum terpene preservation.",
+        features: ["Flash-frozen", "Maximum terpene preservation"],
+        qualityBadges: ["Fresh", "Terps preserved"]
+      }
+    },
+    qualitySection: {
+      title: {
+        primary: 'Pure Potency. Concentrated Excellence.',
+        secondary: 'Fresh Frozen. Maximum Terps.'
+      },
+      subtitle: {
+        primary: 'Every concentrate is crafted for maximum potency and flavor.',
+        secondary: 'Live resin captured at peak freshness for unmatched terpene profiles.'
+      },
+      description: {
+        primary: 'If it doesn\'t dab clean, it\'s gone. No residue, no compromise.',
+        secondary: 'Flash frozen at harvest. Extracted with precision. Terps preserved perfectly.'
+      },
+      columns: [
+        {
+          title: { primary: 'Solventless Excellence', secondary: 'Fresh Frozen Perfection' },
+          description: {
+            primary: 'No butane. No propane. Just pure extraction methods that preserve the plant\'s essence without compromise.',
+            secondary: 'Harvested at peak ripeness and flash frozen within hours. No drying, no curing—just pure, fresh terpenes.'
+          },
+          color: 'amber'
+        },
+        {
+          title: { primary: 'Lab-Tested Purity', secondary: 'Terpene Preservation' },
+          description: {
+            primary: 'Every batch tested for potency, purity, and residuals. Clean dabs only—your lungs will thank you.',
+            secondary: 'Low-temp extraction preserves the full spectrum of terpenes. Taste the strain, not the process.'
+          },
+          color: 'emerald'
+        },
+        {
+          title: { primary: 'Consistency Matters', secondary: 'Strain-Specific Profiles' },
+          description: {
+            primary: 'From shatter to sauce, every texture is perfected. Stable at room temp, melts clean on the nail.',
+            secondary: 'Each batch captures the unique profile of its source strain. Real cannabis flavors, amplified.'
+          },
+          color: 'blue'
+        }
+      ],
+      bottomStatement: {
+        text: {
+          primary: 'You won\'t find dark, burnt concentrates here.',
+          secondary: 'You won\'t find dried-out, flavorless extracts here.'
+        },
+        highlight: {
+          primary: 'You get golden, clean-melting concentrates that hit pure.',
+          secondary: 'You get terp-rich, fresh-frozen excellence in every dab.'
+        },
+        highlightColor: 'emerald'
+      }
+    },
+    experienceSection: {
+      title: "Extracted Fresh. Delivered Fast.",
+      subtitle: "Potency in Motion.",
+      columns: [
+        {
+          title: "Same-Day",
+          highlight: "Processing",
+          highlightColor: "blue",
+          description: { primary: "Orders placed by 2PM ship within hours." }
+        },
+        {
+          title: "Cold-Chain",
+          highlight: "Preserved.",
+          highlightColor: "green",
+          description: {
+            primary: "Every concentrate stored and shipped at optimal temps.",
+            secondary: "Live resin kept cold from extraction to your door."
+          }
+        },
+        {
+          title: "Local?",
+          highlight: "Lightning Fast.",
+          highlightColor: "purple",
+          description: { primary: "Most local orders drop next day. Many land same day." }
+        }
+      ]
+    }
+  },
+  defaultValues: {
+    weight: { primary: '1g', secondary: '0.5g' },
+    sortBy: 'featured'
+  },
+  loadingText: 'Loading concentrate collection...'
+};
+
 // Configuration for Moonwater
 export const moonwaterConfig: ProductCollectionConfig = {
   productType: 'moonwater',
@@ -646,6 +764,7 @@ export const productConfigs: Record<ProductType, ProductCollectionConfig> = {
   edible: edibleConfig,
   vape: vapeConfig,
   wax: waxConfig,
+  concentrate: concentrateConfig,
   moonwater: moonwaterConfig,
   subscriptions: flowerConfig // Using flower config as base for subscriptions
 }; 

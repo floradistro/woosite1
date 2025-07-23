@@ -1,30 +1,28 @@
 // Shared constants for vape page
-export const WEIGHT_PRICING = {
+export const VAPE_PRICING = {
   '0.5g': 35,
-  '1g': 50,
-  '2g': 85,
-  '3g': 120,
-  '5g': 180
+  '1g': 60
 } as const;
 
-// Disposable vape pricing
+// Legacy exports for backward compatibility
+export const WEIGHT_PRICING = VAPE_PRICING;
 export const DISPOSABLE_PRICING = {
-  '0.5g': 35,
-  '1g': 50,
-  '2g': 85,
-  '3g': 120
+  '1-pack': 25,
+  '2-pack': 45,
+  '3-pack': 65
 } as const;
 
-export const WEIGHTS = ['0.5g', '1g', '2g', '3g', '5g'] as const;
-export const DISPOSABLE_SIZES = ['0.5g', '1g', '2g', '3g'] as const;
+export const VAPE_SIZES = ['0.5g', '1g'] as const;
+export const WEIGHTS = VAPE_SIZES;
+export const DISPOSABLE_SIZES = ['1-pack', '2-pack', '3-pack'] as const;
 
 // Format types
-export type ProductFormat = 'cartridge' | 'disposable';
+export type ProductFormat = 'vape' | 'cartridge' | 'disposable';
 
 // Color mappings for tags
 export const CATEGORY_COLORS = {
   indica: "bg-indigo-600 border-indigo-700",
-  sativa: "bg-red-600 border-red-700",
+  sativa: "bg-red-600 border-red-700", 
   hybrid: "bg-green-600 border-green-700"
 } as const;
 
@@ -81,81 +79,119 @@ export interface FilterState {
   nose: string[];
 }
 
-// Product data - Vape products
-export const VAPE_PRODUCTS: FeaturedProduct[] = [
-  {
-    id: 1,
-    title: "jungle cake",
-    description: "mysterious and minimal. jungle cake captures the essence of silence in a room full of noise—undeniably powerful.",
-    price: 35.00,
-    image: "/categories/VAPE.png",
-    category: "indica",
-    vibe: "relax",
-    thc: 88.31,
-    nose: ["sherb", "gas"],
-    spotlight: "premium live resin with exceptional potency",
-    featured: true,
-    lineage: "zkittlez x gelato",
-    terpenes: ["limonene", "caryophyllene", "linalool"]
-  },
-  {
-    id: 2,
-    title: "white runtz",
-    description: "cold, crisp, and calculated. white runtz hits with a clinical precision you'll want to experience again and again.",
-    price: 35.00,
-    image: "/categories/VAPE.png",
-    category: "sativa",
-    vibe: "energize",
-    thc: 92.75,
-    nose: ["candy", "gas"],
-    spotlight: "pure distillate with energizing sativa terpenes",
-    featured: true,
-    lineage: "snowman x white runtz",
-    terpenes: ["myrcene", "pinene", "terpinolene"]
-  },
-  {
-    id: 3,
-    title: "jet fuel",
-    description: "dense and commanding. jet fuel doesn't ask for your attention—it takes it, and never gives it back.",
-    price: 35.00,
-    image: "/categories/VAPE.png",
-    category: "indica",
-    vibe: "relax",
-    thc: 85.19,
-    nose: ["cake", "sherb"],
-    spotlight: "solventless rosin for the true connoisseur",
-    featured: true,
-    lineage: "wedding cake x sherb",
-    terpenes: ["caryophyllene", "limonene", "myrcene"]
-  },
-  {
-    id: 4,
-    title: "gelato 33",
-    description: "this isn't your childhood chimney sweep. gelato 33 lifts you high, with just enough grit to keep you grounded.",
-    price: 35.00,
-    image: "/categories/VAPE.png",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 89.44,
-    nose: ["candy", "gas"],
-    spotlight: "our highest thc hybrid vape for the connoisseur",
-    featured: true,
-    lineage: "gary payton x runtz",
-    terpenes: ["limonene", "caryophyllene", "humulene"]
-  },
-  {
-    id: 5,
-    title: "super skunk",
-    description: "a bold strain for those with acquired taste. super skunk lingers—rich, pungent, and absolutely unapologetic.",
-    price: 35.00,
-    image: "/categories/VAPE.png",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 87.22,
-    nose: ["funk", "gas"],
-    spotlight: "terp sauce with a truly unique funk profile",
-    featured: false,
-    lineage: "miracle alien cookies x cheese",
-    terpenes: ["myrcene", "pinene", "caryophyllene"]
+// Import products from WooCommerce service
+import { productService } from '../../services/productService';
+
+// Transform WooCommerce products to vape format
+export async function getVapeProducts(): Promise<FeaturedProduct[]> {
+  try {
+    console.log('=== FETCHING VAPE PRODUCTS ===');
+    
+    // Direct approach using known category ID
+    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    console.log('Fetching vape products using category ID 1374...');
+    
+    let vapeProducts = await wooCommerceAPI.getProducts({ 
+      category: '1374', 
+      per_page: 100, 
+      status: 'publish' 
+    });
+    
+    console.log(`Found ${vapeProducts.length} vape products`);
+    
+    if (vapeProducts.length === 0) {
+      console.log('No vape products found');
+      return [];
+    }
+    
+    console.log('Raw vape products:', vapeProducts.map(p => ({ id: p.id, name: p.name, categories: p.categories?.map(c => c.name) })));
+    
+    // Transform WooCommerce products to our format
+    const transformedProducts = vapeProducts.map((product, index) => {
+      const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
+      const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      
+      // Extract category from categories or tags
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (categories.includes('indica') || tags.includes('indica')) return 'indica';
+        if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
+        return 'hybrid';
+      };
+
+      // Extract vibe from tags
+      const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
+        if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
+        return 'balance';
+      };
+
+      // Extract nose characteristics from tags
+      const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
+        const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
+        
+        tags.forEach(tag => {
+          if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
+          if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
+          if (tag.includes('cake') || tag.includes('vanilla')) noseOptions.push('cake');
+          if (tag.includes('funk') || tag.includes('cheese')) noseOptions.push('funk');
+          if (tag.includes('sherb') || tag.includes('citrus')) noseOptions.push('sherb');
+        });
+
+        // Default nose profiles if none found
+        if (noseOptions.length === 0) {
+          const category = getCategory();
+          if (category === 'indica') return ['cake', 'sherb'];
+          if (category === 'sativa') return ['gas', 'candy'];
+          return ['gas', 'sherb'];
+        }
+
+        return noseOptions;
+      };
+
+      // Extract THC percentage from description
+      const getThc = (): number => {
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
+        return match ? parseFloat(match[1]) : 85.0; // Default high THC for vapes
+      };
+
+      const transformedProduct = {
+        id: product.id,
+        title: product.name.toLowerCase(),
+        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis vape',
+        price: parseFloat(product.price) || 0,
+        image: product.images?.[0]?.src || '/categories/VAPE.png',
+        category: getCategory(),
+        vibe: getVibe(),
+        thc: getThc(),
+        nose: getNose(),
+        spotlight: `premium ${getCategory()} vape with exceptional potency`,
+        featured: index < 4,
+        lineage: 'premium cannabis extract',
+        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
+                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
+                 ['limonene', 'caryophyllene', 'myrcene']
+      };
+      
+      console.log(`Transformed vape product ${index + 1}:`, {
+        id: transformedProduct.id,
+        title: transformedProduct.title,
+        category: transformedProduct.category,
+        vibe: transformedProduct.vibe,
+        nose: transformedProduct.nose,
+        price: transformedProduct.price
+      });
+      
+      return transformedProduct;
+    });
+    
+    console.log(`Successfully transformed ${transformedProducts.length} vape products`);
+    return transformedProducts;
+  } catch (error) {
+    console.error('❌ Error fetching vape products:', error);
+    return [];
   }
-]; 
+}
+
+// For backward compatibility during transition
+export const VAPE_PRODUCTS: FeaturedProduct[] = []; 

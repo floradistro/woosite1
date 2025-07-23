@@ -80,19 +80,20 @@ export interface FilterState {
   flavor: string[];
 }
 
-// Import products from inventory
-import { products as inventoryProducts } from '../../data/products';
+// Since products.ts was removed during WooCommerce integration,
+// we'll use an empty array for now. This can be populated from WooCommerce later.
+const inventoryProducts: any[] = [];
 
 // Convert inventory products to moonwater format
 export const MOONWATER_PRODUCTS: FeaturedProduct[] = inventoryProducts
-  .filter(product => 
+  .filter((product: any) => 
     product.type === 'Moonwater' || 
-    product.tags.some(tag => tag.toLowerCase().includes('beverage'))
+    product.tags?.some((tag: any) => tag.toLowerCase().includes('beverage'))
   )
-  .map((product, index) => ({
+  .map((product: any, index: number) => ({
     id: index + 1,
-    title: product.title.toLowerCase(),
-    description: product.body.replace(/<[^>]*>/g, ''), // Remove HTML tags
+    title: product.title?.toLowerCase() || '',
+    description: product.body?.replace(/<[^>]*>/g, '') || '', // Remove HTML tags
     price: product.variantPrice,
     image: product.imageSrc,
     category: 'hybrid' as const, // Default for beverages

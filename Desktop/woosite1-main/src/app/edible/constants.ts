@@ -1,21 +1,19 @@
 // Shared constants for edibles page
 export const SINGLE_PRICING = {
-  '1-piece': 5,
-  '2-piece': 9,
-  '5-piece': 20,
-  '10-piece': 35
+  '1-piece': 8,
+  '3-piece': 22,
+  '5-piece': 35
 } as const;
 
 // Bulk pack pricing
 export const PACK_PRICING = {
-  '10-pack': 40,
-  '20-pack': 75,
-  '50-pack': 170,
-  '100-pack': 300
+  '10-pack': 60,
+  '20-pack': 110,
+  '50-pack': 250
 } as const;
 
-export const SINGLE_SIZES = ['1-piece', '2-piece', '5-piece', '10-piece'] as const;
-export const PACK_SIZES = ['10-pack', '20-pack', '50-pack', '100-pack'] as const;
+export const SINGLE_SIZES = ['1-piece', '3-piece', '5-piece'] as const;
+export const PACK_SIZES = ['10-pack', '20-pack', '50-pack'] as const;
 
 // Format types
 export type ProductFormat = 'single' | 'bulk';
@@ -80,96 +78,98 @@ export interface FilterState {
   type: string[];
 }
 
-// Product data
-export const EDIBLE_PRODUCTS: FeaturedProduct[] = [
-  {
-    id: 1,
-    title: "strawberry gummies",
-    description: "sweet nostalgia meets modern potency. strawberry gummies deliver consistent effects with a burst of summer flavor.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/ZOTE.png?v=1743485173",
-    category: "sativa",
-    vibe: "energize",
-    thc: 10,
-    type: ["gummies"],
-    spotlight: "energizing strawberry gummies with natural fruit flavor",
-    featured: true,
-    lineage: "strawberry cough infusion",
-    terpenes: ["limonene", "pinene", "terpinolene"]
-  },
-  {
-    id: 2,
-    title: "dark chocolate squares",
-    description: "rich, decadent, and perfectly dosed. dark chocolate squares offer a sophisticated way to elevate.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Blizzard.png?v=1743485174",
-    category: "indica",
-    vibe: "relax",
-    thc: 10,
-    type: ["chocolates"],
-    spotlight: "premium dark chocolate with relaxing indica effects",
-    featured: true,
-    lineage: "og kush blend",
-    terpenes: ["myrcene", "linalool", "caryophyllene"]
-  },
-  {
-    id: 3,
-    title: "mint chill drops",
-    description: "cool down and chill out. mint chill drops dissolve quickly for fast-acting, refreshing relief.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Cobb_Stopper.png?v=1743485175",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 10,
-    type: ["mints"],
-    spotlight: "fast-acting mints with cooling sensation",
-    featured: true,
-    lineage: "thin mint cookies x peppermint",
-    terpenes: ["limonene", "eucalyptol", "menthol"]
-  },
-  {
-    id: 4,
-    title: "snickerdoodle cookies",
-    description: "homestyle comfort in every bite. snickerdoodle cookies bring warmth and relaxation together.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Gary_Poppins.png?v=1743485175",
-    category: "indica",
-    vibe: "relax",
-    thc: 10,
-    type: ["cookies"],
-    spotlight: "classic cookie flavor with soothing effects",
-    featured: true,
-    lineage: "girl scout cookies blend",
-    terpenes: ["caryophyllene", "limonene", "humulene"]
-  },
-  {
-    id: 5,
-    title: "sea salt caramels",
-    description: "sweet meets savory in perfect harmony. sea salt caramels offer a gourmet experience with every dose.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Mac_And_Cheese.png?v=1743485176",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 10,
-    type: ["caramels"],
-    spotlight: "artisan caramels with balanced hybrid effects",
-    featured: false,
-    lineage: "wedding cake blend",
-    terpenes: ["myrcene", "pinene", "caryophyllene"]
-  },
-  {
-    id: 6,
-    title: "mixed berry gummies",
-    description: "a fruit medley that hits different. mixed berry gummies combine strawberry, blueberry, and raspberry flavors.",
-    price: 5.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Strawberry_Cream.png?v=1743485177",
-    category: "sativa",
-    vibe: "energize",
-    thc: 10,
-    type: ["gummies"],
-    spotlight: "uplifting berry blend for daytime enjoyment",
-    featured: false,
-    lineage: "blue dream x berry white",
-    terpenes: ["limonene", "linalool", "caryophyllene"]
+// Import products from WooCommerce service
+import { productService } from '../../services/productService';
+
+// Transform WooCommerce products to edibles format
+export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
+  try {
+    console.log('=== FETCHING EDIBLES PRODUCTS ===');
+    
+    // Use the optimized multi-category fetch
+    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    const edibleCategories = ['edible', 'edibles', 'gummy', 'gummies', 'chocolate', 'candy'];
+    
+    let edibleProducts = await wooCommerceAPI.getProductsByCategories(edibleCategories);
+    console.log(`Found ${edibleProducts.length} products from edible categories`);
+    
+    // If no products found, try category ID 1381 (based on original code)
+    if (edibleProducts.length === 0) {
+      console.log('Trying category ID 1381...');
+      edibleProducts = await wooCommerceAPI.getProducts({ category: '1381', per_page: 100, status: 'publish' });
+      console.log(`Found ${edibleProducts.length} products from category ID 1381`);
+    }
+    
+    if (edibleProducts.length === 0) {
+      console.log('No edible products found in any category');
+      return [];
+    }
+    
+    // Transform WooCommerce products to our format
+    return edibleProducts.map((product, index) => {
+      const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
+      const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      
+      // Extract category from categories or tags
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (categories.includes('indica') || tags.includes('indica')) return 'indica';
+        if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
+        return 'hybrid';
+      };
+
+      // Extract vibe from tags
+      const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
+        if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
+        return 'balance';
+      };
+
+      // Extract edible type from product info
+      const getType = (): Array<'gummies' | 'chocolates' | 'mints' | 'cookies' | 'caramels'> => {
+        const title = product.name?.toLowerCase() || '';
+        const allText = `${title} ${categories.join(' ')} ${tags.join(' ')}`;
+        
+        const types: Array<'gummies' | 'chocolates' | 'mints' | 'cookies' | 'caramels'> = [];
+        
+        if (allText.includes('gummy') || allText.includes('gummies')) types.push('gummies');
+        if (allText.includes('chocolate')) types.push('chocolates');
+        if (allText.includes('mint')) types.push('mints');
+        if (allText.includes('cookie') || allText.includes('brownie') || allText.includes('baked')) types.push('cookies');
+        if (allText.includes('caramel')) types.push('caramels');
+        
+        return types.length > 0 ? types : ['gummies']; // Default to gummies array
+      };
+
+      // Extract THC dosage from description
+      const getThc = (): number => {
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)\s*mg/i);
+        return match ? parseFloat(match[1]) : 10.0; // Default 10mg for edibles
+      };
+
+      return {
+        id: product.id,
+        title: product.name?.toLowerCase() || 'edible product',
+        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis edible',
+        price: parseFloat(product.price) || 29.99,
+        image: product.images?.[0]?.src || '/categories/EDIBLES.png',
+        category: getCategory(),
+        vibe: getVibe(),
+        thc: getThc(),
+        type: getType(),
+        spotlight: `premium ${getCategory()} edibles with precise dosing`,
+        featured: index < 4,
+        lineage: 'premium cannabis extract',
+        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
+                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
+                 ['limonene', 'caryophyllene', 'myrcene']
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error fetching edibles products:', error);
+    return [];
   }
-]; 
+}
+
+// For backward compatibility during transition
+export const EDIBLE_PRODUCTS: FeaturedProduct[] = []; 

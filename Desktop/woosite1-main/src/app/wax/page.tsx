@@ -1,9 +1,9 @@
 "use client"
 
-// React import not needed in React 17+
+import { useState, useEffect } from 'react';
 import ProductCollectionPage from '../components/ProductCollectionPage';
-import { waxConfig } from '../components/ProductCollectionConfig';
-import { WAX_PRODUCTS } from './constants';
+import { concentrateConfig } from '../components/ProductCollectionConfig';
+import { getConcentrateProducts, type FeaturedProduct } from './constants';
 import { filterProducts } from './utils';
 
 // Import unified components from the shared directory
@@ -13,18 +13,36 @@ import HeroSection from '@/components/product/HeroSection';
 import SubscriptionSection from '@/components/product/SubscriptionSection';
 import ReviewsSection from '@/components/product/ReviewsSection';
 
-export default function WaxCollectionPage() {
+export default function ConcentrateCollectionPage() {
+  const [products, setProducts] = useState<FeaturedProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const concentrateProducts = await getConcentrateProducts();
+        setProducts(concentrateProducts);
+      } catch (error) {
+        console.error('Error fetching concentrate products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   // Enhanced component props for compatibility
   const EnhancedFilterBar = (props: any) => (
-    <FilterBar {...props} formats={waxConfig.formats} />
+    <FilterBar {...props} formats={concentrateConfig.formats} />
   );
   
   const EnhancedDenseView = (props: any) => (
     <DenseView 
       {...props}
-      productType="wax"
-      pricing={props.format === 'wax' ? waxConfig.pricing.primary : waxConfig.pricing.secondary!}
-      sizes={props.format === 'wax' ? Object.keys(waxConfig.pricing.primary) : Object.keys(waxConfig.pricing.secondary!)}
+      productType="concentrate"
+      pricing={props.format === 'concentrate' ? concentrateConfig.pricing.primary : concentrateConfig.pricing.secondary!}
+      sizes={props.format === 'concentrate' ? Object.keys(concentrateConfig.pricing.primary) : Object.keys(concentrateConfig.pricing.secondary!)}
       selectedOptions={props.selectedWeights}
       onOptionSelect={props.onWeightSelect}
     />
@@ -32,33 +50,33 @@ export default function WaxCollectionPage() {
   
   const EnhancedHeroSection = (props: any) => (
     <HeroSection
-      productType="wax"
+      productType="concentrate"
       format={props.format}
       title={{
-        primary: waxConfig.content.hero.primary.title,
-        secondary: waxConfig.content.hero.secondary?.title
+        primary: concentrateConfig.content.hero.primary.title,
+        secondary: concentrateConfig.content.hero.secondary?.title
       }}
       subtitle={{
-        primary: waxConfig.content.hero.primary.subtitle,
-        secondary: waxConfig.content.hero.secondary?.subtitle
+        primary: concentrateConfig.content.hero.primary.subtitle,
+        secondary: concentrateConfig.content.hero.secondary?.subtitle
       }}
-      features={props.format === 'wax' 
-        ? waxConfig.content.hero.primary.features || []
-        : waxConfig.content.hero.secondary?.features || []
+      features={props.format === 'concentrate' 
+        ? concentrateConfig.content.hero.primary.features || []
+        : concentrateConfig.content.hero.secondary?.features || []
       }
-      qualityBadges={props.format === 'wax'
-        ? waxConfig.content.hero.primary.qualityBadges || []
-        : waxConfig.content.hero.secondary?.qualityBadges || []
+      qualityBadges={props.format === 'concentrate'
+        ? concentrateConfig.content.hero.primary.qualityBadges || []
+        : concentrateConfig.content.hero.secondary?.qualityBadges || []
       }
     />
   );
   
   const EnhancedSubscriptionSection = () => (
-    <SubscriptionSection productType="wax" />
+    <SubscriptionSection productType="concentrate" />
   );
   
   const EnhancedReviewsSection = () => (
-    <ReviewsSection productType="wax" />
+    <ReviewsSection productType="concentrate" />
   );
   
   // Wrapper to handle type compatibility
@@ -66,10 +84,18 @@ export default function WaxCollectionPage() {
     return filterProducts(products, filters);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading concentrates...</div>
+      </div>
+    );
+  }
+
   return (
     <ProductCollectionPage
-      config={waxConfig}
-      products={WAX_PRODUCTS}
+      config={concentrateConfig}
+      products={products}
       FilterBar={EnhancedFilterBar}
       DenseView={EnhancedDenseView}
       HeroSection={EnhancedHeroSection}

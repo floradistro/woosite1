@@ -5,7 +5,25 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import Image from 'next/image';
 import { ShoppingCart, Filter, ChevronDown } from 'lucide-react';
-import { products, Product } from '../../data/products';
+
+// Temporary interface for apparel products
+interface Product {
+  id: number;
+  handle: string;
+  title: string;
+  body: string;
+  shortDescription: string;
+  type: string;
+  published: boolean;
+  productCategory: string;
+  tags: string[];
+  options: Array<{ name: string; value: string }>;
+  variantPrice: number;
+  imageSrc: string;
+}
+
+// Temporary empty products array - TODO: integrate with WooCommerce
+const products: Product[] = [];
 
 // Transform Product to ApparelProduct interface
 interface ApparelProduct {

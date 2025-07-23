@@ -1,4 +1,4 @@
-// Shared constants for wax/concentrates page
+// Shared constants for concentrate page
 export const WEIGHT_PRICING = {
   '0.5g': 30,
   '1g': 55,
@@ -19,7 +19,7 @@ export const WEIGHTS = ['0.5g', '1g', '2g', '3.5g', '7g'] as const;
 export const GRAM_SIZES = ['0.5g', '1g', '2g', '3.5g'] as const;
 
 // Format types
-export type ProductFormat = 'wax' | 'live-resin';
+export type ProductFormat = 'concentrate' | 'live-resin';
 
 // Color mappings for tags
 export const CATEGORY_COLORS = {
@@ -81,24 +81,96 @@ export interface FilterState {
   texture: string[];
 }
 
-// Import products from inventory
-import { products as inventoryProducts } from '../../data/products';
+// Import products from WooCommerce service
+import { productService } from '../../services/productService';
 
-// Convert inventory products to wax format
-export const WAX_PRODUCTS: FeaturedProduct[] = inventoryProducts
-  .filter(product => product.type.toLowerCase() === 'wax')
-  .map((product, index) => ({
-    id: index + 1,
-    title: product.title.toLowerCase(),
-    description: product.body.replace(/<[^>]*>/g, ''), // Remove HTML tags
-    price: product.variantPrice,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/WEBSITE_ICONS_12_f18dc325-6f85-491e-a06b-a29cfb9c30b2.png?v=1743487860", // Use consistent wax collection image
-    category: 'hybrid' as const, // Default for concentrates
-    vibe: 'energize' as const, // Default for concentrates
-    thc: 85, // Default THC for concentrates
-    texture: ['shatter'] as Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'>, // Default texture
-    spotlight: `premium ${product.title.toLowerCase()} concentrate with exceptional potency`,
-    featured: true,
-    lineage: 'premium concentrate extraction',
-    terpenes: ['myrcene', 'limonene', 'caryophyllene']
-  })); 
+// Transform WooCommerce products to concentrate format
+export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
+  try {
+    console.log('=== FETCHING CONCENTRATE PRODUCTS ===');
+    
+    // Direct approach using known category ID
+    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    console.log('Fetching concentrate products using category ID 1408...');
+    
+    let concentrateProducts = await wooCommerceAPI.getProducts({ 
+      category: '1408', 
+      per_page: 100, 
+      status: 'publish' 
+    });
+    
+    console.log(`Found ${concentrateProducts.length} concentrate products`);
+    
+    if (concentrateProducts.length === 0) {
+      console.log('No concentrate products found');
+      return [];
+    }
+    
+    console.log('Raw concentrate products:', concentrateProducts.map(p => ({ id: p.id, name: p.name, categories: p.categories?.map(c => c.name) })));
+    
+    // Transform WooCommerce products to our format
+    return concentrateProducts.map((product, index) => {
+      const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
+      const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      
+      // Extract category from categories or tags
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (categories.includes('indica') || tags.includes('indica')) return 'indica';
+        if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
+        return 'hybrid';
+      };
+
+      // Extract vibe from tags
+      const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
+        if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
+        return 'balance';
+      };
+
+      // Extract texture from product title/description/tags
+      const getTexture = (): Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'> => {
+        const title = product.name?.toLowerCase() || '';
+        const description = product.description?.toLowerCase() || product.short_description?.toLowerCase() || '';
+        const allText = `${title} ${description} ${tags.join(' ')}`;
+        
+        const textures: Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'> = [];
+        
+        if (allText.includes('shatter')) textures.push('shatter');
+        if (allText.includes('budder')) textures.push('budder');
+        if (allText.includes('sauce')) textures.push('sauce');
+        if (allText.includes('diamonds')) textures.push('diamonds');
+        if (allText.includes('rosin')) textures.push('rosin');
+        
+        return textures.length > 0 ? textures : ['shatter']; // Default to shatter
+      };
+
+      // Extract THC percentage from description
+      const getThc = (): number => {
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
+        return match ? parseFloat(match[1]) : 85.0; // Default high THC for concentrates
+      };
+
+      return {
+        id: product.id,
+        title: product.name.toLowerCase(),
+        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis concentrate',
+        price: parseFloat(product.price) || 0,
+        image: product.images?.[0]?.src || '/categories/WAX.png',
+        category: getCategory(),
+        vibe: getVibe(),
+        thc: getThc(),
+        texture: getTexture(),
+        spotlight: `premium ${product.name} concentrate with exceptional potency and purity`,
+        featured: index < 4,
+        lineage: 'premium concentrate extraction',
+        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
+                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
+                 ['limonene', 'caryophyllene', 'myrcene']
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error fetching concentrate products:', error);
+    return [];
+  }
+} 

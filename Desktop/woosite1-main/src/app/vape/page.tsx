@@ -1,9 +1,9 @@
 "use client"
 
-// React import not needed in React 17+
+import { useState, useEffect } from 'react';
 import ProductCollectionPage from '../components/ProductCollectionPage';
 import { vapeConfig } from '../components/ProductCollectionConfig';
-import { VAPE_PRODUCTS } from './constants';
+import { getVapeProducts, type FeaturedProduct } from './constants';
 import { filterProducts } from './utils';
 
 // Import unified components from the shared directory
@@ -14,6 +14,24 @@ import SubscriptionSection from '@/components/product/SubscriptionSection';
 import ReviewsSection from '@/components/product/ReviewsSection';
 
 export default function VapeCollectionPage() {
+  const [products, setProducts] = useState<FeaturedProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const vapeProducts = await getVapeProducts();
+        setProducts(vapeProducts);
+      } catch (error) {
+        console.error('Error fetching vape products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   // Enhanced component props for compatibility
   const EnhancedFilterBar = (props: any) => (
     <FilterBar {...props} formats={vapeConfig.formats} />
@@ -58,10 +76,21 @@ export default function VapeCollectionPage() {
     return filterProducts(products, filters);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#4a4a4a] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/70">Loading vape products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ProductCollectionPage
       config={vapeConfig}
-      products={VAPE_PRODUCTS}
+      products={products}
       FilterBar={EnhancedFilterBar}
       DenseView={EnhancedDenseView}
       HeroSection={EnhancedHeroSection}

@@ -266,7 +266,7 @@ function HeaderContent() {
       ]
     },
     {
-      label: "wax",
+      label: "concentrates",
       href: "/wax",
       description: "Concentrates & extracts",
       icon: "/categories/WAX.png",
@@ -277,7 +277,7 @@ function HeaderContent() {
       ]
     },
     {
-      label: "edible",
+      label: "edibles",
       href: "/edible",
       description: "Sweet hitters & treats",
       icon: "/categories/EDIBLES.png",
@@ -630,7 +630,7 @@ function HeaderContent() {
                   href="/wax"
                   className="text-xs font-normal text-white/90 hover:text-white transition-colors"
                 >
-                  Wax
+                  Concentrates
                 </Link>
                 <Link
                   href="/edible"
@@ -1250,14 +1250,14 @@ function HeaderContent() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="block text-white/90 hover:text-white transition-colors text-2xl font-normal py-2.5"
                       >
-                        Wax
+                        Concentrates
                       </Link>
                       <Link
                         href="/edible"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="block text-white/90 hover:text-white transition-colors text-2xl font-normal py-2.5"
                       >
-                        Edible
+                        Edibles
                       </Link>
                       <Link
                         href="/moonwater"

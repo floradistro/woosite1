@@ -40,6 +40,12 @@ const defaultContent: Record<ProductType, {
     ctaText: "Join the Club",
     linkText: "Learn about membership"
   },
+  concentrate: {
+    title: "Concentrate Club.",
+    subtitle: "Exclusive monthly drops. Premium extracts for connoisseurs.",
+    ctaText: "Join the Club",
+    linkText: "Learn about membership"
+  },
   moonwater: {
     title: "Stay Refreshed.",
     subtitle: "Monthly beverage packs. Never run dry on your favorite flavors.",
@@ -102,7 +108,7 @@ export default function SubscriptionSection({
           productType === 'flower' ? 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/10' :
           productType === 'edible' ? 'bg-gradient-to-br from-pink-500/10 to-purple-600/10' :
           productType === 'vape' ? 'bg-gradient-to-br from-blue-500/10 to-indigo-600/10' :
-          productType === 'wax' ? 'bg-gradient-to-br from-amber-500/10 to-orange-600/10' :
+          (productType === 'wax' || productType === 'concentrate') ? 'bg-gradient-to-br from-amber-500/10 to-orange-600/10' :
           productType === 'moonwater' ? 'bg-gradient-to-br from-cyan-500/10 to-blue-600/10' :
           'bg-gradient-to-br from-purple-500/10 to-pink-600/10'
         }`}></div>
@@ -110,7 +116,7 @@ export default function SubscriptionSection({
           productType === 'flower' ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10' :
           productType === 'edible' ? 'bg-gradient-to-br from-purple-500/10 to-pink-500/10' :
           productType === 'vape' ? 'bg-gradient-to-br from-indigo-500/10 to-blue-500/10' :
-          productType === 'wax' ? 'bg-gradient-to-br from-orange-500/10 to-amber-500/10' :
+          (productType === 'wax' || productType === 'concentrate') ? 'bg-gradient-to-br from-orange-500/10 to-amber-500/10' :
           productType === 'moonwater' ? 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10' :
           'bg-gradient-to-br from-pink-500/10 to-purple-500/10'
         }`}></div>

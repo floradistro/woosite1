@@ -81,96 +81,107 @@ export interface FilterState {
   nose: string[];
 }
 
-// Product data
-export const FLOWER_PRODUCTS: FeaturedProduct[] = [
-  {
-    id: 1,
-    title: "zote",
-    description: "mysterious and minimal. zote is like silence in a room full of noise's undeniably powerful.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/ZOTE.png?v=1743485173",
-    category: "indica",
-    vibe: "relax",
-    thc: 26.31,
-    nose: ["sherb", "gas"],
-    spotlight: "premium indica strain with exceptional potency",
-    featured: true,
-    lineage: "zkittlez x gelato",
-    terpenes: ["limonene", "caryophyllene", "linalool"]
-  },
-  {
-    id: 2,
-    title: "blizzard",
-    description: "cold, crisp, and calculated. blizzard hits with a clinical precision you'll want to experience again and again.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Blizzard.png?v=1743485174",
-    category: "sativa",
-    vibe: "energize",
-    thc: 25.75,
-    nose: ["candy", "gas"],
-    spotlight: "energizing sativa blend with a sweet candy profile",
-    featured: true,
-    lineage: "snowman x white runtz",
-    terpenes: ["myrcene", "pinene", "terpinolene"]
-  },
-  {
-    id: 3,
-    title: "cobb stopper",
-    description: "dense and commanding. cobb stopper doesn't ask for your attention's it takes it, and never gives it back.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Cobb_Stopper.png?v=1743485175",
-    category: "indica",
-    vibe: "relax",
-    thc: 25.19,
-    nose: ["cake", "sherb"],
-    spotlight: "deep relaxation with an unforgettable cake nose",
-    featured: true,
-    lineage: "wedding cake x sherb",
-    terpenes: ["caryophyllene", "limonene", "myrcene"]
-  },
-  {
-    id: 4,
-    title: "gary poppins",
-    description: "this isn't your childhood chimney sweep. gary poppins lifts you high, with just enough grit to keep you grounded.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Gary_Poppins.png?v=1743485175",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 28.44,
-    nose: ["candy", "gas"],
-    spotlight: "our highest thc hybrid strain for the connoisseur",
-    featured: true,
-    lineage: "gary payton x runtz",
-    terpenes: ["limonene", "caryophyllene", "humulene"]
-  },
-  {
-    id: 5,
-    title: "mac and cheese",
-    description: "a bold strain for those with acquired taste. mac and cheese lingers's rich, pungent, and absolutely unapologetic.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Mac_And_Cheese.png?v=1743485176",
-    category: "hybrid",
-    vibe: "balance",
-    thc: 28.22,
-    nose: ["funk", "gas"],
-    spotlight: "a truly unique funk profile for those who appreciate complexity",
-    featured: false,
-    lineage: "miracle alien cookies x cheese",
-    terpenes: ["myrcene", "pinene", "caryophyllene"]
-  },
-  {
-    id: 6,
-    title: "strawberry cream",
-    description: "sweet, seductive, and dangerously smooth. strawberry cream is what you reach for when you're too refined for reality.",
-    price: 15.00,
-    image: "https://cdn.shopify.com/s/files/1/0877/4480/7195/files/Strawberry_Cream.png?v=1743485177",
-    category: "indica",
-    vibe: "relax",
-    thc: 23.47,
-    nose: ["cake", "candy"],
-    spotlight: "dessert-like indica with a sweet finish",
-    featured: false,
-    lineage: "strawberry banana x cookies & cream",
-    terpenes: ["limonene", "linalool", "caryophyllene"]
+// Import products from WooCommerce service
+import { productService } from '../../services/productService';
+
+// Transform WooCommerce products to flower format
+export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
+  try {
+    console.log('=== FETCHING FLOWER PRODUCTS ===');
+    
+    // Use the optimized multi-category fetch
+    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    const flowerCategories = ['flower', 'flowers', 'bud', 'cannabis-flower', 'herb'];
+    
+    let flowerProducts = await wooCommerceAPI.getProductsByCategories(flowerCategories);
+    console.log(`Found ${flowerProducts.length} products from flower categories`);
+    
+    // If no products found, try some additional specific terms but avoid expensive "all products" fetch
+    if (flowerProducts.length === 0) {
+      console.log('Trying additional flower-specific categories...');
+      const additionalCategories = ['indica', 'sativa', 'hybrid', 'strain'];
+      flowerProducts = await wooCommerceAPI.getProductsByCategories(additionalCategories);
+      console.log(`Found ${flowerProducts.length} products from additional categories`);
+    }
+    
+    if (flowerProducts.length === 0) {
+      console.log('No flower products found in any category');
+      return [];
+    }
+    
+    // Transform WooCommerce products to our format
+    return flowerProducts.map((product, index) => {
+      const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
+      const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      
+      // Extract category from categories or tags
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (categories.includes('indica') || tags.includes('indica')) return 'indica';
+        if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
+        return 'hybrid';
+      };
+
+      // Extract vibe from tags
+      const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
+        if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
+        return 'balance';
+      };
+
+      // Extract nose characteristics
+      const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
+        const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
+        
+        tags.forEach(tag => {
+          if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
+          if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
+          if (tag.includes('cake') || tag.includes('vanilla')) noseOptions.push('cake');
+          if (tag.includes('funk') || tag.includes('cheese')) noseOptions.push('funk');
+          if (tag.includes('sherb') || tag.includes('citrus')) noseOptions.push('sherb');
+        });
+
+        // Default nose profiles if none found
+        if (noseOptions.length === 0) {
+          const category = getCategory();
+          if (category === 'indica') return ['sherb', 'cake'];
+          if (category === 'sativa') return ['gas', 'candy'];
+          return ['gas', 'sherb'];
+        }
+
+        return noseOptions;
+      };
+
+      // Extract THC percentage from description or meta
+      const getThc = (): number => {
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
+        return match ? parseFloat(match[1]) : 25.0;
+      };
+
+      return {
+        id: product.id,
+        title: product.name.toLowerCase(),
+        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || '',
+        price: parseFloat(product.price) || 0,
+        image: product.images?.[0]?.src || '/icons/FLOWER.png',
+        category: getCategory(),
+        vibe: getVibe(),
+        thc: getThc(),
+        nose: getNose(),
+        spotlight: `premium flower strain with exceptional quality`,
+        featured: index < 4, // First 4 products are featured
+        lineage: 'premium cannabis genetics',
+        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
+                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
+                 ['limonene', 'caryophyllene', 'myrcene']
+      };
+    });
+  } catch (error) {
+    console.error('❌ Error fetching flower products:', error);
+    return [];
   }
-]; 
+}
+
+// For backward compatibility, export a function that returns the products
+// This will be replaced with direct API calls in components
+export const FLOWER_PRODUCTS: FeaturedProduct[] = []; 

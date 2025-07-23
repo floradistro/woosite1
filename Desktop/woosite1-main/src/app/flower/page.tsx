@@ -3,8 +3,9 @@
 // React import not needed in React 17+
 import ProductCollectionPage from '../components/ProductCollectionPage';
 import { flowerConfig } from '../components/ProductCollectionConfig';
-import { FLOWER_PRODUCTS } from './constants';
+import { getFlowerProducts, FeaturedProduct } from './constants';
 import { filterProducts } from './utils';
+import { useEffect, useState } from 'react';
 
 // Import unified components from the shared directory
 import FilterBar from '@/components/product/FilterBar';
@@ -14,6 +15,34 @@ import SubscriptionSection from '@/components/product/SubscriptionSection';
 import ReviewsSection from '@/components/product/ReviewsSection';
 
 export default function FlowerCollectionPage() {
+  const [flowerProducts, setFlowerProducts] = useState<FeaturedProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const products = await getFlowerProducts();
+        setFlowerProducts(products);
+      } catch (error) {
+        console.error('Error loading flower products:', error);
+        setFlowerProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading flower products...</div>
+      </div>
+    );
+  }
+
   // Enhanced component props for compatibility
   const EnhancedFilterBar = (props: any) => (
     <FilterBar {...props} formats={flowerConfig.formats} />
@@ -69,7 +98,7 @@ export default function FlowerCollectionPage() {
   return (
     <ProductCollectionPage
       config={flowerConfig}
-      products={FLOWER_PRODUCTS}
+      products={flowerProducts}
       FilterBar={EnhancedFilterBar}
       DenseView={EnhancedDenseView}
       HeroSection={EnhancedHeroSection}

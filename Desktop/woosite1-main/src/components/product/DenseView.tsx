@@ -63,6 +63,7 @@ const ProductImage = ({
   format, 
   onLoad, 
   onClick,
+  onGummyClick,
   index 
 }: {
   product: BaseFeaturedProduct;
@@ -71,6 +72,7 @@ const ProductImage = ({
   format: string;
   onLoad: () => void;
   onClick: (e: React.MouseEvent) => void;
+  onGummyClick?: (e: React.MouseEvent) => void;
   index: number;
 }) => {
   const getIndicator = () => {
@@ -122,23 +124,53 @@ const ProductImage = ({
         quality={85}
       />
       
-      {/* Small magnified fisheye view - bottom right corner */}
+      {/* Bottom right corner indicator */}
       {isLoaded && (
-        <div className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg">
-          <div 
-            className="w-full h-full rounded-full overflow-hidden"
-            style={{
-              backgroundImage: `url(${product.image})`,
-              backgroundSize: '400%',
-              backgroundPosition: 'center center',
-              backgroundRepeat: 'no-repeat',
-              filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
-            }}
-          >
-          </div>
-          {/* Subtle lens effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
-        </div>
+        <>
+          {(productType === 'wax' || productType === 'concentrate') ? (
+            /* Concentrate icon for wax/concentrate products */
+            <div className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-1">
+              <Image
+                src="/icons/concentrate.png"
+                alt="Concentrate indicator"
+                width={48}
+                height={48}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : product.title.toLowerCase().includes('gummy') ? (
+            /* Gummy icon for products containing "gummy" */
+            <div 
+              className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-0.5 cursor-pointer"
+              onClick={onGummyClick}
+            >
+              <Image
+                src="/icons/newGummy.png"
+                alt="Gummy indicator"
+                width={56}
+                height={56}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : productType !== 'edible' ? (
+            /* Small magnified fisheye view for non-edible products */
+            <div className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg">
+              <div 
+                className="w-full h-full rounded-full overflow-hidden"
+                style={{
+                  backgroundImage: `url(${product.image})`,
+                  backgroundSize: '400%',
+                  backgroundPosition: 'center center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
+                }}
+              >
+              </div>
+              {/* Subtle lens effect */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -166,7 +198,7 @@ const ProductInfo = ({
   };
 
   const getThcLabel = () => {
-    return productType === 'flower' || productType === 'vape' || productType === 'wax' ? 'THCa:' : 'THC:';
+    return productType === 'flower' || productType === 'vape' || productType === 'wax' || productType === 'concentrate' ? 'THCa:' : 'THC:';
   };
 
   const getThcValue = () => {
@@ -245,7 +277,7 @@ const ProductInfo = ({
         </div>
       )}
       
-      {productType === 'wax' && product.texture && Array.isArray(product.texture) && (
+                      {(productType === 'wax' || productType === 'concentrate') && product.texture && Array.isArray(product.texture) && (
         <div className="flex flex-wrap gap-1 mb-1">
           <span className="text-white/70 text-sm md:text-xs mr-1">Texture:</span>
           {product.texture.map((tex, idx) => (
@@ -386,7 +418,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
     if (productType === 'flower') return format === 'flower' ? '3.5g' : '1-pack';
     if (productType === 'edible') return format === 'single' ? '1-piece' : '10-pack';
     if (productType === 'vape') return '0.5g';
-    if (productType === 'wax') return '1g';
+    if (productType === 'wax' || productType === 'concentrate') return '1g';
     if (productType === 'moonwater') return '1-bottle';
     return sizes[0];
   };
@@ -412,6 +444,22 @@ export default function DenseView<T extends BaseFeaturedProduct>({
     
     // Open quick view instead of navigating
     setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const handleGummyClick = (product: T, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Save current scroll position before opening modal
+    const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    setSavedScrollPosition(currentScrollY);
+    
+    // Open quick view with gummy image instead of product image
+    setQuickViewProduct({
+      ...product,
+      image: '/icons/newGummy.png',
+      title: 'Gummy Details',
+      description: 'Premium gummy with no artificial dyes'
+    } as T);
     setIsQuickViewOpen(true);
   };
 
@@ -448,7 +496,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
       boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07)'
     }}>
       <div className="w-full relative z-10">
-        <div className="w-full md:columns-2 lg:columns-3 md:gap-1 space-y-2 md:space-y-0">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-2">
           {products.map((product, index) => {
             const selectedOption = selectedOptions[product.id] || getDefaultSelection(product.id);
             const price = pricing[selectedOption as keyof typeof pricing];
@@ -461,9 +509,9 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                 ref={(el) => {
                   productRefs.current[product.id] = el;
                 }}
-                className={`group relative cursor-pointer transition-all duration-200 break-inside-avoid mb-1 ${
-                  index < 12 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                } ${isExpanded ? 'z-10' : 'z-0'} ${getFadeClass(product.id)} ${
+                className={`group relative cursor-pointer transition-all duration-200 opacity-100 translate-y-0 ${
+                  isExpanded ? 'z-10' : 'z-0'
+                } ${getFadeClass(product.id)} ${
                   isMobile && isExpanded ? 'my-1' : ''
                 }`}
                 style={{ transitionDelay: `${Math.min(index * 50, 600)}ms` }}
@@ -481,15 +529,26 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                   )}
                   
                   <div className="flex items-start gap-1.5 mb-3 md:mb-4">
-                    <ProductImage
-                      product={product}
-                      isLoaded={isImageLoaded}
-                      productType={productType}
-                      format={format}
-                      onLoad={() => onImageLoad(product.id)}
-                      onClick={(e) => handleImageClick(product, e)}
-                      index={index}
-                    />
+                    <div className="flex flex-col">
+                      <ProductImage
+                        product={product}
+                        isLoaded={isImageLoaded}
+                        productType={productType}
+                        format={format}
+                        onLoad={() => onImageLoad(product.id)}
+                        onClick={(e) => handleImageClick(product, e)}
+                        onGummyClick={product.title.toLowerCase().includes('gummy') ? (e) => handleGummyClick(product, e) : undefined}
+                        index={index}
+                      />
+                      {/* No Artificial Dyes text for gummy products */}
+                      {product.title.toLowerCase().includes('gummy') && (
+                        <div className="text-center mt-1">
+                          <p className="text-red-400 text-xs font-medium">
+                            **No Artificial Dyes**
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
                     <ProductInfo
                       product={product}

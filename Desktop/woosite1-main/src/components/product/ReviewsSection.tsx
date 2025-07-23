@@ -273,6 +273,65 @@ const reviewData: Record<ProductType, {
       helper: "Help others discover premium extracts."
     }
   },
+  concentrate: {
+    reviews: [
+      {
+        name: "Brandon K.",
+        location: "Charlotte, NC",
+        rating: 5,
+        date: "2 days ago",
+        review: "The shatter is crystal clear and incredibly potent. Perfect consistency, no residue, and amazing terpene profile. Professional grade concentrate.",
+        verified: true,
+        product: "OG Kush Shatter"
+      },
+      {
+        name: "Alex T.",
+        location: "Raleigh, NC",
+        rating: 5,
+        date: "1 week ago",
+        review: "The budder is so smooth and terpy! Easy to work with and the effects are long-lasting. Best concentrate I've found in NC.",
+        verified: true,
+        product: "Wedding Cake Budder"
+      },
+      {
+        name: "Maria G.",
+        location: "Durham, NC",
+        rating: 5,
+        date: "4 days ago",
+        review: "Live rosin is absolutely incredible. You can taste every terpene and the effects are clean and powerful. Worth every penny.",
+        verified: true,
+        product: "GMO Live Rosin"
+      },
+      {
+        name: "Derek L.",
+        location: "Asheville, NC",
+        rating: 5,
+        date: "3 days ago",
+        review: "The sauce is perfect - great consistency and the diamonds are huge! Incredible flavor and potency. Will be ordering more.",
+        verified: true,
+        product: "Gelato Sauce"
+      },
+      {
+        name: "Samantha R.",
+        location: "Winston-Salem, NC",
+        rating: 5,
+        date: "6 days ago",
+        review: "Best diamonds I've ever had. Super clean, no harsh taste, and the high is exactly what I want from a concentrate. 10/10!",
+        verified: true,
+        product: "THCa Diamonds"
+      },
+    ],
+    stats: {
+      total: 600,
+      average: 4.9,
+      recommend: 99
+    },
+    headers: {
+      title: "Share Your Experience",
+      subtitle: "Enjoyed our concentrates? Share your feedback.",
+      helper: "Help others discover premium extracts."
+    }
+  },
   moonwater: {
     reviews: [
       {
