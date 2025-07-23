@@ -1,3 +1,5 @@
+'use client';
+
 export default function IconVerification() {
   const icons = [
     { name: 'Vape Icon', path: '/icons/vapeicon2.png' },
