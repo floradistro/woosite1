@@ -77,7 +77,7 @@ const ProductImage = ({
 }) => {
   const getIndicator = () => {
     if (productType === 'flower' && format === 'preroll') {
-      return { type: 'image', src: '/icons/PRE ROLL.png', alt: 'Pre-roll indicator' };
+      return { type: 'image', src: '/icons/pre-roll.png', alt: 'Pre-roll indicator' };
     }
     if (productType === 'edible' && format === 'bulk') {
       return { type: 'badge', text: 'BULK', color: 'orange' };

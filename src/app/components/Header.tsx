@@ -245,7 +245,7 @@ function HeaderContent() {
       label: "pre-roll",
       href: "/flower?format=preroll",
       description: "Ready to smoke",
-      icon: "/categories/PRE ROLL.png",
+      icon: "/icons/pre-roll.png",
       subcategories: [
         { label: "indica", href: "/flower?format=preroll&type=indica" },
         { label: "sativa", href: "/flower?format=preroll&type=sativa" },
