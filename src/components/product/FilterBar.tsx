@@ -125,13 +125,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
     <>
       <div 
         className={`
-          sticky z-50 transition-all duration-300 ease-in-out
+          sticky top-16 z-50 transition-all duration-300 ease-in-out
           ${isSticky 
             ? 'bg-[#2a2a2a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
             : 'bg-[#2a2a2a] border-b border-white/5'
           }
         `}
-        style={{ top: '60px' }}
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}

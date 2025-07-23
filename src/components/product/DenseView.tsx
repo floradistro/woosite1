@@ -77,7 +77,7 @@ const ProductImage = ({
 }) => {
   const getIndicator = () => {
     if (productType === 'flower' && format === 'preroll') {
-      return { type: 'image', src: '/categories/PRE ROLL.png', alt: 'Pre-roll indicator' };
+      return { type: 'image', src: '/icons/PRE ROLL.png', alt: 'Pre-roll indicator' };
     }
     if (productType === 'edible' && format === 'bulk') {
       return { type: 'badge', text: 'BULK', color: 'orange' };
@@ -156,7 +156,7 @@ const ProductImage = ({
             /* Vape icon for vape products */
             <div className="absolute bottom-1 right-1 w-20 h-20 md:w-24 md:h-24 opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center">
               <Image
-                src="/icons/vapeicon2.png"
+                src="/icons/VAPE.png"
                 alt="Vape indicator"
                 width={80}
                 height={80}
