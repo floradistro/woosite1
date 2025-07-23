@@ -156,7 +156,7 @@ const ProductImage = ({
             /* Vape icon for vape products */
             <div className="absolute bottom-1 right-1 w-20 h-20 md:w-24 md:h-24 opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center">
               <Image
-                src="/categories/VAPE.png"
+                src="/icons/vapeicon2.png"
                 alt="Vape indicator"
                 width={80}
                 height={80}

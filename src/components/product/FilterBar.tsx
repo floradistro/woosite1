@@ -131,7 +131,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             : 'bg-[#2a2a2a] border-b border-white/5'
           }
         `}
-        style={{ top: 'var(--header-height, 60px)' }}
+        style={{ top: '60px' }}
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}
