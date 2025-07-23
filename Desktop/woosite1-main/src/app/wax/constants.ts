@@ -93,7 +93,7 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
     const { wooCommerceAPI } = await import('../../lib/woocommerce');
     console.log('Fetching concentrate products using category ID 1408...');
     
-    let concentrateProducts = await wooCommerceAPI.getProducts({ 
+    const concentrateProducts = await wooCommerceAPI.getProducts({ 
       category: '1408', 
       per_page: 100, 
       status: 'publish' 

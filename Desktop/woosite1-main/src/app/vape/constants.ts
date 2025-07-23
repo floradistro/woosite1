@@ -91,7 +91,7 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
     const { wooCommerceAPI } = await import('../../lib/woocommerce');
     console.log('Fetching vape products using category ID 1374...');
     
-    let vapeProducts = await wooCommerceAPI.getProducts({ 
+    const vapeProducts = await wooCommerceAPI.getProducts({ 
       category: '1374', 
       per_page: 100, 
       status: 'publish' 
