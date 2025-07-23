@@ -8,6 +8,7 @@ import { useFooterVisibility } from '@/hooks/useFooterVisibility';
 
 // Import sections
 import HeroSection from './components/HeroSection';
+import FlowerCarousel from './components/FlowerCarousel';
 import Section from './components/Section';
 import THCAExplanationSection from './components/THCAExplanationSection';
 import ReviewsSection from './components/ReviewsSection';
@@ -97,7 +98,7 @@ export default function Home() {
       <main>
         <HeroSection timeUntilDeadline={timeUntilDeadline} />
         
-
+        <FlowerCarousel />
         
         <THCAExplanationSection 
           visibleSections={visibleSections} 

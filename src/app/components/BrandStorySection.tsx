@@ -15,7 +15,7 @@ export default function BrandStorySection() {
           {/* Section Header */}
           <SectionHeader 
             title="Flora Distro"
-            subtitle="History in Motion."
+            subtitle="About Flora"
             className="mb-8"
             delay="0.3s"
           />
@@ -24,15 +24,19 @@ export default function BrandStorySection() {
           <div className={animationStyles.fadeInUpDelayed}>
             <div className="max-w-3xl mx-auto space-y-4">
               <p className="text-white/85 font-light text-luxury-base leading-relaxed tracking-luxury-normal">
-                We built Flora with one goal—move real product and make it out clean. This wasn't a rebrand or rollout. It was survival. Ten years in the game, through charges, droughts, and losses. No investors. No second chances. Just hard work and high stakes.
-              </p>
-              
-              <p className="text-white/85 font-light text-luxury-base leading-relaxed tracking-luxury-normal">
-                Now it's legal—and all ours. No middlemen. No fluff. Coast-to-coast drops, clean stores, fast ecom, and real product. The kind that built the game.
+                We built Flora because the industry lost the plot. No originality, no standards — just a flood of copy-paste brands and random products pulled off cash-and-carry shelves. People selling mids in pre-sealed bags out of tobacco shops and calling it a dispensary. What happened?
               </p>
               
               <p className="text-white/95 font-medium text-luxury-lg leading-relaxed tracking-luxury-normal mt-6">
-                It was risk. Now it's business.
+                That's not us.
+              </p>
+              
+              <p className="text-white/85 font-light text-luxury-base leading-relaxed tracking-luxury-normal">
+                We're a small, experienced team that actually cares about the details — good product, clean design, and stores that feel considered. Our menus are simple, our selection is tight, and everything we carry is something we'd stand behind ourselves.
+              </p>
+              
+              <p className="text-white/85 font-light text-luxury-base leading-relaxed tracking-luxury-normal">
+                Flora is what we always wanted this space to be — real, focused, and built with intent.
               </p>
             </div>
             
