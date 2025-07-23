@@ -6,7 +6,7 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes for individual products
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const storeUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
@@ -19,6 +19,7 @@ export async function GET(
       }, { status: 500 });
     }
 
+    const params = await context.params;
     const { id } = params;
     const cacheKey = `product_${id}`;
     
