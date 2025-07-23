@@ -124,9 +124,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <>
       <div 
-        style={{ position: 'sticky', top: '80px', zIndex: 40 }}
         className={`
-          transition-all duration-300 ease-in-out
+          sticky top-0 z-40 transition-all duration-300 ease-in-out
           ${isSticky 
             ? 'bg-[#2a2a2a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
             : 'bg-[#2a2a2a] border-b border-white/5'
