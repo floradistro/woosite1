@@ -185,7 +185,7 @@ export default function HeroSection({
         <div className="absolute inset-0"></div>
         
         {/* Hero Content */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pb-16 md:pb-0">
           <div className="text-center space-y-2 animate-fadeInUp px-6">
             {productType === 'moonwater' ? (
               <div className="flex flex-col items-center justify-center">
@@ -244,7 +244,7 @@ export default function HeroSection({
 
         {/* Fresh Quality Banner Overlay */}
         <div 
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full z-50"
+          className="absolute bottom-0 left-0 right-0 px-4 py-3 md:bottom-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 md:px-6 md:rounded-full z-50 w-full md:w-auto"
           style={{
             background: 'transparent',
             backdropFilter: 'blur(12px) saturate(200%)',
@@ -253,10 +253,10 @@ export default function HeroSection({
             border: '1px solid rgba(255, 255, 255, 0.08)'
           }}
         >
-          <div className="flex items-center justify-center gap-4 md:gap-6">
+          <div className="flex items-center justify-center gap-2 md:gap-4 text-center">
             {qualityBadges.map((badge, index) => (
               <React.Fragment key={index}>
-                <span className="text-white/90 font-medium text-sm md:text-base">✓ {badge}</span>
+                <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ {badge}</span>
                 {index < qualityBadges.length - 1 && <span className="text-white/40">•</span>}
               </React.Fragment>
             ))}
