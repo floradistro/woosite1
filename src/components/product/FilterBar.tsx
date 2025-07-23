@@ -52,7 +52,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      const headerHeight = 60; // Match actual header height from CSS variables
+      const headerHeight = 80; // Actual header height on mobile
       setIsSticky(scrollPosition > headerHeight);
     };
 
@@ -124,8 +124,9 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <>
       <div 
+        style={{ position: 'sticky', top: '80px', zIndex: 40 }}
         className={`
-          sticky top-16 z-50 transition-all duration-300 ease-in-out
+          transition-all duration-300 ease-in-out
           ${isSticky 
             ? 'bg-[#2a2a2a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
             : 'bg-[#2a2a2a] border-b border-white/5'

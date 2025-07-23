@@ -104,7 +104,7 @@ const ProductImage = ({
       {indicator && (
         <div className="absolute top-1 left-0 z-10 p-0">
           {indicator.type === 'image' ? (
-            <Image src={indicator.src || ''} alt={indicator.alt || ''} width={40} height={40} className="w-10 h-10" />
+            <Image src={indicator.src || ''} alt={indicator.alt || ''} width={40} height={40} className="w-10 h-10" unoptimized={true} />
           ) : (
             <div className={`bg-${indicator.color || 'orange'}-500 text-white text-xs px-2 py-1 rounded-br-lg font-medium`}>
               {indicator.text || ''}
@@ -136,6 +136,7 @@ const ProductImage = ({
                 width={48}
                 height={48}
                 className="w-full h-full object-contain"
+                unoptimized={true}
               />
             </div>
           ) : product.title.toLowerCase().includes('gummy') ? (
@@ -150,17 +151,19 @@ const ProductImage = ({
                 width={56}
                 height={56}
                 className="w-full h-full object-contain"
+                unoptimized={true}
               />
             </div>
           ) : productType === 'vape' ? (
             /* Vape icon for vape products */
             <div className="absolute bottom-1 right-1 w-20 h-20 md:w-24 md:h-24 opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center">
               <Image
-                src="/icons/VAPE.png"
+                src="/icons/vapeicon2.png"
                 alt="Vape indicator"
                 width={80}
                 height={80}
                 className="w-full h-full object-contain"
+                unoptimized={true}
               />
             </div>
           ) : productType !== 'edible' && productType !== 'moonwater' ? (
