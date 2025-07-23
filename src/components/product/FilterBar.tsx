@@ -127,8 +127,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
         className={`
           sticky top-0 z-40 transition-all duration-300 ease-in-out
           ${isSticky 
-            ? 'bg-[#2a2a2a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
-            : 'bg-[#2a2a2a] border-b border-white/5'
+            ? 'bg-[#4a4a4a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
+            : 'bg-[#4a4a4a] border-b border-white/5'
           }
         `}
       >
@@ -304,7 +304,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
 
           {/* Modal */}
-          <div className="fixed inset-x-0 bottom-0 bg-[#2a2a2a] rounded-t-2xl max-h-[80vh] overflow-hidden">
+          <div className="fixed inset-x-0 bottom-0 bg-[#4a4a4a] rounded-t-2xl max-h-[80vh] overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <h3 className="text-lg font-medium text-white">Filters</h3>
