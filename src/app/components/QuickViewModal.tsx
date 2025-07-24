@@ -259,34 +259,38 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     }
   };
 
-  // Optimize magnifier positioning based on hand preference - memoized for performance
+  // Optimize magnifier positioning - now follows fingers freely anywhere
   const getOptimalMagnifierPosition = React.useCallback((center: { x: number, y: number }, rect: DOMRect) => {
     const halfSize = magnifierSize / 2;
-    const padding = 20;
+    const screenPadding = 10; // Minimal padding from screen edges
     
     let x = center.x;
     let y = center.y;
     
-    // Adjust based on hand preference to avoid finger occlusion
+    // Adjust based on hand preference to avoid finger occlusion, but allow free movement
     switch (handPreference) {
       case 'left':
         // Position magnifier to the right and slightly up
-        x = Math.min(center.x + 100, rect.width - halfSize - padding);
-        y = Math.max(center.y - 80, halfSize + padding);
+        x = center.x + 100;
+        y = center.y - 80;
         break;
       case 'right':
         // Position magnifier to the left and slightly up
-        x = Math.max(center.x - 100, halfSize + padding);
-        y = Math.max(center.y - 80, halfSize + padding);
+        x = center.x - 100;
+        y = center.y - 80;
         break;
       default:
         // Center positioning with slight upward offset
-        x = Math.max(halfSize + padding, Math.min(center.x, rect.width - halfSize - padding));
-        y = Math.max(center.y - 60, halfSize + padding);
+        x = center.x;
+        y = center.y - 60;
     }
     
-    // Ensure magnifier stays within bounds
-    y = Math.min(y, rect.height - halfSize - padding);
+    // Only constrain to screen bounds, not container bounds
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    x = Math.max(halfSize + screenPadding, Math.min(x, screenWidth - halfSize - screenPadding));
+    y = Math.max(halfSize + screenPadding, Math.min(y, screenHeight - halfSize - screenPadding));
     
     return { x, y };
   }, [magnifierSize, handPreference]);
@@ -304,22 +308,27 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       const distance = getTouchDistance(e.touches);
       setLastTouchDistance(distance);
       
-      const center = getTouchCenter(e.touches, rect);
+      // Use screen coordinates for magnifier positioning
+      const screenCenter = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      };
+      
       detectHandPreference(e.touches, rect);
-      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
       setMobileMagnifierCenter(optimalPosition);
       
       // Adjust magnifier size based on zoom for better UX
       const newSize = Math.max(250, Math.min(320, 280 + (mobileZoom - 1) * 10));
       setMagnifierSize(newSize);
     } else if (e.touches.length === 1 && showMobileMagnifier) {
-      // Single touch to move magnifier - instant response
+      // Single touch to move magnifier - use screen coordinates for free movement
       const touch = e.touches[0];
-      const center = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      const screenCenter = { x: touch.clientX, y: touch.clientY };
+      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
       setMobileMagnifierCenter(optimalPosition);
     }
-  }, [isMobile, showMobileMagnifier, mobileZoom, getTouchDistance, getTouchCenter, detectHandPreference, getOptimalMagnifierPosition]);
+  }, [isMobile, showMobileMagnifier, mobileZoom, getTouchDistance, detectHandPreference, getOptimalMagnifierPosition]);
 
   const handleMobileTouchMove = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -331,7 +340,12 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     
     if (e.touches.length === 2 && isMultiTouch) {
       const distance = getTouchDistance(e.touches);
-      const center = getTouchCenter(e.touches, rect);
+      
+      // Use screen coordinates for magnifier positioning
+      const screenCenter = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      };
       
       if (lastTouchDistance > 0) {
         const scale = distance / lastTouchDistance;
@@ -343,17 +357,17 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
         setMagnifierSize(newSize);
       }
       
-      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
       setMobileMagnifierCenter(optimalPosition);
       setLastTouchDistance(distance);
     } else if (e.touches.length === 1 && showMobileMagnifier && !isMultiTouch) {
-      // Single finger movement - instant response
+      // Single finger movement - use screen coordinates for free movement
       const touch = e.touches[0];
-      const center = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      const screenCenter = { x: touch.clientX, y: touch.clientY };
+      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
       setMobileMagnifierCenter(optimalPosition);
     }
-  }, [isMobile, isMultiTouch, showMobileMagnifier, lastTouchDistance, mobileZoom, getTouchDistance, getTouchCenter, getOptimalMagnifierPosition]);
+  }, [isMobile, isMultiTouch, showMobileMagnifier, lastTouchDistance, mobileZoom, getTouchDistance, getOptimalMagnifierPosition]);
 
   const handleMobileTouchEnd = (e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -425,11 +439,15 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
               if (window.innerWidth < 768) {
                 setTimeout(() => {
                   setShowMobileMagnifier(true);
-                  // Center the magnifier optimally
+                  // Center the magnifier optimally using screen coordinates
                   const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
                   if (rect) {
-                    const center = { x: rect.width / 2, y: rect.height / 2 };
-                    const optimalPosition = getOptimalMagnifierPosition(center, rect);
+                    containerRectRef.current = rect;
+                    const screenCenter = { 
+                      x: rect.left + rect.width / 2, 
+                      y: rect.top + rect.height / 2 
+                    };
+                    const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
                     setMobileMagnifierCenter(optimalPosition);
                   }
                 }, 600); // Faster appearance
@@ -495,7 +513,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
           {isMobile && showMobileMagnifier && (
             <div
               ref={magnifierRef}
-              className="absolute pointer-events-none z-10"
+              className="fixed pointer-events-none z-50"
               style={{
                 left: `${mobileMagnifierCenter.x - magnifierSize/2}px`,
                 top: `${mobileMagnifierCenter.y - magnifierSize/2}px`,
@@ -512,7 +530,19 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
-                  backgroundPosition: `${(mobileMagnifierCenter.x / (containerRectRef.current?.width || window.innerWidth)) * 100}% ${(mobileMagnifierCenter.y / (containerRectRef.current?.height || window.innerHeight)) * 100}%`,
+                  backgroundPosition: `${(() => {
+                    const rect = containerRectRef.current;
+                    if (!rect) return '50% 50%';
+                    
+                    // Convert screen coordinates back to container-relative coordinates for background positioning
+                    const containerX = mobileMagnifierCenter.x - rect.left;
+                    const containerY = mobileMagnifierCenter.y - rect.top;
+                    
+                    const bgX = (containerX / rect.width) * 100;
+                    const bgY = (containerY / rect.height) * 100;
+                    
+                    return `${Math.max(0, Math.min(100, bgX))}% ${Math.max(0, Math.min(100, bgY))}%`;
+                  })()}`,
                   backgroundRepeat: 'no-repeat',
                   filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
                   willChange: 'background-size, background-position',
