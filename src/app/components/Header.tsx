@@ -199,8 +199,33 @@ function HeaderContent() {
 
   // Remove blur for mobile menu
   useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      // Force a layout recalculation to prevent filter bar positioning issues
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      // Force a reflow to fix any positioning issues after closing menu
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        // Additional layout fix for filter bar
+        const filterBar = document.querySelector('[data-filter-bar]');
+        if (filterBar) {
+          (filterBar as HTMLElement).style.transform = 'translateZ(0)';
+          setTimeout(() => {
+            (filterBar as HTMLElement).style.transform = '';
+          }, 50);
+        }
+      }, 50);
+    }
+    return () => { 
+      document.body.style.overflow = ''; 
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
   }, [isMobileMenuOpen]);
 
   // Add blur effect to page when cart OR shop menu OR concierge are open (but NOT mobile menu)
@@ -1288,7 +1313,7 @@ function HeaderContent() {
                       <Link
                         href="/flower"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/flower') && !searchParams.get('format')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1302,7 +1327,7 @@ function HeaderContent() {
                       <Link
                         href="/flower?format=preroll"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/flower?format=preroll')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1316,7 +1341,7 @@ function HeaderContent() {
                       <Link
                         href="/vape"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/vape')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1330,7 +1355,7 @@ function HeaderContent() {
                       <Link
                         href="/wax"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/wax')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1344,7 +1369,7 @@ function HeaderContent() {
                       <Link
                         href="/edible"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/edible')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1358,7 +1383,7 @@ function HeaderContent() {
                       <Link
                         href="/moonwater"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/moonwater')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'
@@ -1372,7 +1397,7 @@ function HeaderContent() {
                       <Link
                         href="/apparel"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative ${
+                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
                           isActiveLink('/apparel')
                             ? 'text-white' 
                             : 'text-white/90 hover:text-white'

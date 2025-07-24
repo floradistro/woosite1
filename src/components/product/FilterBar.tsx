@@ -148,6 +148,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             : 'bg-[#4a4a4a] border-b border-white/5'
           }
         `}
+        data-filter-bar
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}

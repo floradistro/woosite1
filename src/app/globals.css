@@ -290,4 +290,18 @@ html, body {
   height: 100%;
 }
 
+/* Prevent filter bar positioning issues when mobile menu is open */
+body[style*="position: fixed"] [data-filter-bar] {
+  position: sticky !important;
+  top: 0 !important;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Mobile menu specific styles */
+[data-mobile-menu] {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
 
