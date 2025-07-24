@@ -196,17 +196,17 @@ export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
 
       return {
         id: product.id,
-        title: product.name?.toLowerCase() || 'edible product',
-        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis edible',
+        title: product.name || 'Edible Product',
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis edible',
         price: parseFloat(product.price) || 29.99,
         image: product.images?.[0]?.src || '/categories/EDIBLES.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         type: getType(),
-        spotlight: `premium ${getCategory()} edibles with precise dosing`,
+        spotlight: `Premium ${getCategory()} edibles with precise dosing`,
         featured: index < 4,
-        lineage: 'premium cannabis extract',
+        lineage: 'Premium cannabis extract',
         terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
                  getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
                  ['limonene', 'caryophyllene', 'myrcene']

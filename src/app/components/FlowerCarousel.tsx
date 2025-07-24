@@ -139,7 +139,7 @@ export default function FlowerCarousel({
                         product.category === 'sativa' ? 'bg-red-600/80 border-red-500 text-white' :
                         'bg-green-600/80 border-green-500 text-white'
                       } backdrop-blur-sm`}>
-                        {product.category}
+                        {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
                       </span>
                     </div>
 

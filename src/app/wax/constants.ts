@@ -146,17 +146,17 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
 
       return {
         id: product.id,
-        title: product.name.toLowerCase(),
-        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis concentrate',
+        title: product.name,
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis concentrate',
         price: parseFloat(product.price) || 0,
         image: product.images?.[0]?.src || '/categories/WAX.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         texture: getTexture(),
-        spotlight: `premium ${product.name} concentrate with exceptional potency and purity`,
+        spotlight: `Premium ${product.name} concentrate with exceptional potency and purity`,
         featured: index < 4,
-        lineage: 'premium concentrate extraction',
+        lineage: 'Premium concentrate extraction',
         terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
                  getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
                  ['limonene', 'caryophyllene', 'myrcene']

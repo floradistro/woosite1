@@ -250,17 +250,17 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
 
       return {
         id: product.id,
-        title: product.name.toLowerCase(),
-        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || '',
+        title: product.name,
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || '',
         price: parseFloat(product.price) || 0,
         image: product.images?.[0]?.src || '/icons/FLOWER.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         nose: getNose(),
-        spotlight: `premium flower strain with exceptional quality`,
+        spotlight: `Premium flower strain with exceptional quality`,
         featured: index < 4, // First 4 products are featured
-        lineage: 'premium cannabis genetics',
+        lineage: 'Premium cannabis genetics',
         terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
                  getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
                  ['limonene', 'caryophyllene', 'myrcene']

@@ -235,7 +235,7 @@ export default function ProductShowcase({ products, title, subtitle }: ProductSh
                                   featuredProduct.category === 'sativa' ? 'bg-green-500/25 text-green-300' :
                                   'bg-yellow-500/25 text-yellow-300'
                                 }`}>
-                                  {featuredProduct.category}
+                                  {featuredProduct.category.charAt(0).toUpperCase() + featuredProduct.category.slice(1)}
                                 </span>
                               </div>
                               

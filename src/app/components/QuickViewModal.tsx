@@ -23,14 +23,24 @@ interface QuickViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (product: QuickViewProduct, weight: string) => void;
+  productType?: string;
 }
 
-export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }: QuickViewModalProps) {
+export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, productType }: QuickViewModalProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMagnifying, setIsMagnifying] = useState(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(6); // Default to 6x zoom
+  
+  // Mobile pinch-to-zoom states
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileMagnifier, setShowMobileMagnifier] = useState(false);
+  const [mobileZoom, setMobileZoom] = useState(1); // 1 = no zoom, up to 10
+  const [mobileMagnifierCenter, setMobileMagnifierCenter] = useState({ x: 0, y: 0 });
+  const [lastTouchDistance, setLastTouchDistance] = useState(0);
+  const [isMultiTouch, setIsMultiTouch] = useState(false);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -77,30 +87,53 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       setImageLoaded(false);
+      // Reset zoom level when modal opens
+      setZoomLevel(6);
+      
+      // Detect mobile and show magnifier after a delay
+      const checkMobile = () => {
+        const mobile = window.innerWidth < 768;
+        setIsMobile(mobile);
+      };
+      
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      
+      return () => {
+        window.removeEventListener('resize', checkMobile);
+      };
     } else {
       document.body.style.overflow = 'unset';
+      setShowMobileMagnifier(false);
+      setMobileZoom(1);
     }
 
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, productType, imageLoaded]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
+      } else if (e.key >= '5' && e.key <= '9') {
+        e.preventDefault();
+        selectZoom(parseInt(e.key));
+      } else if (e.key === '0') {
+        e.preventDefault();
+        selectZoom(10);
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleKeydown);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeydown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, zoomLevel]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
@@ -176,7 +209,101 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
     setIsMagnifying(false);
   };
 
+  // Mobile pinch-to-zoom functions
+  const getTouchDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) + 
+      Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+  };
+
+  const getTouchCenter = (touches: React.TouchList, rect: DOMRect) => {
+    if (touches.length === 0) return { x: 0, y: 0 };
+    
+    let x = 0, y = 0;
+    for (let i = 0; i < touches.length; i++) {
+      x += touches[i].clientX - rect.left;
+      y += touches[i].clientY - rect.top;
+    }
+    return {
+      x: x / touches.length,
+      y: y / touches.length
+    };
+  };
+
+  const handleMobileTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    if (e.touches.length === 2) {
+      setIsMultiTouch(true);
+      const distance = getTouchDistance(e.touches);
+      setLastTouchDistance(distance);
+      
+      const center = getTouchCenter(e.touches, rect);
+      setMobileMagnifierCenter(center);
+    } else if (e.touches.length === 1 && showMobileMagnifier) {
+      // Single touch to move magnifier
+      const touch = e.touches[0];
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      setMobileMagnifierCenter({ x, y });
+    }
+  };
+
+  const handleMobileTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile || !isMultiTouch) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.touches.length === 2) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const distance = getTouchDistance(e.touches);
+      const center = getTouchCenter(e.touches, rect);
+      
+      if (lastTouchDistance > 0) {
+        const scale = distance / lastTouchDistance;
+        const newZoom = Math.max(1, Math.min(10, mobileZoom * scale));
+        setMobileZoom(newZoom);
+      }
+      
+      setMobileMagnifierCenter(center);
+      setLastTouchDistance(distance);
+    }
+  };
+
+  const handleMobileTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    
+    if (e.touches.length < 2) {
+      setIsMultiTouch(false);
+      setLastTouchDistance(0);
+    }
+  };
+
   if (!isOpen || !product) return null;
+
+  // Calculate zoom configuration based on current zoom level
+  const getZoomConfig = () => {
+    const size = `${zoomLevel * 100}%`;
+    return { size, label: `${zoomLevel}x zoom` };
+  };
+
+  const zoomConfig = getZoomConfig();
+
+  // Available zoom levels (reversed order - 10x at top, 5x at bottom)
+  const availableZoomLevels = [10, 9, 8, 7, 6, 5];
+  
+  // Zoom control function
+  const selectZoom = (level: number) => {
+    setZoomLevel(level);
+  };
 
   return (
     <div 
@@ -201,10 +328,10 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
           onMouseDown={startMagnifying}
           onMouseUp={stopMagnifying}
           onMouseLeave={stopMagnifying}
-          onTouchMove={handleTouchMove}
-          onTouchStart={startMagnifying}
-          onTouchEnd={stopMagnifying}
-          onTouchCancel={stopMagnifying}
+          onTouchMove={isMobile ? handleMobileTouchMove : handleTouchMove}
+          onTouchStart={isMobile ? handleMobileTouchStart : startMagnifying}
+          onTouchEnd={isMobile ? handleMobileTouchEnd : stopMagnifying}
+          onTouchCancel={isMobile ? handleMobileTouchEnd : stopMagnifying}
           onContextMenu={(e) => e.preventDefault()}
         >
           <Image
@@ -215,7 +342,23 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
             quality={95}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
-            onLoad={() => setImageLoaded(true)}
+            onLoad={() => {
+              setImageLoaded(true);
+              // Show mobile magnifier when image loads on mobile
+              if (window.innerWidth < 768) {
+                setTimeout(() => {
+                  setShowMobileMagnifier(true);
+                  // Center the magnifier
+                  const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
+                  if (rect) {
+                    setMobileMagnifierCenter({
+                      x: rect.width / 2,
+                      y: rect.height / 2
+                    });
+                  }
+                }, 800);
+              }
+            }}
           />
 
           {/* Small magnified fisheye view - bottom right corner */}
@@ -225,7 +368,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
                 className="w-full h-full rounded-full overflow-hidden"
                 style={{
                   backgroundImage: `url(${product.image})`,
-                  backgroundSize: '400%',
+                  backgroundSize: zoomConfig.size,
                   backgroundPosition: 'center center',
                   backgroundRepeat: 'no-repeat',
                   filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
@@ -237,19 +380,19 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
             </div>
           )}
           
-          {/* Magnifying Glass */}
-          {isMagnifying && (
+          {/* Desktop Magnifying Glass */}
+          {isMagnifying && !isMobile && (
             <>
               {/* Magnifier positioned within image bounds */}
               <div
                 className="absolute pointer-events-none border-2 border-white/60 rounded-full shadow-lg z-10"
                 style={{
-                  width: '200px',
-                  height: '200px',
-                  left: `${Math.max(0, Math.min(magnifierPosition.x - 100, window.innerWidth - 200))}px`,
-                  top: `${Math.max(0, Math.min(magnifierPosition.y - 100, window.innerHeight - 200))}px`,
+                  width: '300px',
+                  height: '300px',
+                  left: `${Math.max(0, Math.min(magnifierPosition.x - 150, window.innerWidth - 300))}px`,
+                  top: `${Math.max(0, Math.min(magnifierPosition.y - 150, window.innerHeight - 300))}px`,
                   backgroundImage: `url(${product.image})`,
-                  backgroundSize: '400% 400%',
+                  backgroundSize: `${zoomConfig.size} ${zoomConfig.size}`,
                   backgroundPosition: `${imagePosition.x}% ${imagePosition.y}%`,
                   backgroundRepeat: 'no-repeat',
                   willChange: 'left, top, background-position',
@@ -271,12 +414,90 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
               </div>
             </>
           )}
+
+          {/* Mobile Pinch-to-Zoom Magnifier */}
+          {isMobile && showMobileMagnifier && (
+            <div
+              className="absolute pointer-events-none z-10 transition-all duration-300"
+              style={{
+                left: `${mobileMagnifierCenter.x - 100}px`,
+                top: `${mobileMagnifierCenter.y - 100}px`,
+                width: '200px',
+                height: '200px',
+              }}
+            >
+              {/* Main magnifier circle */}
+              <div 
+                className="w-full h-full rounded-full border-2 border-white/60 shadow-2xl overflow-hidden relative"
+                style={{
+                  backgroundImage: `url(${product.image})`,
+                  backgroundSize: `${mobileZoom * 100}%`,
+                  backgroundPosition: `${(mobileMagnifierCenter.x / window.innerWidth) * 100}% ${(mobileMagnifierCenter.y / window.innerHeight) * 100}%`,
+                  backgroundRepeat: 'no-repeat',
+                  transform: `scale(${Math.max(0.8, Math.min(1.2, 0.8 + (mobileZoom - 1) * 0.1))})`,
+                  transition: 'transform 0.1s ease-out',
+                }}
+              >
+                {/* Lens effect overlay */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-transparent to-black/20 pointer-events-none"></div>
+                
+                {/* Zoom level indicator */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1">
+                  <span className="text-white text-xs font-medium">
+                    {mobileZoom.toFixed(1)}x
+                  </span>
+                </div>
+                
+                {/* Pinch instruction (only when zoom is 1) */}
+                {mobileZoom <= 1.1 && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2 text-center">
+                      <div className="text-white text-xs font-medium mb-1">🤏</div>
+                      <div className="text-white/90 text-xs">Pinch to zoom</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Touch points indicators when multi-touch */}
+              {isMultiTouch && (
+                <>
+                  <div className="absolute w-4 h-4 bg-white/80 rounded-full border-2 border-blue-400 -top-2 -left-2 animate-pulse"></div>
+                  <div className="absolute w-4 h-4 bg-white/80 rounded-full border-2 border-blue-400 -bottom-2 -right-2 animate-pulse"></div>
+                </>
+              )}
+            </div>
+          )}
           
           {/* Instructions */}
-          <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg px-4 py-2">
-            <p className="text-white/90 text-sm font-medium">
-              Drag to magnify (4x zoom)
-            </p>
+          <div className="absolute top-4 left-4">
+            <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2">
+              <p className="text-white/90 text-sm font-medium">
+                <span className="md:hidden">Pinch magnifier to zoom</span>
+                <span className="hidden md:inline">Drag to magnify • 5-9,0 keys</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop Zoom Controls - Vertical Column on left side */}
+          <div className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 flex-col gap-2">
+            {availableZoomLevels.map(level => (
+              <button
+                key={level}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectZoom(level);
+                }}
+                className={`w-12 h-10 rounded-xl text-sm font-semibold transition-all duration-300 backdrop-blur-md border ${
+                  zoomLevel === level
+                    ? 'bg-white/90 text-black border-white/50 shadow-lg scale-105'
+                    : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 hover:scale-102 shadow-md'
+                }`}
+                title={`${level}x zoom`}
+              >
+                {level}x
+              </button>
+            ))}
           </div>
         </div>
         

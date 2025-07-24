@@ -221,6 +221,10 @@ const ProductInfo = ({
     return productType === 'edible' || productType === 'moonwater' ? `${product.thc}mg` : `${product.thc}%`;
   };
 
+  const formatCategory = (category: string) => {
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
   return (
     <div className="flex-1 min-w-0 relative">
       <h3 className={`font-extralight text-2xl md:text-xl transition-colors duration-300 ${
@@ -253,7 +257,7 @@ const ProductInfo = ({
       <div className="flex items-center gap-2 mb-1">
         <span className="text-white/70 text-sm md:text-xs">Type:</span>
         <span className={`px-2 py-0.5 rounded-full text-sm md:text-xs font-light tracking-wide flex-shrink-0 ${getCategoryColor(product.category)}`}>
-          {product.category}
+          {formatCategory(product.category)}
         </span>
       </div>
       
@@ -696,6 +700,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
         isOpen={isQuickViewOpen}
         onClose={handleQuickViewClose}
         onAddToCart={handleQuickViewAddToCart}
+        productType={productType}
       />
     </section>
   );

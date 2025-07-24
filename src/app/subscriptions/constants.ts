@@ -92,7 +92,7 @@ export const MOONWATER_PRODUCTS: FeaturedProduct[] = inventoryProducts
   )
   .map((product: any, index: number) => ({
     id: index + 1,
-    title: product.title?.toLowerCase() || '',
+    title: product.title || '',
     description: product.body?.replace(/<[^>]*>/g, '') || '', // Remove HTML tags
     price: product.variantPrice,
     image: product.imageSrc,
@@ -100,8 +100,8 @@ export const MOONWATER_PRODUCTS: FeaturedProduct[] = inventoryProducts
     vibe: 'balance' as const, // Default for beverages  
     thc: 5, // Default THC for beverages (5mg)
     flavor: ['citrus'] as Array<'citrus' | 'berry' | 'tropical' | 'herbal' | 'mint'>, // Default flavor
-    spotlight: `refreshing ${product.title.toLowerCase()} with natural hemp-derived delta-9 thc`,
+    spotlight: `Refreshing ${product.title} with natural hemp-derived delta-9 THC`,
     featured: true,
-    lineage: 'hemp-derived delta-9 thc infusion',
+    lineage: 'Hemp-derived delta-9 THC infusion',
     terpenes: ['limonene', 'myrcene', 'pinene']
   })); 

@@ -205,17 +205,17 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
 
       const transformedProduct = {
         id: product.id,
-        title: product.name.toLowerCase(),
-        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium cannabis vape',
+        title: product.name,
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis vape',
         price: parseFloat(product.price) || 0,
         image: product.images?.[0]?.src || '/icons/vapeicon2.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         nose: getNose(),
-        spotlight: `premium ${getCategory()} vape with exceptional potency`,
+        spotlight: `Premium ${getCategory()} vape with exceptional potency`,
         featured: index < 4,
-        lineage: 'premium cannabis extract',
+        lineage: 'Premium cannabis extract',
         terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
                  getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
                  ['limonene', 'caryophyllene', 'myrcene']

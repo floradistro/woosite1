@@ -149,17 +149,17 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
 
       return {
         id: product.id,
-        title: product.name?.toLowerCase() || 'moonwater beverage',
-        description: product.short_description?.replace(/<[^>]*>/g, '').toLowerCase() || product.description?.replace(/<[^>]*>/g, '').toLowerCase() || 'premium thc beverage',
+        title: product.name || 'Moonwater Beverage',
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium THC beverage',
         price: parseFloat(product.price) || 12.99,
         image: product.images?.[0]?.src || '/icons/Moonwater.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         flavor: getFlavor(),
-        spotlight: `refreshing ${getFlavor()[0]} moonwater with ${getThc()}mg thc`,
+        spotlight: `Refreshing ${getFlavor()[0]} moonwater with ${getThc()}mg THC`,
         featured: index < 4,
-        lineage: 'premium cannabis extract',
+        lineage: 'Premium cannabis extract',
         terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool'] : 
                  getCategory() === 'sativa' ? ['limonene', 'pinene'] : 
                  ['limonene', 'myrcene']
@@ -187,17 +187,17 @@ export const MOONWATER_PRODUCTS: FeaturedProduct[] = inventoryProducts
   )
   .map(product => ({
     id: product.id,
-    title: product.title.toLowerCase(),
-    description: product.description.toLowerCase(),
+    title: product.title,
+    description: product.description,
     price: product.price,
     image: product.image,
     category: 'hybrid' as const,
     vibe: 'balance' as const,
     thc: 5, // Default THC for beverages
     flavor: ['citrus'], // Default flavor
-    spotlight: `refreshing ${product.title.toLowerCase()} with balanced effects`,
+    spotlight: `Refreshing ${product.title} with balanced effects`,
     featured: product.id <= 2,
-    lineage: 'premium hemp extract',
+    lineage: 'Premium hemp extract',
     terpenes: ['limonene', 'myrcene', 'pinene']
   }));
 */ 
