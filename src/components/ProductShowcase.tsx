@@ -232,8 +232,8 @@ export default function ProductShowcase({ products, title, subtitle }: ProductSh
                                 <span className="text-white/70 text-xs">Type:</span>
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-light tracking-wide flex-shrink-0 ${
                                   featuredProduct.category === 'indica' ? 'bg-purple-500/25 text-purple-300' :
-                                  featuredProduct.category === 'sativa' ? 'bg-green-500/25 text-green-300' :
-                                  'bg-yellow-500/25 text-yellow-300'
+                                  featuredProduct.category === 'sativa' ? 'bg-yellow-500/25 text-yellow-300' :
+                                  'bg-green-500/25 text-green-300'
                                 }`}>
                                   {featuredProduct.category.charAt(0).toUpperCase() + featuredProduct.category.slice(1)}
                                 </span>

@@ -33,7 +33,7 @@ export async function GET(
       });
     }
     
-    const url = `${storeUrl}/wp-json/wc/v3/products/${id}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
+    const url = `${storeUrl}/wp-json/wc/v3/products/${id}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}&acf_format=standard`;
     
     const response = await fetch(url, {
       method: 'GET',

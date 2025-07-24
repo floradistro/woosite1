@@ -21,8 +21,8 @@ export type ProductFormat = 'vape' | 'cartridge' | 'disposable';
 
 // Color mappings for tags
 export const CATEGORY_COLORS = {
-  indica: "bg-indigo-600 border-indigo-700",
-  sativa: "bg-red-600 border-red-700", 
+  indica: "bg-purple-600 border-purple-700",
+  sativa: "bg-yellow-600 border-yellow-700", 
   hybrid: "bg-green-600 border-green-700"
 } as const;
 
@@ -83,159 +83,106 @@ export interface FilterState {
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
-// Check if we should use WooCommerce or fallback to hardcoded data
-const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
-
 // Transform WooCommerce products to vape format
 export async function getVapeProducts(): Promise<FeaturedProduct[]> {
-  // If WooCommerce is disabled, return hardcoded fallback data
-  if (!USE_WOOCOMMERCE) {
-
-    return [
-      {
-        id: 1,
-        title: "wedding cake cart",
-        description: "premium live resin cartridge with sweet vanilla notes",
-        price: 45,
-        image: "/icons/vapeicon2.png",
-        category: "indica" as const,
-        vibe: "relax" as const,
-        thc: 85.0,
-        nose: ["cake", "sherb"] as const,
-        spotlight: "solventless extraction for pure flavor",
-        featured: true,
-        lineage: "cherry pie x girl scout cookies",
-        terpenes: ["myrcene", "limonene", "caryophyllene"]
-      },
-      {
-        id: 2,
-        title: "blue dream cart",
-        description: "uplifting sativa cartridge for daytime use",
-        price: 45,
-        image: "/icons/vapeicon2.png",
-        category: "sativa" as const,
-        vibe: "energize" as const,
-        thc: 82.0,
-        nose: ["candy", "gas"] as const,
-        spotlight: "energizing effects with sweet berry flavor",
-        featured: true,
-        lineage: "blueberry x haze",
-        terpenes: ["pinene", "myrcene", "limonene"]
-      },
-      {
-        id: 3,
-        title: "gelato cart",
-        description: "balanced hybrid cartridge with dessert-like flavor",
-        price: 45,
-        image: "/icons/vapeicon2.png",
-        category: "hybrid" as const,
-        vibe: "balance" as const,
-        thc: 87.0,
-        nose: ["cake", "sherb"] as const,
-        spotlight: "perfect balance of euphoria and relaxation",
-        featured: true,
-        lineage: "sunset sherbet x thin mint gsc",
-        terpenes: ["limonene", "caryophyllene", "linalool"]
-      }
-    ];
-  }
-  
   try {
-
-    // Direct approach using known category ID
-    const vapeProducts = await wooCommerceServerAPI.getProducts({ 
-      category: '1374', 
-      per_page: 100, 
-      status: 'publish' 
-    });
-
+    // Try multiple category names since vape products might be in Concentrate category
+    const vapeCategories = ['vape', 'Vape', 'concentrate', 'Concentrate'];
+    
+    let vapeProducts = await wooCommerceServerAPI.getProductsByCategories(vapeCategories);
+    
     if (vapeProducts.length === 0) {
-
+      console.log('No vape products found in WooCommerce categories:', vapeCategories);
       return [];
     }
-
-    // Transform WooCommerce products to our format
-    const transformedProducts = vapeProducts.map((product, index) => {
+    
+    return vapeProducts.map((product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      const acf = product.acf || {};
       
-      // Extract category from categories or tags
+      // Extract category from ACF strain_type or fallback to categories/tags
       const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (acf.strain_type) {
+          const strainType = acf.strain_type.toLowerCase();
+          if (strainType.includes('indica')) return 'indica';
+          if (strainType.includes('sativa')) return 'sativa';
+          if (strainType.includes('hybrid')) return 'hybrid';
+        }
         if (categories.includes('indica') || tags.includes('indica')) return 'indica';
         if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
         return 'hybrid';
       };
 
-      // Extract vibe from tags
+      // Extract vibe from ACF effects or fallback to tags
       const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (acf.effects) {
+          const effects = acf.effects.toLowerCase();
+          if (effects.includes('relax') || effects.includes('calm') || effects.includes('sleep')) return 'relax';
+          if (effects.includes('energiz') || effects.includes('uplifting') || effects.includes('focus')) return 'energize';
+        }
         if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
         if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
         return 'balance';
       };
 
-      // Extract nose characteristics from tags
+      // Extract nose from ACF or fallback to tags
       const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
-        const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
-        
-        tags.forEach(tag => {
-          if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
-          if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
-          if (tag.includes('cake') || tag.includes('vanilla')) noseOptions.push('cake');
-          if (tag.includes('funk') || tag.includes('cheese')) noseOptions.push('funk');
-          if (tag.includes('sherb') || tag.includes('citrus')) noseOptions.push('sherb');
-        });
-
-        // Default nose profiles if none found
-        if (noseOptions.length === 0) {
-          const category = getCategory();
-          if (category === 'indica') return ['cake', 'sherb'];
-          if (category === 'sativa') return ['gas', 'candy'];
-          return ['gas', 'sherb'];
+        if (acf.nose) {
+          const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
+          const noseText = acf.nose.toLowerCase();
+          
+          if (noseText.includes('candy') || noseText.includes('sweet')) noseOptions.push('candy');
+          if (noseText.includes('gas') || noseText.includes('fuel')) noseOptions.push('gas');
+          if (noseText.includes('cake') || noseText.includes('vanilla')) noseOptions.push('cake');
+          if (noseText.includes('funk') || noseText.includes('cheese')) noseOptions.push('funk');
+          if (noseText.includes('sherb') || noseText.includes('citrus')) noseOptions.push('sherb');
+          
+          if (noseOptions.length > 0) return noseOptions;
         }
-
-        return noseOptions;
+        
+        const category = getCategory();
+        if (category === 'indica') return ['cake', 'sherb'];
+        if (category === 'sativa') return ['gas', 'candy'];
+        return ['gas', 'sherb'];
       };
 
-      // Extract THC percentage from description
+      // Extract THC from ACF thca_% field
       const getThc = (): number => {
-        const description = product.description || product.short_description || '';
-        const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
-        return match ? parseFloat(match[1]) : 85.0; // Default high THC for vapes
+        // Check ACF fields
+        if (acf['thca_%']) {
+          const thcValue = parseFloat(acf['thca_%'].replace('%', ''));
+          if (!isNaN(thcValue)) return thcValue;
+        }
+        
+        // Check meta_data for thca field
+        const thcaMeta = product.meta_data?.find((m: any) => m.key === 'thca');
+        if (thcaMeta?.value) {
+          const thcValue = parseFloat(thcaMeta.value.replace('%', ''));
+          if (!isNaN(thcValue)) return thcValue;
+        }
+        
+        return 85.0; // Default for vape
       };
 
-      const transformedProduct = {
+      return {
         id: product.id,
-        title: product.name,
-        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis vape',
-        price: parseFloat(product.price) || 0,
-        image: product.images?.[0]?.src || '/icons/vapeicon2.png',
+        title: product.name.toLowerCase(),
+        description: product.short_description || product.description || 'Premium vape cartridge',
+        price: parseFloat(product.price) || 45,
+        image: product.images?.[0]?.src || "/icons/vapeicon2.png",
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         nose: getNose(),
-        spotlight: `Premium ${getCategory()} vape with exceptional potency`,
+        spotlight: acf.effects || "Premium live resin extraction",
         featured: index < 4,
-        lineage: 'Premium cannabis extract',
-        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
-                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
-                 ['limonene', 'caryophyllene', 'myrcene']
+        lineage: acf.lineage || "premium genetics",
+        terpenes: acf.dominent_terpene ? [acf.dominent_terpene.toLowerCase(), "limonene", "caryophyllene"] : ["myrcene", "limonene", "caryophyllene"]
       };
-      
-      console.log(`Transformed vape product ${index + 1}:`, {
-        id: transformedProduct.id,
-        title: transformedProduct.title,
-        category: transformedProduct.category,
-        vibe: transformedProduct.vibe,
-        nose: transformedProduct.nose,
-        price: transformedProduct.price
-      });
-      
-      return transformedProduct;
     });
-
-    return transformedProducts;
   } catch (error) {
-    console.error('❌ Error fetching vape products:', error);
+    console.error('Error fetching vape products from WooCommerce:', error);
     return [];
   }
 }

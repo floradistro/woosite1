@@ -1,3 +1,31 @@
+// ACF Field Interfaces based on your export
+export interface EdibleMoonwaterACF {
+  strength_mg?: string;
+  effects?: string;
+}
+
+export interface FlowerVapeConcentrateACF {
+  'thca_%'?: string;
+  strain_type?: string;
+  nose?: string;
+  effects?: string;
+  dominent_terpene?: string;
+  lineage?: string;
+}
+
+// Combined ACF fields interface
+export interface ACFFields {
+  // Edible/Moonwater fields
+  strength_mg?: string;
+  // Flower/Vape/Concentrate fields
+  'thca_%'?: string;
+  strain_type?: string;
+  nose?: string;
+  effects?: string;
+  dominent_terpene?: string;
+  lineage?: string;
+}
+
 // WooCommerce Product Interface
 export interface WooCommerceProduct {
   id: number;
@@ -77,10 +105,16 @@ export interface WooCommerceProduct {
   menu_order: number;
   price_html: string;
   related_ids: number[];
-  meta_data: any[];
+  meta_data: Array<{
+    id: number;
+    key: string;
+    value: any;
+  }>;
   stock_status: string;
   has_options: boolean;
   post_password: string;
+  // ACF Fields
+  acf?: ACFFields;
 }
 
 // Normalized Product Interface for our app
@@ -117,10 +151,102 @@ export interface Product {
   thcaPercentage?: string;
   shortDescription?: string;
   longDescription: string | null;
+  // ACF Fields mapped to our format
+  strengthMg?: string;
+  effects?: string;
+  nose?: string;
+  dominentTerpene?: string;
 }
 
 // Transform WooCommerce product to our format
 export function transformWooCommerceProduct(wooProduct: WooCommerceProduct): Product {
+  // Extract ACF fields from meta_data
+  const extractMetaValue = (key: string): string | undefined => {
+    if (!wooProduct.meta_data) return undefined;
+    const meta = wooProduct.meta_data.find((m: any) => m.key === key);
+    if (!meta?.value) return undefined;
+    
+    // Fix character encoding issues
+    let value = meta.value;
+    if (typeof value === 'string') {
+      // Fix common UTF-8 encoding issues
+      value = value
+        .replace(/â€™/g, "'")
+        .replace(/â€"/g, "—")
+        .replace(/â€"/g, "–")
+        .replace(/â€œ/g, '"')
+        .replace(/â€/g, '"')
+        .replace(/Ã—/g, "×")
+        .replace(/Ã/g, "×")
+        .replace(/â€'/g, "-");
+    }
+    
+    return value;
+  };
+  
+  // Try to get ACF fields from acf object first, then fallback to meta_data
+  const acf = wooProduct.acf || {};
+  
+  // Helper function to get ACF value with fallback to meta_data
+  const getACFValue = (acfKey: keyof ACFFields, metaKey?: string): string | undefined => {
+    // First try the acf object
+    const acfValue = acf[acfKey];
+    if (acfValue && typeof acfValue === 'string' && acfValue.trim()) {
+      return acfValue.trim();
+    }
+    
+    // Then try meta_data with the provided key or a default mapping
+    const metaKeyToUse = metaKey || acfKey.replace('_%', '').replace('_', '');
+    const metaValue = extractMetaValue(metaKeyToUse);
+    if (metaValue && typeof metaValue === 'string' && metaValue.trim()) {
+      return metaValue.trim();
+    }
+    
+    // Try alternative meta keys based on what we found in the actual data
+    const alternativeKeys: Record<string, string[]> = {
+      'thca_%': ['thca', 'thca_%'],
+      'strain_type': ['strain_type'],
+      'nose': ['nose'],
+      'effects': ['effects'],
+      'dominent_terpene': ['terpenes', 'dominent_terpene'],
+      'lineage': ['taglinelineage', 'lineage'],
+      'strength_mg': ['strength', 'strength_mg']
+    };
+    
+    const altKeys = alternativeKeys[acfKey];
+    if (altKeys) {
+      for (const altKey of altKeys) {
+        const altValue = extractMetaValue(altKey);
+        if (altValue && typeof altValue === 'string' && altValue.trim()) {
+          return altValue.trim();
+        }
+      }
+    }
+    
+    return undefined;
+  };
+  
+  // Debug log ACF fields for troubleshooting
+  if (process.env.NODE_ENV === 'development' && wooProduct.categories?.[0]?.name === 'Flower') {
+    const extractedFields = {
+      thca: getACFValue('thca_%', 'thca'),
+      strain_type: getACFValue('strain_type', 'strain_type'),
+      nose: getACFValue('nose', 'nose'),
+      effects: getACFValue('effects', 'effects'),
+      terpenes: getACFValue('dominent_terpene', 'terpenes'),
+      lineage: getACFValue('lineage', 'taglinelineage'),
+      strength: getACFValue('strength_mg', 'strength')
+    };
+    
+    console.log(`🌿 Flower Product ${wooProduct.id} (${wooProduct.name}):`, {
+      categories: wooProduct.categories?.map(c => c.name),
+      extractedACF: extractedFields,
+      rawMetaData: wooProduct.meta_data?.filter((m: any) => 
+        ['thca', 'strain_type', 'nose', 'effects', 'terpenes', 'taglinelineage'].includes(m.key)
+      ).map((m: any) => ({ key: m.key, value: m.value }))
+    });
+  }
+  
   return {
     id: wooProduct.id,
     handle: wooProduct.slug,
@@ -149,11 +275,17 @@ export function transformWooCommerceProduct(wooProduct: WooCommerceProduct): Pro
     seoTitle: wooProduct.name,
     seoDescription: wooProduct.short_description || wooProduct.description || '',
     status: wooProduct.status,
-    strainType2: undefined,
-    lineage: undefined,
-    thcaPercentage: undefined,
+    // Map ACF fields with proper handling
+    strainType2: getACFValue('strain_type', 'strain_type'),
+    lineage: getACFValue('lineage', 'taglinelineage'),
+    thcaPercentage: getACFValue('thca_%', 'thca'),
     shortDescription: wooProduct.short_description || '',
     longDescription: wooProduct.description || null,
+    // Map ACF fields to our format
+    strengthMg: getACFValue('strength_mg', 'strength'),
+    effects: getACFValue('effects', 'effects'),
+    nose: getACFValue('nose', 'nose'),
+    dominentTerpene: getACFValue('dominent_terpene', 'terpenes'),
   };
 }
 

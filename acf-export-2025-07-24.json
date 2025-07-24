@@ -1,0 +1,279 @@
+[
+    {
+        "key": "group_687fd7d50d51f",
+        "title": "EDIBLE\/MOONWATER",
+        "fields": [
+            {
+                "key": "field_687fd7d6598e1",
+                "label": "Strength (MG)",
+                "name": "strength_mg",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "strengthMg",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd7e7598e2",
+                "label": "Effects",
+                "name": "effects",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "effects",
+                "graphql_non_null": 0
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "product_cat",
+                    "operator": "==",
+                    "value": "edibles"
+                }
+            ],
+            [
+                {
+                    "param": "product_cat",
+                    "operator": "==",
+                    "value": "moonwater"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_rest": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "edible\/Moonwater",
+        "map_graphql_types_from_location_rules": 0,
+        "graphql_types": ""
+    },
+    {
+        "key": "group_687fd5eb9d4bd",
+        "title": "FLOWER\/VAPE\/CONCENTRATE",
+        "fields": [
+            {
+                "key": "field_687fd5edc726c",
+                "label": "THCa %",
+                "name": "thca_%",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "thca",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd655c726d",
+                "label": "Strain Type",
+                "name": "strain_type",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "strainType",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd691c726e",
+                "label": "Nose",
+                "name": "nose",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "nose",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd69bc726f",
+                "label": "Effects",
+                "name": "effects",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "effects",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd6a3c7270",
+                "label": "Dominent Terpene",
+                "name": "dominent_terpene",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "dominentTerpene",
+                "graphql_non_null": 0
+            },
+            {
+                "key": "field_687fd6cec7271",
+                "label": "Lineage",
+                "name": "lineage",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "",
+                "maxlength": "",
+                "allow_in_bindings": 0,
+                "placeholder": "",
+                "prepend": "",
+                "append": "",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "lineage",
+                "graphql_non_null": 0
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "product_cat",
+                    "operator": "==",
+                    "value": "vape"
+                }
+            ],
+            [
+                {
+                    "param": "product_cat",
+                    "operator": "==",
+                    "value": "flower"
+                }
+            ],
+            [
+                {
+                    "param": "product_cat",
+                    "operator": "==",
+                    "value": "concentrate"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_rest": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "flower\/Vape\/Concentrate",
+        "map_graphql_types_from_location_rules": 0,
+        "graphql_types": ""
+    }
+]

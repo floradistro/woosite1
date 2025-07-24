@@ -1,6 +1,19 @@
 // Server-side WooCommerce functions for SSR
 // These functions directly call WooCommerce API without going through Next.js API routes
 
+// ACF Field Interfaces
+export interface ACFFields {
+  // Edible/Moonwater fields
+  strength_mg?: string;
+  // Flower/Vape/Concentrate fields
+  'thca_%'?: string;
+  strain_type?: string;
+  nose?: string;
+  effects?: string;
+  dominent_terpene?: string;
+  lineage?: string;
+}
+
 export interface WooCommerceProduct {
   id: number;
   name: string;
@@ -79,10 +92,16 @@ export interface WooCommerceProduct {
   menu_order: number;
   price_html: string;
   related_ids: number[];
-  meta_data: any[];
+  meta_data: Array<{
+    id: number;
+    key: string;
+    value: any;
+  }>;
   stock_status: string;
   has_options: boolean;
   post_password: string;
+  // ACF Fields
+  acf?: ACFFields;
 }
 
 // Server-side cache for better performance
@@ -144,6 +163,11 @@ export const wooCommerceServerAPI = {
       // Set defaults
       if (!params?.per_page) queryParams.append('per_page', '100');
       if (!params?.status) queryParams.append('status', 'publish');
+      
+      // Add ACF fields to the request - ensure ACF fields are included
+      queryParams.append('acf_format', 'standard');
+      // Temporarily remove _fields to get full response including ACF
+      // queryParams.append('_fields', 'id,name,slug,price,regular_price,sale_price,categories,tags,images,description,short_description,status,featured,acf');
       
       const url = `${storeUrl}/wp-json/wc/v3/products?${queryParams.toString()}`;
       

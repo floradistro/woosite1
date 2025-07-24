@@ -269,11 +269,6 @@ function ProductCollectionContent({
                   ? config.content.qualitySection.subtitle.secondary
                   : config.content.qualitySection.subtitle.primary}
               </p>
-              <p className="text-lg text-white/60 font-light mt-2">
-                {format === config.formats.secondary && config.content.qualitySection.description.secondary
-                  ? config.content.qualitySection.description.secondary
-                  : config.content.qualitySection.description.primary}
-              </p>
             </div>
 
             {/* Content Grid */}

@@ -208,8 +208,9 @@ const ProductInfo = ({
     const baseClass = isExpanded ? 'bg-opacity-25' : 'bg-opacity-20';
     switch (category) {
       case 'indica': return `bg-purple-500/${baseClass} text-purple-300`;
-      case 'sativa': return `bg-green-500/${baseClass} text-green-300`;
-      default: return `bg-yellow-500/${baseClass} text-yellow-300`;
+      case 'sativa': return `bg-yellow-500/${baseClass} text-yellow-300`;
+      case 'hybrid': return `bg-green-500/${baseClass} text-green-300`;
+      default: return `bg-green-500/${baseClass} text-green-300`;
     }
   };
 
@@ -242,29 +243,66 @@ const ProductInfo = ({
         </span>
       </h3>
       
+      {/* No Artificial Dyes text for gummy products */}
+      {product.title.toLowerCase().includes('gummy') && (
+        <p className="text-red-400 text-xs font-medium mb-1">
+          **No Artificial Dyes**
+        </p>
+      )}
+      
       {(format === 'preroll' || format === 'bulk') && (
         <p className={`md:hidden text-${format === 'preroll' ? 'emerald' : 'orange'}-400 text-sm font-light mb-1`}>
           {format === 'preroll' ? 'pre-rolls' : 'bulk pack'}
         </p>
       )}
       
-      {product.lineage && (
-        <p className={`text-sm md:text-xs italic mb-1 ${
-          isExpanded ? 'text-white/70' : 'text-white/60'
-        }`}>{product.lineage}</p>
+      {/* For edibles and moonwater, show the same 2-field layout */}
+      {(productType === 'edible' || productType === 'moonwater') ? (
+        <>
+          {/* Strength and Effects side by side */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {/* Strength */}
+            <div className="p-2 rounded-md bg-gradient-to-r from-white/5 to-white/2 border border-white/10">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Strength</span>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-lg font-light ${productType === 'edible' ? 'text-red-400' : 'text-blue-400'}`}>{product.thc}</span>
+                <span className={`text-xs font-light ${productType === 'edible' ? 'text-red-400/70' : 'text-blue-400/70'}`}>mg</span>
+              </div>
+            </div>
+            
+            {/* Effects */}
+            {product.spotlight && (
+              <div className="p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+                <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Effects</span>
+                <p className="text-white/90 text-xs font-light leading-relaxed">
+                  {product.spotlight}
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Non-edible product fields */}
+          {product.lineage && (
+            <p className={`text-sm md:text-xs italic mb-1 ${
+              isExpanded ? 'text-white/70' : 'text-white/60'
+            }`}>{product.lineage}</p>
+          )}
+          
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-white/70 text-sm md:text-xs">Type:</span>
+            <span className={`px-2 py-0.5 rounded-full text-sm md:text-xs font-light tracking-wide flex-shrink-0 ${getCategoryColor(product.category)}`}>
+              {formatCategory(product.category)}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-white/70 text-sm md:text-xs">{getThcLabel()}</span>
+            <span className="text-emerald-400 text-sm md:text-xs font-medium">{getThcValue()}</span>
+          </div>
+        </>
       )}
-      
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-white/70 text-sm md:text-xs">Type:</span>
-        <span className={`px-2 py-0.5 rounded-full text-sm md:text-xs font-light tracking-wide flex-shrink-0 ${getCategoryColor(product.category)}`}>
-          {formatCategory(product.category)}
-        </span>
-      </div>
-      
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-white/70 text-sm md:text-xs">{getThcLabel()}</span>
-        <span className="text-emerald-400 text-sm md:text-xs font-medium">{getThcValue()}</span>
-      </div>
       
       {productType === 'flower' && product.nose && Array.isArray(product.nose) && (
         <div className="flex flex-wrap gap-1 mb-1">
@@ -277,16 +315,7 @@ const ProductInfo = ({
         </div>
       )}
       
-      {productType === 'edible' && product.type && Array.isArray(product.type) && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          <span className="text-white/70 text-sm md:text-xs mr-1">Type:</span>
-          {product.type.map((edibleType, idx) => (
-            <span key={idx} className="text-white/70 text-base md:text-xs hover:text-white transition-colors duration-300 capitalize">
-              {edibleType}
-            </span>
-          ))}
-        </div>
-      )}
+
       
       {productType === 'vape' && product.nose && (
         <div className="flex items-center gap-2 mb-1">
@@ -308,51 +337,54 @@ const ProductInfo = ({
         </div>
       )}
       
-      {productType === 'moonwater' && product.flavor && Array.isArray(product.flavor) && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          <span className="text-white/70 text-sm md:text-xs mr-1">Flavor:</span>
-          {product.flavor.map((flav, idx) => (
-            <span key={idx} className="text-white/70 text-base md:text-xs hover:text-white transition-colors duration-300 capitalize">
-              {flav}
-            </span>
-          ))}
+
+      
+      {/* Effects - Hide for edibles and moonwater since it's in the spotlight field */}
+      {productType !== 'edible' && productType !== 'moonwater' && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          <span className="text-white/70 text-sm md:text-xs mr-1">Effects:</span>
+          {product.vibe === 'relax' && (
+            <>
+              <span className="text-purple-300 text-base md:text-xs hover:text-purple-200 transition-colors duration-300 capitalize">Relaxed</span>
+              <span className="text-indigo-300 text-base md:text-xs hover:text-indigo-200 transition-colors duration-300 hidden md:inline capitalize">Sleepy</span>
+              <span className="text-blue-300 text-base md:text-xs hover:text-blue-200 transition-colors duration-300 hidden md:inline capitalize">Calm</span>
+            </>
+          )}
+          {product.vibe === 'energize' && (
+            <>
+              <span className="text-green-300 text-base md:text-xs hover:text-green-200 transition-colors duration-300 capitalize">Energetic</span>
+              <span className="text-yellow-300 text-base md:text-xs hover:text-yellow-200 transition-colors duration-300 hidden md:inline capitalize">Focused</span>
+              <span className="text-orange-300 text-base md:text-xs hover:text-orange-200 transition-colors duration-300 hidden md:inline capitalize">Creative</span>
+            </>
+          )}
+          {product.vibe === 'balance' && (
+            <>
+              <span className="text-emerald-300 text-base md:text-xs hover:text-emerald-200 transition-colors duration-300 capitalize">Balanced</span>
+              <span className="text-teal-300 text-base md:text-xs hover:text-teal-200 transition-colors duration-300 hidden md:inline capitalize">Euphoric</span>
+              <span className="text-cyan-300 text-base md:text-xs hover:text-cyan-200 transition-colors duration-300 hidden md:inline capitalize">Uplifted</span>
+            </>
+          )}
         </div>
       )}
       
-      {/* Effects */}
-      <div className="flex flex-wrap gap-1 mb-2">
-        <span className="text-white/70 text-sm md:text-xs mr-1">Effects:</span>
-        {product.vibe === 'relax' && (
-          <>
-            <span className="text-purple-300 text-base md:text-xs hover:text-purple-200 transition-colors duration-300 capitalize">Relaxed</span>
-            <span className="text-indigo-300 text-base md:text-xs hover:text-indigo-200 transition-colors duration-300 hidden md:inline capitalize">Sleepy</span>
-            <span className="text-blue-300 text-base md:text-xs hover:text-blue-200 transition-colors duration-300 hidden md:inline capitalize">Calm</span>
-          </>
-        )}
-        {product.vibe === 'energize' && (
-          <>
-            <span className="text-green-300 text-base md:text-xs hover:text-green-200 transition-colors duration-300 capitalize">Energetic</span>
-            <span className="text-yellow-300 text-base md:text-xs hover:text-yellow-200 transition-colors duration-300 hidden md:inline capitalize">Focused</span>
-            <span className="text-orange-300 text-base md:text-xs hover:text-orange-200 transition-colors duration-300 hidden md:inline capitalize">Creative</span>
-          </>
-        )}
-        {product.vibe === 'balance' && (
-          <>
-            <span className="text-emerald-300 text-base md:text-xs hover:text-emerald-200 transition-colors duration-300 capitalize">Balanced</span>
-            <span className="text-teal-300 text-base md:text-xs hover:text-teal-200 transition-colors duration-300 hidden md:inline capitalize">Euphoric</span>
-            <span className="text-cyan-300 text-base md:text-xs hover:text-cyan-200 transition-colors duration-300 hidden md:inline capitalize">Uplifted</span>
-          </>
-        )}
-      </div>
-      
-      {/* Description - Desktop only */}
-      <div className="hidden md:block">
-        <p className={`text-xs leading-relaxed transition-colors duration-300 ${
-          isExpanded ? 'text-white/80' : 'text-white/70'
-        }`}>
-          {product.description}
-        </p>
-      </div>
+      {/* Description - Desktop only for edibles/moonwater, desktop only for others */}
+      {(productType === 'edible' || productType === 'moonwater') ? (
+        <div className="hidden md:block mb-2">
+          <p className={`text-xs leading-relaxed transition-colors duration-300 ${
+            isExpanded ? 'text-white/80' : 'text-white/70'
+          }`}>
+            {product.description}
+          </p>
+        </div>
+      ) : (
+        <div className="hidden md:block">
+          <p className={`text-xs leading-relaxed transition-colors duration-300 ${
+            isExpanded ? 'text-white/80' : 'text-white/70'
+          }`}>
+            {product.description}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -549,26 +581,16 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                   )}
                   
                   <div className="flex items-start gap-1.5 mb-3 md:mb-4">
-                    <div className="flex flex-col">
-                      <ProductImage
-                        product={product}
-                        isLoaded={isImageLoaded}
-                        productType={productType}
-                        format={format}
-                        onLoad={() => onImageLoad(product.id)}
-                        onClick={(e) => handleImageClick(product, e)}
-                        onGummyClick={product.title.toLowerCase().includes('gummy') ? (e) => handleGummyClick(product, e) : undefined}
-                        index={index}
-                      />
-                      {/* No Artificial Dyes text for gummy products */}
-                      {product.title.toLowerCase().includes('gummy') && (
-                        <div className="text-center mt-1">
-                          <p className="text-red-400 text-xs font-medium">
-                            **No Artificial Dyes**
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      product={product}
+                      isLoaded={isImageLoaded}
+                      productType={productType}
+                      format={format}
+                      onLoad={() => onImageLoad(product.id)}
+                      onClick={(e) => handleImageClick(product, e)}
+                      onGummyClick={product.title.toLowerCase().includes('gummy') ? (e) => handleGummyClick(product, e) : undefined}
+                      index={index}
+                    />
 
                     <ProductInfo
                       product={product}
@@ -578,15 +600,17 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                     />
                   </div>
 
-                  {/* Description - Mobile only */}
+                  {/* Description - Full width under everything for mobile */}
                   <div className="md:hidden mb-3">
                     <p className={`text-sm leading-relaxed transition-colors duration-300 ${
                       isExpanded ? 'text-white/80' : 'text-white/70'
                     }`}>
                       {product.description}
                     </p>
-                    
-                    {/* Text indicator for expanding options */}
+                  </div>
+
+                  {/* Text indicator for expanding options - Mobile only */}
+                  <div className="md:hidden mb-3">
                     <div className="text-center mt-3">
                       <p className={`text-xs font-light transition-all duration-200 ${
                         isExpanded ? 'text-emerald-300 opacity-100' : 'text-white/60 animate-subtle-glow'

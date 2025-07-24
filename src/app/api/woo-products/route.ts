@@ -53,6 +53,11 @@ export async function GET(request: Request) {
     params.append('consumer_key', consumerKey);
     params.append('consumer_secret', consumerSecret);
     
+    // Add ACF fields to the request - ensure ACF fields are included
+    params.append('acf_format', 'standard');
+    // Temporarily remove _fields to get full response including ACF
+    // params.append('_fields', 'id,name,slug,price,regular_price,sale_price,categories,tags,images,description,short_description,status,featured,acf');
+    
     const url = `${storeUrl}/wp-json/wc/v3/products?${params.toString()}`;
     const cacheKey = getCacheKey(url);
     
@@ -96,6 +101,17 @@ export async function GET(request: Request) {
     
     try {
       const products = await requestPromise;
+      
+      // Log first product to debug ACF fields
+      if (products.length > 0) {
+        console.log('🔍 First product raw data:', {
+          id: products[0].id,
+          name: products[0].name,
+          acf: products[0].acf,
+          hasACF: !!products[0].acf,
+          acfKeys: products[0].acf ? Object.keys(products[0].acf) : []
+        });
+      }
       
       const result = { 
         success: true,

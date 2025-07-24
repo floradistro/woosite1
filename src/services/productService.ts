@@ -4,9 +4,6 @@ import { wooCommerceAPI, transformWooCommerceProduct, Product as WooProduct, Woo
 const productCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 60 * 1000; // Reduced to 1 minute since API route has longer cache
 
-// Check if we should use WooCommerce or fallback to hardcoded data
-const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
-
 class ProductService {
   private isValidCache(key: string): boolean {
     const cached = productCache.get(key);
@@ -15,7 +12,8 @@ class ProductService {
   }
 
   private getCache(key: string): any {
-    return productCache.get(key)?.data;
+    const cached = productCache.get(key);
+    return cached ? cached.data : null;
   }
 
   private setCache(key: string, data: any): void {
@@ -29,13 +27,7 @@ class ProductService {
       return this.getCache(cacheKey);
     }
 
-    if (!USE_WOOCOMMERCE) {
-
-      return [];
-    }
-
     try {
-
       const wooProducts = await wooCommerceAPI.getProducts({ 
         per_page: 100, 
         status: 'publish' 
@@ -47,7 +39,7 @@ class ProductService {
       return transformedProducts;
     } catch (error) {
       console.error('Error fetching products from WooCommerce:', error);
-      return []; // Return empty array on error, no fallback
+      return []; // Return empty array on error
     }
   }
 
@@ -78,11 +70,6 @@ class ProductService {
       return this.getCache(cacheKey);
     }
 
-    if (!USE_WOOCOMMERCE) {
-
-      return null;
-    }
-
     try {
       const wooProduct = await wooCommerceAPI.getProduct(id);
       if (wooProduct) {
@@ -104,11 +91,6 @@ class ProductService {
       return this.getCache(cacheKey);
     }
 
-    if (!USE_WOOCOMMERCE) {
-
-      return [];
-    }
-
     try {
       const wooProducts = await wooCommerceAPI.getProducts({ 
         featured: true, 
@@ -126,11 +108,6 @@ class ProductService {
 
   // Search products
   async searchProducts(query: string): Promise<WooProduct[]> {
-    if (!USE_WOOCOMMERCE) {
-
-      return [];
-    }
-
     try {
       const wooProducts = await wooCommerceAPI.getProducts({ 
         search: query, 
@@ -149,11 +126,6 @@ class ProductService {
     const cacheKey = `category_${categorySlug}`;
     if (this.isValidCache(cacheKey)) {
       return this.getCache(cacheKey);
-    }
-
-    if (!USE_WOOCOMMERCE) {
-
-      return [];
     }
 
     try {

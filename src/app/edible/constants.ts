@@ -20,8 +20,8 @@ export type ProductFormat = 'single' | 'bulk';
 
 // Color mappings for tags
 export const CATEGORY_COLORS = {
-  indica: "bg-indigo-600 border-indigo-700",
-  sativa: "bg-red-600 border-red-700",
+  indica: "bg-purple-600 border-purple-700",
+  sativa: "bg-yellow-600 border-yellow-700",
   hybrid: "bg-green-600 border-green-700"
 } as const;
 
@@ -82,138 +82,152 @@ export interface FilterState {
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
-// Check if we should use WooCommerce or fallback to hardcoded data
-const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
-
 // Transform WooCommerce products to edibles format
 export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
-  // If WooCommerce is disabled, return hardcoded fallback data
-  if (!USE_WOOCOMMERCE) {
-
-    return [
-      {
-        id: 1,
-        title: "gummy bears",
-        description: "classic fruit-flavored gummies with precise dosing",
-        price: 25,
-        image: "/icons/EDIBLES.png",
-        category: "indica",
-        vibe: "relax",
-        thc: 10.0,
-        type: ["gummies"],
-        spotlight: "perfectly dosed for consistent effects",
-        featured: true
-      },
-      {
-        id: 2,
-        title: "chocolate bar",
-        description: "rich dark chocolate infused with premium cannabis",
-        price: 30,
-        image: "/icons/EDIBLES.png",
-        category: "hybrid",
-        vibe: "balance",
-        thc: 100.0,
-        type: ["chocolates"],
-        spotlight: "artisanal chocolate with full-spectrum extract",
-        featured: true
-      },
-      {
-        id: 3,
-        title: "sour gummies",
-        description: "tangy sour gummies perfect for micro-dosing",
-        price: 25,
-        image: "/icons/EDIBLES.png",
-        category: "sativa",
-        vibe: "energize",
-        thc: 5.0,
-        type: ["gummies"],
-        spotlight: "low-dose option for controlled experience",
-        featured: true
-      }
-    ];
-  }
-  
   try {
-
-    // Use the optimized multi-category fetch
-    const edibleCategories = ['edible', 'edibles', 'gummy', 'gummies', 'chocolate', 'candy'];
+    // Transform WooCommerce products to edibles format
+    // Try multiple category names to match WooCommerce categories
+    const edibleCategories = ['edibles', 'Edibles', 'edible', 'Edible'];
     
     let edibleProducts = await wooCommerceServerAPI.getProductsByCategories(edibleCategories);
-
-    // If no products found, try category ID 1381 (based on original code)
+    
+    // If no products found by category name, try getting all products and filtering
     if (edibleProducts.length === 0) {
-
-      edibleProducts = await wooCommerceServerAPI.getProducts({ category: '1381', per_page: 100, status: 'publish' });
-
+      const allProducts = await wooCommerceServerAPI.getProducts({ per_page: 100 });
+      edibleProducts = allProducts.filter(product => 
+        product.categories?.some((cat: any) => 
+          ['edibles', 'Edibles', 'edible', 'Edible'].includes(cat.name)
+        )
+      );
     }
     
-    if (edibleProducts.length === 0) {
-
-      return [];
-    }
+          if (edibleProducts.length === 0) {
+        console.log('🍯 Still no edible products found after filtering, returning empty array');
+        return [];
+      }
     
-    // Transform WooCommerce products to our format
     return edibleProducts.map((product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
+      const acf = product.acf || {};
       
-      // Extract category from categories or tags
+      // Helper function to get ACF value from meta_data
+      const getACFValue = (acfKey: string): string | undefined => {
+        // ACF fields are stored in meta_data, not in a separate acf object
+        const metaValue = product.meta_data?.find((m: any) => m.key === acfKey)?.value;
+        if (metaValue && typeof metaValue === 'string' && metaValue.trim()) {
+          return metaValue.trim();
+        }
+        
+        return undefined;
+      };
+      
+      // Extract category - for edibles, we don't rely on strain_type as much
       const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        // Check ACF effects field to determine category
+        const effects = getACFValue('effects');
+        if (effects) {
+          const effectsLower = effects.toLowerCase();
+          if (effectsLower.includes('relax') || effectsLower.includes('calm') || effectsLower.includes('sleep') || effectsLower.includes('indica')) return 'indica';
+          if (effectsLower.includes('energiz') || effectsLower.includes('uplifting') || effectsLower.includes('focus') || effectsLower.includes('sativa')) return 'sativa';
+          if (effectsLower.includes('balanc') || effectsLower.includes('hybrid')) return 'hybrid';
+        }
+        
+        // Fallback to categories/tags
         if (categories.includes('indica') || tags.includes('indica')) return 'indica';
         if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
         return 'hybrid';
       };
 
-      // Extract vibe from tags
+      // Extract vibe from ACF effects field
       const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        const effects = getACFValue('effects');
+        if (effects) {
+          const effectsLower = effects.toLowerCase();
+          if (effectsLower.includes('relax') || effectsLower.includes('calm') || effectsLower.includes('sleep')) return 'relax';
+          if (effectsLower.includes('energiz') || effectsLower.includes('uplifting') || effectsLower.includes('focus')) return 'energize';
+          if (effectsLower.includes('balanc')) return 'balance';
+        }
+        
+        // Fallback to tags
         if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
         if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
         return 'balance';
       };
 
-      // Extract edible type from product info
-      const getType = (): Array<'gummies' | 'chocolates' | 'mints' | 'cookies' | 'caramels'> => {
-        const title = product.name?.toLowerCase() || '';
-        const allText = `${title} ${categories.join(' ')} ${tags.join(' ')}`;
-        
-        const types: Array<'gummies' | 'chocolates' | 'mints' | 'cookies' | 'caramels'> = [];
-        
-        if (allText.includes('gummy') || allText.includes('gummies')) types.push('gummies');
-        if (allText.includes('chocolate')) types.push('chocolates');
-        if (allText.includes('mint')) types.push('mints');
-        if (allText.includes('cookie') || allText.includes('brownie') || allText.includes('baked')) types.push('cookies');
-        if (allText.includes('caramel')) types.push('caramels');
-        
-        return types.length > 0 ? types : ['gummies']; // Default to gummies array
-      };
-
-      // Extract THC dosage from description
+      // Extract THC from ACF strength_mg field (specific to edibles)
       const getThc = (): number => {
+        // Check ACF strength_mg field (primary field for edibles)
+        const strengthMg = getACFValue('strength_mg');
+        if (strengthMg) {
+          const thcValue = parseFloat(strengthMg.replace(/[^0-9.]/g, ''));
+          if (!isNaN(thcValue)) {
+            return thcValue;
+          }
+        }
+        
+        // Fallback to description parsing
         const description = product.description || product.short_description || '';
         const match = description.match(/(\d+\.?\d*)\s*mg/i);
-        return match ? parseFloat(match[1]) : 10.0; // Default 10mg for edibles
+        const fallbackValue = match ? parseFloat(match[1]) : 10.0;
+        
+        return fallbackValue;
       };
 
+      // Extract edible type from product name or tags
+      const getType = (): Array<'gummies' | 'chocolates' | 'mints' | 'cookies' | 'caramels'> => {
+        const name = product.name.toLowerCase();
+        const productTags = tags;
+        
+        if (name.includes('gumm') || productTags.includes('gummies')) return ['gummies'];
+        if (name.includes('chocolate') || productTags.includes('chocolate')) return ['chocolates'];
+        if (name.includes('cookie') || productTags.includes('cookies')) return ['cookies'];
+        if (name.includes('brownie') || productTags.includes('brownies')) return ['cookies'];
+        if (name.includes('caramel') || productTags.includes('caramels')) return ['caramels'];
+        if (name.includes('mint') || productTags.includes('mints')) return ['mints'];
+        
+        return ['gummies']; // Default type
+      };
+
+      // Get the effects for spotlight text
+      const getSpotlight = (): string => {
+        const effects = getACFValue('effects');
+        if (effects && effects.trim()) {
+          return effects;
+        }
+        return "Precisely dosed for consistent effects";
+      };
+
+
+
+      // For edibles, we show: Strength (MG), Effects, and Description
+      const effects = getACFValue('effects');
+      const displayEffects = effects && effects.trim() ? effects : 'Relaxed Sleepy Calm';
+      
+      // Get the actual product description (not the mock one)
+      let productDescription = '';
+      if (product.short_description && product.short_description.trim()) {
+        productDescription = product.short_description.replace(/<[^>]*>/g, '').trim();
+      } else if (product.description && product.description.trim()) {
+        productDescription = product.description.replace(/<[^>]*>/g, '').trim();
+      }
+      
       return {
         id: product.id,
-        title: product.name || 'Edible Product',
-        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis edible',
-        price: parseFloat(product.price) || 29.99,
-        image: product.images?.[0]?.src || '/categories/EDIBLES.png',
+        title: product.name.toLowerCase(),
+        description: productDescription || 'Premium cannabis edible', // Show actual product description
+        price: parseFloat(product.price) || 25,
+        image: product.images?.[0]?.src || "/icons/newGummy.webp",
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         type: getType(),
-        spotlight: `Premium ${getCategory()} edibles with precise dosing`,
-        featured: index < 4,
-        lineage: 'Premium cannabis extract',
-        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
-                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
-                 ['limonene', 'caryophyllene', 'myrcene']
+        spotlight: displayEffects, // Show ACF effects field here
+        featured: index < 4
       };
     });
   } catch (error) {
-    console.error('❌ Error fetching edibles products:', error);
+    console.error('Error fetching edible products from WooCommerce:', error);
     return [];
   }
 }

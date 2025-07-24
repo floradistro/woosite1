@@ -23,8 +23,8 @@ export type ProductFormat = 'concentrate' | 'live-resin';
 
 // Color mappings for tags
 export const CATEGORY_COLORS = {
-  indica: "bg-indigo-600 border-indigo-700",
-  sativa: "bg-red-600 border-red-700",
+  indica: "bg-purple-600 border-purple-700",
+  sativa: "bg-yellow-600 border-yellow-700",
   hybrid: "bg-green-600 border-green-700"
 } as const;
 

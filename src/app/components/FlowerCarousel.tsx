@@ -135,8 +135,8 @@ export default function FlowerCarousel({
                     {/* Category Badge */}
                     <div className="absolute top-3 left-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        product.category === 'indica' ? 'bg-indigo-600/80 border-indigo-500 text-white' :
-                        product.category === 'sativa' ? 'bg-red-600/80 border-red-500 text-white' :
+                        product.category === 'indica' ? 'bg-purple-600/80 border-purple-500 text-white' :
+                        product.category === 'sativa' ? 'bg-yellow-600/80 border-yellow-500 text-black' :
                         'bg-green-600/80 border-green-500 text-white'
                       } backdrop-blur-sm`}>
                         {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
