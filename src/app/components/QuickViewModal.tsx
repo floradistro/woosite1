@@ -41,6 +41,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   const [mobileMagnifierCenter, setMobileMagnifierCenter] = useState({ x: 0, y: 0 });
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
   const [isMultiTouch, setIsMultiTouch] = useState(false);
+  const [handPreference, setHandPreference] = useState<'left' | 'right' | 'center'>('center');
+  const [magnifierSize, setMagnifierSize] = useState(280);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -234,6 +236,56 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     };
   };
 
+  // Detect hand preference based on touch patterns
+  const detectHandPreference = (touches: React.TouchList, rect: DOMRect) => {
+    if (touches.length < 2) return;
+    
+    const center = getTouchCenter(touches, rect);
+    const screenWidth = rect.width;
+    const leftThird = screenWidth / 3;
+    const rightThird = screenWidth * 2 / 3;
+    
+    if (center.x < leftThird) {
+      setHandPreference('left');
+    } else if (center.x > rightThird) {
+      setHandPreference('right');
+    } else {
+      setHandPreference('center');
+    }
+  };
+
+  // Optimize magnifier positioning based on hand preference
+  const getOptimalMagnifierPosition = (center: { x: number, y: number }, rect: DOMRect) => {
+    const halfSize = magnifierSize / 2;
+    const padding = 20;
+    
+    let x = center.x;
+    let y = center.y;
+    
+    // Adjust based on hand preference to avoid finger occlusion
+    switch (handPreference) {
+      case 'left':
+        // Position magnifier to the right and slightly up
+        x = Math.min(center.x + 100, rect.width - halfSize - padding);
+        y = Math.max(center.y - 80, halfSize + padding);
+        break;
+      case 'right':
+        // Position magnifier to the left and slightly up
+        x = Math.max(center.x - 100, halfSize + padding);
+        y = Math.max(center.y - 80, halfSize + padding);
+        break;
+      default:
+        // Center positioning with slight upward offset
+        x = Math.max(halfSize + padding, Math.min(center.x, rect.width - halfSize - padding));
+        y = Math.max(center.y - 60, halfSize + padding);
+    }
+    
+    // Ensure magnifier stays within bounds
+    y = Math.min(y, rect.height - halfSize - padding);
+    
+    return { x, y };
+  };
+
   const handleMobileTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
     
@@ -246,24 +298,31 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       setLastTouchDistance(distance);
       
       const center = getTouchCenter(e.touches, rect);
-      setMobileMagnifierCenter(center);
+      detectHandPreference(e.touches, rect);
+      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      setMobileMagnifierCenter(optimalPosition);
+      
+      // Adjust magnifier size based on zoom for better UX
+      const newSize = Math.max(250, Math.min(320, 280 + (mobileZoom - 1) * 10));
+      setMagnifierSize(newSize);
     } else if (e.touches.length === 1 && showMobileMagnifier) {
-      // Single touch to move magnifier
+      // Single touch to move magnifier - instant response
       const touch = e.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      setMobileMagnifierCenter({ x, y });
+      const center = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      setMobileMagnifierCenter(optimalPosition);
     }
   };
 
   const handleMobileTouchMove = (e: React.TouchEvent) => {
-    if (!isMobile || !isMultiTouch) return;
+    if (!isMobile) return;
     
     e.preventDefault();
     e.stopPropagation();
     
-    if (e.touches.length === 2) {
-      const rect = e.currentTarget.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    if (e.touches.length === 2 && isMultiTouch) {
       const distance = getTouchDistance(e.touches);
       const center = getTouchCenter(e.touches, rect);
       
@@ -271,10 +330,21 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
         const scale = distance / lastTouchDistance;
         const newZoom = Math.max(1, Math.min(10, mobileZoom * scale));
         setMobileZoom(newZoom);
+        
+        // Dynamic size adjustment for smoother experience
+        const newSize = Math.max(250, Math.min(320, 280 + (newZoom - 1) * 10));
+        setMagnifierSize(newSize);
       }
       
-      setMobileMagnifierCenter(center);
+      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      setMobileMagnifierCenter(optimalPosition);
       setLastTouchDistance(distance);
+    } else if (e.touches.length === 1 && showMobileMagnifier && !isMultiTouch) {
+      // Single finger movement - instant response
+      const touch = e.touches[0];
+      const center = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+      const optimalPosition = getOptimalMagnifierPosition(center, rect);
+      setMobileMagnifierCenter(optimalPosition);
     }
   };
 
@@ -348,15 +418,14 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
               if (window.innerWidth < 768) {
                 setTimeout(() => {
                   setShowMobileMagnifier(true);
-                  // Center the magnifier
+                  // Center the magnifier optimally
                   const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
                   if (rect) {
-                    setMobileMagnifierCenter({
-                      x: rect.width / 2,
-                      y: rect.height / 2
-                    });
+                    const center = { x: rect.width / 2, y: rect.height / 2 };
+                    const optimalPosition = getOptimalMagnifierPosition(center, rect);
+                    setMobileMagnifierCenter(optimalPosition);
                   }
-                }, 800);
+                }, 600); // Faster appearance
               }
             }}
           />
@@ -418,54 +487,59 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
           {/* Mobile Pinch-to-Zoom Magnifier */}
           {isMobile && showMobileMagnifier && (
             <div
-              className="absolute pointer-events-none z-10 transition-all duration-300"
+              className="absolute pointer-events-none z-10"
               style={{
-                left: `${mobileMagnifierCenter.x - 100}px`,
-                top: `${mobileMagnifierCenter.y - 100}px`,
-                width: '200px',
-                height: '200px',
+                left: `${mobileMagnifierCenter.x - magnifierSize/2}px`,
+                top: `${mobileMagnifierCenter.y - magnifierSize/2}px`,
+                width: `${magnifierSize}px`,
+                height: `${magnifierSize}px`,
+                willChange: 'left, top, width, height',
+                transition: 'none', // Instant positioning for snappy feel
               }}
             >
               {/* Main magnifier circle */}
               <div 
-                className="w-full h-full rounded-full border-2 border-white/60 shadow-2xl overflow-hidden relative"
+                className="w-full h-full rounded-full border-3 border-white/70 shadow-2xl overflow-hidden relative backdrop-blur-sm"
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
-                  backgroundPosition: `${(mobileMagnifierCenter.x / window.innerWidth) * 100}% ${(mobileMagnifierCenter.y / window.innerHeight) * 100}%`,
+                  backgroundPosition: `${(mobileMagnifierCenter.x / (document.querySelector('.magnifier-container')?.getBoundingClientRect().width || window.innerWidth)) * 100}% ${(mobileMagnifierCenter.y / (document.querySelector('.magnifier-container')?.getBoundingClientRect().height || window.innerHeight)) * 100}%`,
                   backgroundRepeat: 'no-repeat',
-                  transform: `scale(${Math.max(0.8, Math.min(1.2, 0.8 + (mobileZoom - 1) * 0.1))})`,
-                  transition: 'transform 0.1s ease-out',
+                  filter: 'contrast(1.1) saturate(1.2) brightness(1.05)',
+                  willChange: 'background-size, background-position',
+                  transition: 'none', // Instant response
                 }}
               >
-                {/* Lens effect overlay */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-transparent to-black/20 pointer-events-none"></div>
+                {/* Enhanced lens effect overlay */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/15 pointer-events-none"></div>
                 
-                {/* Zoom level indicator */}
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1">
-                  <span className="text-white text-xs font-medium">
-                    {mobileZoom.toFixed(1)}x
-                  </span>
-                </div>
+                {/* Subtle inner ring for depth */}
+                <div className="absolute inset-2 rounded-full border border-white/20 pointer-events-none"></div>
                 
-                {/* Pinch instruction (only when zoom is 1) */}
-                {mobileZoom <= 1.1 && (
+                {/* Zoom level indicator - only show when actively zooming */}
+                {isMultiTouch && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20">
+                    <span className="text-white text-sm font-semibold">
+                      {mobileZoom.toFixed(1)}×
+                    </span>
+                  </div>
+                )}
+                
+                {/* Pinch instruction (only when zoom is 1 and not touching) */}
+                {mobileZoom <= 1.1 && !isMultiTouch && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2 text-center">
-                      <div className="text-white text-xs font-medium mb-1">🤏</div>
-                      <div className="text-white/90 text-xs">Pinch to zoom</div>
+                    <div className="bg-black/85 backdrop-blur-md rounded-xl px-4 py-3 text-center border border-white/20">
+                      <div className="text-white text-lg font-medium mb-1">🤏</div>
+                      <div className="text-white/95 text-sm font-medium">Pinch to zoom</div>
                     </div>
                   </div>
                 )}
+                
+                {/* Hand preference indicator (subtle) */}
+                {handPreference !== 'center' && isMultiTouch && (
+                  <div className={`absolute top-2 ${handPreference === 'left' ? 'right-2' : 'left-2'} w-2 h-2 bg-white/40 rounded-full`}></div>
+                )}
               </div>
-              
-              {/* Touch points indicators when multi-touch */}
-              {isMultiTouch && (
-                <>
-                  <div className="absolute w-4 h-4 bg-white/80 rounded-full border-2 border-blue-400 -top-2 -left-2 animate-pulse"></div>
-                  <div className="absolute w-4 h-4 bg-white/80 rounded-full border-2 border-blue-400 -bottom-2 -right-2 animate-pulse"></div>
-                </>
-              )}
             </div>
           )}
           
