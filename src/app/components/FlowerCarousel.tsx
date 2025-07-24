@@ -9,34 +9,39 @@ import { carouselStyles } from '@/styles/shared';
 interface FlowerCarouselProps {
   title?: string;
   subtitle?: string;
+  initialProducts?: FeaturedProduct[];
 }
 
 export default function FlowerCarousel({ 
   title = "Premium Flower Selection",
-  subtitle = "Hand-curated strains for every experience"
+  subtitle = "Hand-curated strains for every experience",
+  initialProducts = []
 }: FlowerCarouselProps) {
   const router = useRouter();
-  const [products, setProducts] = useState<FeaturedProduct[]>([]);
+  const [products, setProducts] = useState<FeaturedProduct[]>(initialProducts);
   const [selectedWeights, setSelectedWeights] = useState<Record<number, string>>({});
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialProducts.length);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const flowerProducts = await getFlowerProducts();
-        // Take only first 6 products
-        setProducts(flowerProducts.slice(0, 6));
-      } catch (error) {
-        console.error('Error loading flower products:', error);
-        setProducts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Only fetch if no initial products provided (client-side navigation)
+    if (initialProducts.length === 0) {
+      const loadProducts = async () => {
+        try {
+          const flowerProducts = await getFlowerProducts();
+          // Take only first 6 products
+          setProducts(flowerProducts.slice(0, 6));
+        } catch (error) {
+          console.error('Error loading flower products:', error);
+          setProducts([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    loadProducts();
-  }, []);
+      loadProducts();
+    }
+  }, [initialProducts.length]);
 
   const handleProductClick = (product: FeaturedProduct) => {
     router.push('/flower');
