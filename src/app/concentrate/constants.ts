@@ -101,20 +101,73 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
       return [];
     }
 
-    // Transform WooCommerce products to our format
     return concentrateProducts.map((product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
-      
-      // Extract category from categories or tags
+      const acf = product.acf;
+
+      console.log(`🧪 Concentrate Product Debug - ${product.name}:`, {
+        id: product.id,
+        acf_object: acf || {},
+        acf_keys: acf ? Object.keys(acf) : [],
+        meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
+        extracted_values: {},
+        final_mapped: {}
+      });
+
+      // Helper function to get ACF value with multiple fallback strategies
+      const getACFValue = (acfKey: string, metaKeys: string[] = []): string | undefined => {
+        // First try the acf object
+        if (acf && typeof acf === 'object' && acfKey in acf) {
+          const acfValue = (acf as any)[acfKey];
+          if (acfValue && typeof acfValue === 'string' && acfValue.trim()) {
+            return acfValue.trim();
+          }
+        }
+        
+        // Then try meta_data with various key variations
+        const keysToTry = [acfKey, ...metaKeys];
+        for (const key of keysToTry) {
+          const metaValue = product.meta_data?.find((m: any) => m.key === key);
+          if (metaValue?.value && typeof metaValue.value === 'string' && metaValue.value.trim()) {
+            return metaValue.value.trim();
+          }
+        }
+        
+        return undefined;
+      };
+
+      // Extract ACF values
+      const thcaValue = getACFValue('thca_%', ['thca', '_thca']);
+      const strainType = getACFValue('strain_type', ['type', '_type']);
+      const nose = getACFValue('nose', ['_nose']);
+      const effects = getACFValue('effects', ['_effects']);
+      const dominentTerpene = getACFValue('dominent_terpene', ['terpenes', '_terpenes']);
+      const lineage = getACFValue('lineage', ['_lineage']);
+
+      // Map strain type to category
       const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        if (strainType) {
+          const type = strainType.toLowerCase();
+          if (type.includes('indica')) return 'indica';
+          if (type.includes('sativa')) return 'sativa';
+          if (type.includes('hybrid')) return 'hybrid';
+        }
+        // Fallback to categories/tags
         if (categories.includes('indica') || tags.includes('indica')) return 'indica';
         if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
         return 'hybrid';
       };
 
-      // Extract vibe from tags
+      // Map effects to vibe
       const getVibe = (): 'relax' | 'energize' | 'balance' => {
+        if (effects) {
+          const effect = effects.toLowerCase();
+          if (effect.includes('relax')) return 'relax';
+          if (effect.includes('energize')) return 'energize';
+          if (effect.includes('balance')) return 'balance';
+        }
+        // Fallback to tags
         if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
         if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
         return 'balance';
@@ -137,29 +190,73 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         return textures.length > 0 ? textures : ['shatter']; // Default to shatter
       };
 
-      // Extract THC percentage from description
+      // Parse THC percentage
       const getThc = (): number => {
+        if (thcaValue) {
+          const match = thcaValue.match(/(\d+\.?\d*)/);
+          if (match) return parseFloat(match[1]);
+        }
+        // Fallback to description parsing
         const description = product.description || product.short_description || '';
         const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
         return match ? parseFloat(match[1]) : 85.0; // Default high THC for concentrates
       };
 
+      const category = getCategory();
+      const vibe = getVibe();
+      const thc = getThc();
+      const texture = getTexture();
+      const spotlight = effects || `Premium ${product.name} concentrate`;
+
+      // Build terpenes array
+      const terpenes = dominentTerpene ? 
+        [dominentTerpene.toLowerCase(), 'limonene', 'caryophyllene'] :
+        category === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
+        category === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
+        ['limonene', 'caryophyllene', 'myrcene'];
+
+      const extractedValues = {
+        thca: thcaValue,
+        strain_type: strainType,
+        nose: nose,
+        effects: effects,
+        dominent_terpene: dominentTerpene,
+        lineage: lineage
+      };
+
+      const finalMapped = {
+        category,
+        thc,
+        lineage: lineage || 'Premium concentrate extraction',
+        nose: nose ? [nose.toLowerCase()] : ['concentrate'],
+        vibe,
+        spotlight
+      };
+
+      // Update the debug log with actual values
+      console.log(`🧪 Concentrate Product Debug - ${product.name}:`, {
+        id: product.id,
+        acf_object: acf || {},
+        acf_keys: acf ? Object.keys(acf) : [],
+        meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
+        extracted_values: extractedValues,
+        final_mapped: finalMapped
+      });
+
       return {
         id: product.id,
         title: product.name,
-        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || 'Premium cannabis concentrate',
+        description: product.description?.replace(/<[^>]*>/g, '') || product.short_description?.replace(/<[^>]*>/g, '') || 'Premium cannabis concentrate',
         price: parseFloat(product.price) || 0,
         image: product.images?.[0]?.src || '/categories/WAX.png',
-        category: getCategory(),
-        vibe: getVibe(),
-        thc: getThc(),
-        texture: getTexture(),
-        spotlight: `Premium ${product.name} concentrate with exceptional potency and purity`,
+        category,
+        vibe,
+        thc,
+        texture,
+        spotlight,
         featured: index < 4,
-        lineage: 'Premium concentrate extraction',
-        terpenes: getCategory() === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
-                 getCategory() === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
-                 ['limonene', 'caryophyllene', 'myrcene']
+        lineage: lineage || 'Premium concentrate extraction',
+        terpenes
       };
     });
   } catch (error) {

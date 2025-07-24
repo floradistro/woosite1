@@ -304,7 +304,7 @@ const ProductInfo = ({
         </>
       )}
       
-      {productType === 'flower' && product.nose && Array.isArray(product.nose) && (
+      {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.nose && Array.isArray(product.nose) && (
         <div className="flex flex-wrap gap-1 mb-1">
           <span className="text-white/70 text-sm md:text-xs mr-1">Nose:</span>
           {product.nose.map((note, idx) => (
@@ -315,7 +315,7 @@ const ProductInfo = ({
         </div>
       )}
       
-      {(productType === 'flower' || productType === 'vape') && product.terpenes && product.terpenes.length > 0 && (
+      {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.terpenes && product.terpenes.length > 0 && (
         <div className="flex items-center gap-2 mb-1">
           <span className="text-white/70 text-sm md:text-xs">Dominant Terpene:</span>
           <span className="text-amber-400 text-base md:text-xs hover:text-amber-300 transition-colors duration-300 capitalize">
@@ -348,31 +348,17 @@ const ProductInfo = ({
       
 
       
-      {/* Effects - Hide for edibles and moonwater since it's in the spotlight field */}
-      {productType !== 'edible' && productType !== 'moonwater' && (
+      {/* Effects - Show real ACF effects data */}
+      {productType !== 'edible' && productType !== 'moonwater' && product.spotlight && (
         <div className="flex flex-wrap gap-1 mb-2">
           <span className="text-white/70 text-sm md:text-xs mr-1">Effects:</span>
-          {product.vibe === 'relax' && (
-            <>
-              <span className="text-purple-300 text-base md:text-xs hover:text-purple-200 transition-colors duration-300 capitalize">Relaxed</span>
-              <span className="text-indigo-300 text-base md:text-xs hover:text-indigo-200 transition-colors duration-300 hidden md:inline capitalize">Sleepy</span>
-              <span className="text-blue-300 text-base md:text-xs hover:text-blue-200 transition-colors duration-300 hidden md:inline capitalize">Calm</span>
-            </>
-          )}
-          {product.vibe === 'energize' && (
-            <>
-              <span className="text-green-300 text-base md:text-xs hover:text-green-200 transition-colors duration-300 capitalize">Energetic</span>
-              <span className="text-yellow-300 text-base md:text-xs hover:text-yellow-200 transition-colors duration-300 hidden md:inline capitalize">Focused</span>
-              <span className="text-orange-300 text-base md:text-xs hover:text-orange-200 transition-colors duration-300 hidden md:inline capitalize">Creative</span>
-            </>
-          )}
-          {product.vibe === 'balance' && (
-            <>
-              <span className="text-emerald-300 text-base md:text-xs hover:text-emerald-200 transition-colors duration-300 capitalize">Balanced</span>
-              <span className="text-teal-300 text-base md:text-xs hover:text-teal-200 transition-colors duration-300 hidden md:inline capitalize">Euphoric</span>
-              <span className="text-cyan-300 text-base md:text-xs hover:text-cyan-200 transition-colors duration-300 hidden md:inline capitalize">Uplifted</span>
-            </>
-          )}
+          <span className={`text-base md:text-xs hover:opacity-80 transition-colors duration-300 capitalize ${
+            product.vibe === 'relax' ? 'text-purple-300' :
+            product.vibe === 'energize' ? 'text-green-300' :
+            'text-emerald-300'
+          }`}>
+            {product.spotlight}
+          </span>
         </div>
       )}
       
