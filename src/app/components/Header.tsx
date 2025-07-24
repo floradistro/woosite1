@@ -230,24 +230,25 @@ function HeaderContent() {
         window.scrollTo(0, savedScrollPosition);
       }
       
-      // Force a comprehensive layout fix after a short delay
-      setTimeout(() => {
-        // Dispatch resize event to recalculate sticky positions
-        window.dispatchEvent(new Event('resize'));
-        
-        // Force filter bar recalculation
-        const filterBar = document.querySelector('[data-filter-bar]');
-        if (filterBar) {
-          const filterBarElement = filterBar as HTMLElement;
-          // Temporarily force a style recalculation
-          filterBarElement.style.position = 'relative';
-          void filterBarElement.offsetHeight; // Force reflow
-          filterBarElement.style.position = '';
-        }
-        
-        // Additional scroll event to ensure sticky positioning is recalculated
-        window.dispatchEvent(new Event('scroll'));
-      }, 100);
+             // Force a comprehensive layout fix after a short delay
+       setTimeout(() => {
+         // Dispatch resize event to recalculate sticky positions
+         window.dispatchEvent(new Event('resize'));
+         
+         // Force filter bar recalculation with aggressive positioning fix
+         const filterBar = document.querySelector('[data-filter-bar]');
+         if (filterBar) {
+           const filterBarElement = filterBar as HTMLElement;
+           // Force sticky positioning with important styles
+           filterBarElement.style.setProperty('position', 'sticky', 'important');
+           filterBarElement.style.setProperty('top', '0px', 'important');
+           filterBarElement.style.setProperty('z-index', '40', 'important');
+           void filterBarElement.offsetHeight; // Force reflow
+         }
+         
+         // Additional scroll event to ensure sticky positioning is recalculated
+         window.dispatchEvent(new Event('scroll'));
+       }, 100);
     }
     
     return () => { 

@@ -290,22 +290,24 @@ html, body {
   height: 100%;
 }
 
-/* Prevent filter bar positioning issues when mobile menu is open */
+/* Ensure filter bar always sticks to top without gaps */
+[data-filter-bar] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Mobile menu specific fixes */
 body.mobile-menu-open [data-filter-bar] {
   position: sticky !important;
   top: 0 !important;
-  transform: translateZ(0);
-  will-change: transform;
+  z-index: 40 !important;
 }
 
 /* Enhanced mobile menu specific styles */
 [data-mobile-menu] {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* Ensure filter bar maintains proper positioning after mobile menu closes */
-[data-filter-bar] {
   transform: translateZ(0);
   will-change: transform;
 }
@@ -317,10 +319,11 @@ body.mobile-menu-open {
   overflow: hidden !important;
 }
 
-/* Force layout recalculation after mobile menu state changes */
+/* Ensure no gaps in sticky positioning */
 body:not(.mobile-menu-open) [data-filter-bar] {
-  position: sticky;
-  top: 0;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
 }
 
 

@@ -47,47 +47,29 @@ const FilterBar: React.FC<FilterBarProps> = ({
   productCount,
   totalCount
 }) => {
-  const [isSticky, setIsSticky] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-  // Check if filter bar should be sticky
+  // Force layout recalculation when mobile menu state changes
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      // Get actual header height dynamically
-      const headerElement = document.querySelector('[data-header="true"]') as HTMLElement;
-      const headerHeight = headerElement?.offsetHeight || 80;
-      setIsSticky(scrollPosition > headerHeight);
-    };
-
-    // Handle mobile menu state changes
     const handleMobileMenuStateChange = () => {
-      // Force recalculation after mobile menu state changes
-      setTimeout(() => {
-        handleScroll();
-        // Force a layout recalculation
-        const filterBarElement = document.querySelector('[data-filter-bar]') as HTMLElement;
-        if (filterBarElement) {
-          filterBarElement.style.transform = 'translateZ(0)';
-          void filterBarElement.offsetHeight; // Force reflow
-        }
-      }, 50);
+      // Force a layout recalculation
+      const filterBarElement = document.querySelector('[data-filter-bar]') as HTMLElement;
+      if (filterBarElement) {
+        filterBarElement.style.transform = 'translateZ(0)';
+        void filterBarElement.offsetHeight; // Force reflow
+        filterBarElement.style.transform = '';
+      }
     };
 
-    // Initial check
-    handleScroll();
-    
-    // Listen for various events that might affect positioning
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    
     // Listen for mobile menu state changes
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
           const target = mutation.target as HTMLElement;
-          if (target === document.body && (target.classList.contains('mobile-menu-open') || !target.classList.contains('mobile-menu-open'))) {
-            handleMobileMenuStateChange();
+          if (target === document.body) {
+            if (target.classList.contains('mobile-menu-open') || !target.classList.contains('mobile-menu-open')) {
+              setTimeout(handleMobileMenuStateChange, 50);
+            }
           }
         }
       });
@@ -96,8 +78,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
       observer.disconnect();
     };
   }, []);
@@ -171,14 +151,13 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <>
       <div 
-        className={`
-          sticky top-0 z-40 transition-all duration-300 ease-in-out
-          ${isSticky 
-            ? 'bg-[#4a4a4a]/95 backdrop-blur-md shadow-xl border-b border-white/10' 
-            : 'bg-[#4a4a4a] border-b border-white/5'
-          }
-        `}
+        className="sticky top-0 z-40 bg-[#4a4a4a]/95 backdrop-blur-md shadow-xl border-b border-white/10 transition-all duration-300 ease-in-out"
         data-filter-bar
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+        }}
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}
