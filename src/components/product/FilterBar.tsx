@@ -116,8 +116,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <>
       <div 
-        className="relative z-40 bg-[#4a4a4a]/95 backdrop-blur-md shadow-xl border-b border-white/10 transition-all duration-300 ease-in-out"
+        className="relative z-40 shadow-xl border-b border-white/10 transition-all duration-300 ease-in-out"
         data-filter-bar
+        style={{
+          background: 'transparent',
+          backdropFilter: 'blur(12px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(200%)',
+          backgroundColor: 'rgba(74, 74, 74, 0.6)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+        }}
       >
         <div className="max-w-7xl mx-auto">
           {/* Desktop Filter Bar */}
