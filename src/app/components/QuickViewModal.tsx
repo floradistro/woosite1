@@ -43,6 +43,11 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   const [isMultiTouch, setIsMultiTouch] = useState(false);
   const [handPreference, setHandPreference] = useState<'left' | 'right' | 'center'>('center');
   const [magnifierSize, setMagnifierSize] = useState(280);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  // Refs for performance optimization
+  const magnifierRef = React.useRef<HTMLDivElement>(null);
+  const containerRectRef = React.useRef<DOMRect | null>(null);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -254,8 +259,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     }
   };
 
-  // Optimize magnifier positioning based on hand preference
-  const getOptimalMagnifierPosition = (center: { x: number, y: number }, rect: DOMRect) => {
+  // Optimize magnifier positioning based on hand preference - memoized for performance
+  const getOptimalMagnifierPosition = React.useCallback((center: { x: number, y: number }, rect: DOMRect) => {
     const halfSize = magnifierSize / 2;
     const padding = 20;
     
@@ -284,16 +289,18 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     y = Math.min(y, rect.height - halfSize - padding);
     
     return { x, y };
-  };
+  }, [magnifierSize, handPreference]);
 
-  const handleMobileTouchStart = (e: React.TouchEvent) => {
+  const handleMobileTouchStart = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
     
     e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = containerRectRef.current || e.currentTarget.getBoundingClientRect();
+    containerRectRef.current = rect; // Cache for performance
     
     if (e.touches.length === 2) {
       setIsMultiTouch(true);
+      setIsInitialLoad(false);
       const distance = getTouchDistance(e.touches);
       setLastTouchDistance(distance);
       
@@ -312,15 +319,15 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       const optimalPosition = getOptimalMagnifierPosition(center, rect);
       setMobileMagnifierCenter(optimalPosition);
     }
-  };
+  }, [isMobile, showMobileMagnifier, mobileZoom, getTouchDistance, getTouchCenter, detectHandPreference, getOptimalMagnifierPosition]);
 
-  const handleMobileTouchMove = (e: React.TouchEvent) => {
+  const handleMobileTouchMove = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
     
     e.preventDefault();
     e.stopPropagation();
     
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = containerRectRef.current || e.currentTarget.getBoundingClientRect();
     
     if (e.touches.length === 2 && isMultiTouch) {
       const distance = getTouchDistance(e.touches);
@@ -346,7 +353,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       const optimalPosition = getOptimalMagnifierPosition(center, rect);
       setMobileMagnifierCenter(optimalPosition);
     }
-  };
+  }, [isMobile, isMultiTouch, showMobileMagnifier, lastTouchDistance, mobileZoom, getTouchDistance, getTouchCenter, getOptimalMagnifierPosition]);
 
   const handleMobileTouchEnd = (e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -487,57 +494,50 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
           {/* Mobile Pinch-to-Zoom Magnifier */}
           {isMobile && showMobileMagnifier && (
             <div
+              ref={magnifierRef}
               className="absolute pointer-events-none z-10"
               style={{
                 left: `${mobileMagnifierCenter.x - magnifierSize/2}px`,
                 top: `${mobileMagnifierCenter.y - magnifierSize/2}px`,
                 width: `${magnifierSize}px`,
                 height: `${magnifierSize}px`,
-                willChange: 'left, top, width, height',
-                transition: 'none', // Instant positioning for snappy feel
+                willChange: 'transform',
+                transform: 'translateZ(0)', // Hardware acceleration
+                transition: 'none',
               }}
             >
               {/* Main magnifier circle */}
               <div 
-                className="w-full h-full rounded-full border-3 border-white/70 shadow-2xl overflow-hidden relative backdrop-blur-sm"
+                className="w-full h-full rounded-full border-2 border-white/60 shadow-xl overflow-hidden relative"
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
-                  backgroundPosition: `${(mobileMagnifierCenter.x / (document.querySelector('.magnifier-container')?.getBoundingClientRect().width || window.innerWidth)) * 100}% ${(mobileMagnifierCenter.y / (document.querySelector('.magnifier-container')?.getBoundingClientRect().height || window.innerHeight)) * 100}%`,
+                  backgroundPosition: `${(mobileMagnifierCenter.x / (containerRectRef.current?.width || window.innerWidth)) * 100}% ${(mobileMagnifierCenter.y / (containerRectRef.current?.height || window.innerHeight)) * 100}%`,
                   backgroundRepeat: 'no-repeat',
-                  filter: 'contrast(1.1) saturate(1.2) brightness(1.05)',
+                  filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
                   willChange: 'background-size, background-position',
-                  transition: 'none', // Instant response
+                  transform: 'translateZ(0)', // Hardware acceleration
                 }}
               >
-                {/* Enhanced lens effect overlay */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-black/15 pointer-events-none"></div>
+                {/* Subtle lens effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/10 pointer-events-none"></div>
                 
-                {/* Subtle inner ring for depth */}
-                <div className="absolute inset-2 rounded-full border border-white/20 pointer-events-none"></div>
-                
-                {/* Zoom level indicator - only show when actively zooming */}
-                {isMultiTouch && (
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20">
-                    <span className="text-white text-sm font-semibold">
+                {/* Zoom level indicator - minimal and only when zooming */}
+                {isMultiTouch && mobileZoom > 1.2 && (
+                  <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
+                    <span className="text-white text-xs font-medium">
                       {mobileZoom.toFixed(1)}×
                     </span>
                   </div>
                 )}
                 
-                {/* Pinch instruction (only when zoom is 1 and not touching) */}
-                {mobileZoom <= 1.1 && !isMultiTouch && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black/85 backdrop-blur-md rounded-xl px-4 py-3 text-center border border-white/20">
-                      <div className="text-white text-lg font-medium mb-1">🤏</div>
-                      <div className="text-white/95 text-sm font-medium">Pinch to zoom</div>
+                {/* Ultra-subtle pinch instruction - only on initial load */}
+                {isInitialLoad && mobileZoom <= 1.1 && !isMultiTouch && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/30 backdrop-blur-sm rounded-md px-2 py-0.5 text-center border border-white/5">
+                      <div className="text-white/60 text-xs font-light">pinch to zoom</div>
                     </div>
                   </div>
-                )}
-                
-                {/* Hand preference indicator (subtle) */}
-                {handPreference !== 'center' && isMultiTouch && (
-                  <div className={`absolute top-2 ${handPreference === 'left' ? 'right-2' : 'left-2'} w-2 h-2 bg-white/40 rounded-full`}></div>
                 )}
               </div>
             </div>
