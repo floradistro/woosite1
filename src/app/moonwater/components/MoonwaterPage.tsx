@@ -6,7 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { MoonwaterProductWithVariations, FeaturedProduct } from '../constants';
 import { filterProducts } from '../utils';
 import MoonwaterGrid from './MoonwaterGrid';
-import HeroSection from '@/components/product/HeroSection';
+
 import FilterBar from '@/components/product/FilterBar';
 import SubscriptionSection from '@/components/product/SubscriptionSection';
 import ReviewsSection from '@/components/product/ReviewsSection';
@@ -157,21 +157,94 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
 
   return (
     <div className="min-h-screen bg-[#4a4a4a] text-white">
-      {/* Hero Section */}
-      <HeroSection
-        productType="moonwater"
-        format={format}
-        title={{
-          primary: "Liquid Bliss.",
-          secondary: "Hydrate & Elevate."
-        }}
-        subtitle={{
-          primary: "Cannabis-Infused Beverages",
-          secondary: "Moonwater Multi-Packs"
-        }}
-        features={format === 'bottle' ? ["Nano-enhanced", "Fast-acting"] : ["Stock up", "Perfect for sharing"]}
-        qualityBadges={format === 'bottle' ? ["THC", "Fast-acting"] : ["Multi-packs", "Perfect for sharing"]}
-      />
+      {/* Custom Moonwater Hero Section with wave_reversed.png */}
+      <section className="relative h-64 md:h-72 lg:h-80 overflow-hidden bg-[#4a4a4a] animate-fadeIn">
+        {/* Wave Background */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'url(/icons/wave_reversed.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        ></div>
+
+        {/* Subtle colorful gradient spots for moonwater theme */}
+        <div className="absolute inset-0 opacity-60">
+          <div 
+            className="absolute w-48 h-48 md:w-80 md:h-80 rounded-full blur-xl animate-pulse"
+            style={{
+              background: `radial-gradient(circle, rgba(59, 130, 246, 0.35), rgba(37, 99, 235, 0.20) 0%, transparent 70%)`,
+              top: '10%',
+              left: '5%',
+              animationDuration: '4s',
+              animationDelay: '0s'
+            }}
+          ></div>
+          <div 
+            className="absolute w-40 h-40 md:w-64 md:h-64 rounded-full blur-lg animate-pulse"
+            style={{
+              background: `radial-gradient(circle, rgba(14, 165, 233, 0.30), rgba(2, 132, 199, 0.15) 0%, transparent 70%)`,
+              top: '50%',
+              right: '10%',
+              animationDuration: '5s',
+              animationDelay: '1s'
+            }}
+          ></div>
+          <div 
+            className="absolute w-36 h-36 md:w-56 md:h-56 rounded-full blur-lg animate-pulse"
+            style={{
+              background: `radial-gradient(circle, rgba(6, 182, 212, 0.25), rgba(8, 145, 178, 0.12) 0%, transparent 70%)`,
+              top: '0%',
+              right: '15%',
+              animationDuration: '6s',
+              animationDelay: '2s'
+            }}
+          ></div>
+        </div>
+
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex items-center justify-center pb-16 md:pb-12">
+          <div className="text-center space-y-3 animate-fadeInUp px-6">
+            <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light tracking-wide transform hover:scale-105 transition-transform duration-200 uppercase">
+              <span className="block mb-2">Moonwater</span>
+            </h1>
+            <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide drop-shadow-lg opacity-0 animate-fadeInUp" 
+                style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+              Pop, sip, float.
+            </h2>
+            
+            {/* Features */}
+            <div className="flex justify-center gap-4 mt-4 opacity-0 animate-fadeInUp" 
+                 style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+              <span className="text-white/80 text-sm">✓ THC</span>
+              <span className="text-white/40">•</span>
+              <span className="text-white/80 text-sm">✓ Fast-acting</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quality Banner */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 px-4 py-3 md:bottom-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 md:px-6 md:rounded-full z-50 w-full md:w-auto"
+          style={{
+            background: 'transparent',
+            backdropFilter: 'blur(12px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(12px) saturate(200%)',
+            backgroundColor: 'rgba(74, 74, 74, 0.6)',
+            border: '1px solid rgba(255, 255, 255, 0.08)'
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 md:gap-4 text-center">
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Nano-enhanced</span>
+            <span className="text-white/40">•</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Fast-acting</span>
+            <span className="text-white/40">•</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Refreshing</span>
+          </div>
+        </div>
+      </section>
 
       {/* Filter Bar */}
       <FilterBar
@@ -329,6 +402,30 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           </div>
         </div>
       </Section>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 1.5s ease-out;
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 1.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
