@@ -80,20 +80,22 @@ export interface FilterState {
   flavor: string[];
 }
 
+// Import server-side API
+import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
+
 // Transform WooCommerce products to moonwater format
 export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
   try {
 
     // Use the optimized multi-category fetch
-    const { wooCommerceAPI } = await import('../../lib/woocommerce');
     const moonwaterCategories = ['moonwater', 'beverage', 'beverages', 'drink', 'drinks'];
     
-    let moonwaterProducts = await wooCommerceAPI.getProductsByCategories(moonwaterCategories);
+    let moonwaterProducts = await wooCommerceServerAPI.getProductsByCategories(moonwaterCategories);
 
     // If no products found, try category ID 1378 (based on original code)
     if (moonwaterProducts.length === 0) {
 
-      moonwaterProducts = await wooCommerceAPI.getProducts({ category: '1378', per_page: 100, status: 'publish' });
+      moonwaterProducts = await wooCommerceServerAPI.getProducts({ category: '1378', per_page: 100, status: 'publish' });
 
     }
     

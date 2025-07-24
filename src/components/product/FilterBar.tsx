@@ -1,3 +1,5 @@
+'use client';
+
 // React import not needed in React 17+
 import { ChevronDown, Filter, X } from 'lucide-react';
 import { useState, useEffect } from 'react';

@@ -81,6 +81,7 @@ export interface FilterState {
 
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
+import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
 // Check if we should use WooCommerce or fallback to hardcoded data
 const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
@@ -142,9 +143,7 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
   try {
 
     // Direct approach using known category ID
-    const { wooCommerceAPI } = await import('../../lib/woocommerce');
-
-    const vapeProducts = await wooCommerceAPI.getProducts({ 
+    const vapeProducts = await wooCommerceServerAPI.getProducts({ 
       category: '1374', 
       per_page: 100, 
       status: 'publish' 

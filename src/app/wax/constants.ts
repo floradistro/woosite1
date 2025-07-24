@@ -83,15 +83,14 @@ export interface FilterState {
 
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
+import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
 // Transform WooCommerce products to concentrate format
 export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
   try {
 
     // Direct approach using known category ID
-    const { wooCommerceAPI } = await import('../../lib/woocommerce');
-
-    const concentrateProducts = await wooCommerceAPI.getProducts({ 
+    const concentrateProducts = await wooCommerceServerAPI.getProducts({ 
       category: '1408', 
       per_page: 100, 
       status: 'publish' 

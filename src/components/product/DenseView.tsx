@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { ProductType } from '@/app/components/ProductCollectionConfig';

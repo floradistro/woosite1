@@ -80,6 +80,7 @@ export interface FilterState {
 
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
+import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
 // Check if we should use WooCommerce or fallback to hardcoded data
 const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
@@ -135,15 +136,14 @@ export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
   try {
 
     // Use the optimized multi-category fetch
-    const { wooCommerceAPI } = await import('../../lib/woocommerce');
     const edibleCategories = ['edible', 'edibles', 'gummy', 'gummies', 'chocolate', 'candy'];
     
-    let edibleProducts = await wooCommerceAPI.getProductsByCategories(edibleCategories);
+    let edibleProducts = await wooCommerceServerAPI.getProductsByCategories(edibleCategories);
 
     // If no products found, try category ID 1381 (based on original code)
     if (edibleProducts.length === 0) {
 
-      edibleProducts = await wooCommerceAPI.getProducts({ category: '1381', per_page: 100, status: 'publish' });
+      edibleProducts = await wooCommerceServerAPI.getProducts({ category: '1381', per_page: 100, status: 'publish' });
 
     }
     

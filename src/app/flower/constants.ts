@@ -83,6 +83,7 @@ export interface FilterState {
 
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
+import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
 // Check if we should use WooCommerce or fallback to hardcoded data
 const USE_WOOCOMMERCE = process.env.NEXT_PUBLIC_USE_WOOCOMMERCE === 'true';
@@ -162,18 +163,18 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
   // Only import WooCommerce modules if we're actually using them
   try {
 
-    // Use the optimized multi-category fetch
-    const { wooCommerceAPI } = await import('../../lib/woocommerce');
+    // Use the server-side API directly for SSR
     const flowerCategories = ['flower', 'flowers', 'bud', 'cannabis-flower', 'herb'];
     
-    let flowerProducts = await wooCommerceAPI.getProductsByCategories(flowerCategories);
+    let flowerProducts = await wooCommerceServerAPI.getProductsByCategories(flowerCategories);
 
-    // If no products found, try some additional specific terms but avoid expensive "all products" fetch
+    // If no products found, try category ID 1372 (based on logs)
     if (flowerProducts.length === 0) {
-
-      const additionalCategories = ['indica', 'sativa', 'hybrid', 'strain'];
-      flowerProducts = await wooCommerceAPI.getProductsByCategories(additionalCategories);
-
+      flowerProducts = await wooCommerceServerAPI.getProducts({ 
+        category: '1372', 
+        per_page: 100, 
+        status: 'publish' 
+      });
     }
     
     if (flowerProducts.length === 0) {
