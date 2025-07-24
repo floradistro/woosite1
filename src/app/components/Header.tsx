@@ -199,32 +199,63 @@ function HeaderContent() {
 
   // Remove blur for mobile menu
   useEffect(() => {
+    let scrollPosition = 0;
+    
     if (isMobileMenuOpen) {
+      // Save current scroll position
+      scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // Prevent body scroll
       document.body.style.overflow = 'hidden';
-      // Force a layout recalculation to prevent filter bar positioning issues
       document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPosition}px`;
       document.body.style.width = '100%';
+      
+      // Add class to identify when mobile menu is open
+      document.body.classList.add('mobile-menu-open');
     } else {
+      // Get the saved scroll position from the body's top style
+      const bodyTop = document.body.style.top;
+      const savedScrollPosition = bodyTop ? parseInt(bodyTop.replace('-', '').replace('px', '')) : 0;
+      
+      // Reset body styles
       document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
-      // Force a reflow to fix any positioning issues after closing menu
+      document.body.classList.remove('mobile-menu-open');
+      
+      // Restore scroll position immediately
+      if (savedScrollPosition > 0) {
+        window.scrollTo(0, savedScrollPosition);
+      }
+      
+      // Force a comprehensive layout fix after a short delay
       setTimeout(() => {
+        // Dispatch resize event to recalculate sticky positions
         window.dispatchEvent(new Event('resize'));
-        // Additional layout fix for filter bar
+        
+        // Force filter bar recalculation
         const filterBar = document.querySelector('[data-filter-bar]');
         if (filterBar) {
-          (filterBar as HTMLElement).style.transform = 'translateZ(0)';
-          setTimeout(() => {
-            (filterBar as HTMLElement).style.transform = '';
-          }, 50);
+          const filterBarElement = filterBar as HTMLElement;
+          // Temporarily force a style recalculation
+          filterBarElement.style.position = 'relative';
+          filterBarElement.offsetHeight; // Force reflow
+          filterBarElement.style.position = '';
         }
-      }, 50);
+        
+        // Additional scroll event to ensure sticky positioning is recalculated
+        window.dispatchEvent(new Event('scroll'));
+      }, 100);
     }
+    
     return () => { 
       document.body.style.overflow = ''; 
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
+      document.body.classList.remove('mobile-menu-open');
     };
   }, [isMobileMenuOpen]);
 

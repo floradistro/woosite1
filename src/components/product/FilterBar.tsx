@@ -60,15 +60,45 @@ const FilterBar: React.FC<FilterBarProps> = ({
       setIsSticky(scrollPosition > headerHeight);
     };
 
+    // Handle mobile menu state changes
+    const handleMobileMenuStateChange = () => {
+      // Force recalculation after mobile menu state changes
+      setTimeout(() => {
+        handleScroll();
+        // Force a layout recalculation
+        const filterBarElement = document.querySelector('[data-filter-bar]') as HTMLElement;
+        if (filterBarElement) {
+          filterBarElement.style.transform = 'translateZ(0)';
+          filterBarElement.offsetHeight; // Force reflow
+        }
+      }, 50);
+    };
+
     // Initial check
     handleScroll();
     
+    // Listen for various events that might affect positioning
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll); // Recalculate on resize
+    window.addEventListener('resize', handleScroll);
+    
+    // Listen for mobile menu state changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (target === document.body && (target.classList.contains('mobile-menu-open') || !target.classList.contains('mobile-menu-open'))) {
+            handleMobileMenuStateChange();
+          }
+        }
+      });
+    });
+    
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
+      observer.disconnect();
     };
   }, []);
 
