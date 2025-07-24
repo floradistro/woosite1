@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import ProductCollectionPage from './ProductCollectionPage';
 import { ProductCollectionConfig } from './ProductCollectionConfig';
 import FilterBar from '@/components/product/FilterBar';
@@ -20,30 +21,40 @@ export default function ProductPageClientWrapper({
   productType 
 }: ProductPageClientWrapperProps) {
   // Dynamically import the correct filterProducts function based on productType
-  let filterProducts: (products: any[], filters: any) => any[];
+  const [filterProducts, setFilterProducts] = useState<(products: any[], filters: any) => any[]>(() => (products: any[]) => products);
   
-  switch (productType) {
-    case 'flower':
-      filterProducts = require('@/app/flower/utils').filterProducts;
-      break;
-    case 'vape':
-      filterProducts = require('@/app/vape/utils').filterProducts;
-      break;
-    case 'edible':
-      filterProducts = require('@/app/edible/utils').filterProducts;
-      break;
-    case 'concentrate':
-      filterProducts = require('@/app/concentrate/utils').filterProducts;
-      break;
-    case 'moonwater':
-      filterProducts = require('@/app/moonwater/utils').filterProducts;
-      break;
-    case 'wax':
-      filterProducts = require('@/app/wax/utils').filterProducts;
-      break;
-    default:
-      filterProducts = (products: any[]) => products;
-  }
+  useEffect(() => {
+    const loadFilterFunction = async () => {
+      let filterFunc: (products: any[], filters: any) => any[];
+      
+      switch (productType) {
+        case 'flower':
+          filterFunc = (await import('@/app/flower/utils')).filterProducts;
+          break;
+        case 'vape':
+          filterFunc = (await import('@/app/vape/utils')).filterProducts;
+          break;
+        case 'edible':
+          filterFunc = (await import('@/app/edible/utils')).filterProducts;
+          break;
+        case 'concentrate':
+          filterFunc = (await import('@/app/concentrate/utils')).filterProducts;
+          break;
+        case 'moonwater':
+          filterFunc = (await import('@/app/moonwater/utils')).filterProducts;
+          break;
+        case 'wax':
+          filterFunc = (await import('@/app/wax/utils')).filterProducts;
+          break;
+        default:
+          filterFunc = (products: any[]) => products;
+      }
+      
+      setFilterProducts(() => filterFunc);
+    };
+    
+    loadFilterFunction();
+  }, [productType]);
   
   // Enhanced component props for compatibility
   const EnhancedFilterBar = (props: any) => (
