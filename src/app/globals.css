@@ -98,6 +98,12 @@
   will-change: opacity;
 }
 
+/* Filter modal body scroll prevention */
+body.filter-modal-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 @keyframes fadeInOverlay {
   from { opacity: 0; }
   to { opacity: 1; }

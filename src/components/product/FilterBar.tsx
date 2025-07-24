@@ -54,12 +54,22 @@ const FilterBar: React.FC<FilterBarProps> = ({
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      const headerHeight = 80; // Actual header height on mobile
+      // Get actual header height dynamically
+      const headerElement = document.querySelector('[data-header="true"]') as HTMLElement;
+      const headerHeight = headerElement?.offsetHeight || 80;
       setIsSticky(scrollPosition > headerHeight);
     };
 
+    // Initial check
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll); // Recalculate on resize
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   // Close mobile filters on escape key
@@ -72,14 +82,19 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
     if (isMobileFiltersOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      // Prevent background scrolling without affecting sticky positioning
+      document.body.classList.add('filter-modal-open');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('filter-modal-open');
+      // Force a reflow to fix any positioning issues
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 0);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.body.classList.remove('filter-modal-open');
     };
   }, [isMobileFiltersOpen]);
 

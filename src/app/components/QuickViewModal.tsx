@@ -41,16 +41,12 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   const [mobileMagnifierCenter, setMobileMagnifierCenter] = useState({ x: 0, y: 0 });
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
   const [isMultiTouch, setIsMultiTouch] = useState(false);
-  const [handPreference, setHandPreference] = useState<'left' | 'right' | 'center'>('center');
   const [magnifierSize, setMagnifierSize] = useState(280);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isGrabbingMagnifier, setIsGrabbingMagnifier] = useState(false);
   
   // Refs for performance optimization
   const magnifierRef = React.useRef<HTMLDivElement>(null);
   const containerRectRef = React.useRef<DOMRect | null>(null);
-  const backgroundPositionRef = React.useRef('50% 50%');
-  const lastUpdateTime = React.useRef(0);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -219,7 +215,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     setIsMagnifying(false);
   };
 
-  // Mobile pinch-to-zoom functions
+  // Simple touch handling functions
   const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     const touch1 = touches[0];
@@ -230,13 +226,13 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     );
   };
 
-  const getTouchCenter = (touches: React.TouchList, rect: DOMRect) => {
+  const getTouchCenter = (touches: React.TouchList) => {
     if (touches.length === 0) return { x: 0, y: 0 };
     
     let x = 0, y = 0;
     for (let i = 0; i < touches.length; i++) {
-      x += touches[i].clientX - rect.left;
-      y += touches[i].clientY - rect.top;
+      x += touches[i].clientX;
+      y += touches[i].clientY;
     }
     return {
       x: x / touches.length,
@@ -244,26 +240,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     };
   };
 
-  // Detect hand preference based on touch patterns
-  const detectHandPreference = (touches: React.TouchList, rect: DOMRect) => {
-    if (touches.length < 2) return;
-    
-    const center = getTouchCenter(touches, rect);
-    const screenWidth = rect.width;
-    const leftThird = screenWidth / 3;
-    const rightThird = screenWidth * 2 / 3;
-    
-    if (center.x < leftThird) {
-      setHandPreference('left');
-    } else if (center.x > rightThird) {
-      setHandPreference('right');
-    } else {
-      setHandPreference('center');
-    }
-  };
-
-  // Calculate background position - memoized for performance
-  const calculateBackgroundPosition = React.useCallback((magnifierX: number, magnifierY: number) => {
+  // Calculate background position for magnifier
+  const getBackgroundPosition = (magnifierX: number, magnifierY: number) => {
     const rect = containerRectRef.current;
     if (!rect) return '50% 50%';
     
@@ -271,119 +249,40 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     const containerX = magnifierX - rect.left;
     const containerY = magnifierY - rect.top;
     
-    // Calculate background position with proper edge handling
+    // Calculate background position
     const bgX = (containerX / rect.width) * 100;
     const bgY = (containerY / rect.height) * 100;
     
     return `${bgX}% ${bgY}%`;
-  }, []);
-
-  // Check if touch is on magnifier circumference/edge
-  const isTouchOnMagnifier = React.useCallback((touchX: number, touchY: number) => {
-    if (!showMobileMagnifier) return false;
-    
-    const centerX = mobileMagnifierCenter.x;
-    const centerY = mobileMagnifierCenter.y;
-    const radius = magnifierSize / 2;
-    
-    // Calculate distance from touch to magnifier center
-    const distance = Math.sqrt(
-      Math.pow(touchX - centerX, 2) + Math.pow(touchY - centerY, 2)
-    );
-    
-    // Allow grabbing from anywhere within the magnifier circle or slightly outside
-    const grabZone = radius + 20; // 20px outside edge for easier grabbing
-    
-    return distance <= grabZone;
-  }, [showMobileMagnifier, mobileMagnifierCenter.x, mobileMagnifierCenter.y, magnifierSize]);
-
-  // Optimize magnifier positioning - allows off-screen movement
-  const getOptimalMagnifierPosition = React.useCallback((center: { x: number, y: number }, rect: DOMRect, isDirectGrab = false) => {
-    let x = center.x;
-    let y = center.y;
-    
-    // If user is directly grabbing the magnifier, use exact position
-    if (isDirectGrab) {
-      // Allow magnifier to go partially off-screen when grabbed directly
-      // Update background position ref for performance
-      backgroundPositionRef.current = calculateBackgroundPosition(x, y);
-      return { x, y };
-    }
-    
-    // Adjust based on hand preference to avoid finger occlusion for touch interactions
-    switch (handPreference) {
-      case 'left':
-        // Position magnifier to the right and slightly up
-        x = center.x + 100;
-        y = center.y - 80;
-        break;
-      case 'right':
-        // Position magnifier to the left and slightly up
-        x = center.x - 100;
-        y = center.y - 80;
-        break;
-      default:
-        // Center positioning with slight upward offset
-        x = center.x;
-        y = center.y - 60;
-    }
-    
-    // Allow magnifier to go off-screen for more natural movement
-    // No constraints - complete freedom of movement
-    
-    // Update background position ref for performance
-    backgroundPositionRef.current = calculateBackgroundPosition(x, y);
-    
-    return { x, y };
-  }, [magnifierSize, handPreference, calculateBackgroundPosition]);
+  };
 
   const handleMobileTouchStart = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
     
     e.preventDefault();
     const rect = containerRectRef.current || e.currentTarget.getBoundingClientRect();
-    containerRectRef.current = rect; // Cache for performance
+    containerRectRef.current = rect;
     
     if (e.touches.length === 2) {
       setIsMultiTouch(true);
       setIsInitialLoad(false);
-      setIsGrabbingMagnifier(false);
       const distance = getTouchDistance(e.touches);
       setLastTouchDistance(distance);
       
-      // Use screen coordinates for magnifier positioning
-      const screenCenter = {
-        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-      };
+      const center = getTouchCenter(e.touches);
+      setMobileMagnifierCenter(center);
       
-      detectHandPreference(e.touches, rect);
-      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
-      setMobileMagnifierCenter(optimalPosition);
-      
-      // Adjust magnifier size based on zoom for better UX
       const newSize = Math.max(250, Math.min(320, 280 + (mobileZoom - 1) * 10));
       setMagnifierSize(newSize);
     } else if (e.touches.length === 1 && showMobileMagnifier) {
       const touch = e.touches[0];
-      const touchX = touch.clientX;
-      const touchY = touch.clientY;
-      
-      // Check if user is grabbing the magnifier directly
-      const isGrabbing = isTouchOnMagnifier(touchX, touchY);
-      setIsGrabbingMagnifier(isGrabbing);
-      
-      if (isGrabbing) {
-        // Direct grab - move magnifier exactly to touch position
-        const optimalPosition = getOptimalMagnifierPosition({ x: touchX, y: touchY }, rect, true);
-        setMobileMagnifierCenter(optimalPosition);
-      } else {
-        // Regular touch - use hand preference positioning
-        const optimalPosition = getOptimalMagnifierPosition({ x: touchX, y: touchY }, rect, false);
-        setMobileMagnifierCenter(optimalPosition);
-      }
+      // Simple: magnifier follows finger with slight offset to avoid occlusion
+      setMobileMagnifierCenter({
+        x: touch.clientX,
+        y: touch.clientY - 100 // Offset up to avoid finger
+      });
     }
-  }, [isMobile, showMobileMagnifier, mobileZoom, getTouchDistance, detectHandPreference, getOptimalMagnifierPosition, isTouchOnMagnifier]);
+  }, [isMobile, showMobileMagnifier, mobileZoom, getTouchDistance, getTouchCenter]);
 
   const handleMobileTouchMove = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -391,52 +290,30 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     e.preventDefault();
     e.stopPropagation();
     
-    // Throttle updates for better performance
-    const now = performance.now();
-    if (now - lastUpdateTime.current < 16) return; // ~60fps max
-    lastUpdateTime.current = now;
-    
-    const rect = containerRectRef.current || e.currentTarget.getBoundingClientRect();
-    
     if (e.touches.length === 2 && isMultiTouch) {
       const distance = getTouchDistance(e.touches);
-      
-      // Use screen coordinates for magnifier positioning
-      const screenCenter = {
-        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-      };
+      const center = getTouchCenter(e.touches);
       
       if (lastTouchDistance > 0) {
         const scale = distance / lastTouchDistance;
         const newZoom = Math.max(1, Math.min(10, mobileZoom * scale));
         setMobileZoom(newZoom);
         
-        // Dynamic size adjustment for smoother experience
         const newSize = Math.max(250, Math.min(320, 280 + (newZoom - 1) * 10));
         setMagnifierSize(newSize);
       }
       
-      const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
-      setMobileMagnifierCenter(optimalPosition);
+      setMobileMagnifierCenter(center);
       setLastTouchDistance(distance);
     } else if (e.touches.length === 1 && showMobileMagnifier && !isMultiTouch) {
-      // Single finger movement
       const touch = e.touches[0];
-      const touchX = touch.clientX;
-      const touchY = touch.clientY;
-      
-      if (isGrabbingMagnifier) {
-        // Direct grab - move magnifier exactly to touch position
-        const optimalPosition = getOptimalMagnifierPosition({ x: touchX, y: touchY }, rect, true);
-        setMobileMagnifierCenter(optimalPosition);
-      } else {
-        // Regular touch - use hand preference positioning
-        const optimalPosition = getOptimalMagnifierPosition({ x: touchX, y: touchY }, rect, false);
-        setMobileMagnifierCenter(optimalPosition);
-      }
+      // Simple: magnifier follows finger with offset
+      setMobileMagnifierCenter({
+        x: touch.clientX,
+        y: touch.clientY - 100
+      });
     }
-  }, [isMobile, isMultiTouch, showMobileMagnifier, lastTouchDistance, mobileZoom, getTouchDistance, getOptimalMagnifierPosition, isGrabbingMagnifier]);
+  }, [isMobile, isMultiTouch, showMobileMagnifier, lastTouchDistance, mobileZoom, getTouchDistance, getTouchCenter]);
 
   const handleMobileTouchEnd = (e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -444,10 +321,6 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     if (e.touches.length < 2) {
       setIsMultiTouch(false);
       setLastTouchDistance(0);
-    }
-    
-    if (e.touches.length === 0) {
-      setIsGrabbingMagnifier(false);
     }
   };
 
@@ -512,18 +385,16 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
               if (window.innerWidth < 768) {
                 setTimeout(() => {
                   setShowMobileMagnifier(true);
-                  // Center the magnifier optimally using screen coordinates
+                  // Center the magnifier
                   const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
                   if (rect) {
                     containerRectRef.current = rect;
-                    const screenCenter = { 
-                      x: rect.left + rect.width / 2, 
-                      y: rect.top + rect.height / 2 
-                    };
-                    const optimalPosition = getOptimalMagnifierPosition(screenCenter, rect);
-                    setMobileMagnifierCenter(optimalPosition);
+                    setMobileMagnifierCenter({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top + rect.height / 2
+                    });
                   }
-                }, 600); // Faster appearance
+                }, 600);
               }
             }}
           />
@@ -599,15 +470,11 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
             >
               {/* Main magnifier circle */}
               <div 
-                className={`w-full h-full rounded-full shadow-xl overflow-hidden relative transition-all duration-150 ${
-                  isGrabbingMagnifier 
-                    ? 'border-3 border-blue-400/80 scale-105' 
-                    : 'border-2 border-white/60'
-                }`}
+                className="w-full h-full rounded-full border-2 border-white/60 shadow-xl overflow-hidden relative"
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
-                  backgroundPosition: backgroundPositionRef.current,
+                  backgroundPosition: getBackgroundPosition(mobileMagnifierCenter.x, mobileMagnifierCenter.y),
                   backgroundRepeat: 'no-repeat',
                   filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
                   willChange: 'background-size, background-position',
