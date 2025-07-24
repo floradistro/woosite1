@@ -230,7 +230,8 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         lineage: lineage || 'Premium concentrate extraction',
         nose: nose ? [nose.toLowerCase()] : ['concentrate'],
         vibe,
-        spotlight
+        spotlight,
+        terpenes
       };
 
       // Update the debug log with actual values
@@ -256,7 +257,8 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         spotlight,
         featured: index < 4,
         lineage: lineage || 'Premium concentrate extraction',
-        terpenes
+        terpenes,
+        nose: nose ? [nose.toLowerCase()] : ['concentrate']
       };
     });
   } catch (error) {
