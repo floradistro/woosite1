@@ -214,7 +214,7 @@ export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
       
       return {
         id: product.id,
-        title: product.name.toLowerCase(),
+        title: product.name,
         description: productDescription || 'Premium cannabis edible', // Show actual product description
         price: parseFloat(product.price) || 25,
         image: product.images?.[0]?.src || "/icons/newGummy.webp",

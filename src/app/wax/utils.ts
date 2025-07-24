@@ -17,12 +17,13 @@ export function filterProducts(products: FeaturedProduct[], filters: FilterState
       return false;
     }
     
-    // Texture filter
-    if (filters.texture.length > 0) {
-      const hasMatchingTexture = product.texture.some(texture => 
-        filters.texture.includes(texture)
+    // Nose filter
+    if (filters.nose && filters.nose.length > 0) {
+      const productNose = product.nose || [];
+      const hasMatchingNose = productNose.some((nose: string) => 
+        filters.nose!.includes(nose)
       );
-      if (!hasMatchingTexture) {
+      if (!hasMatchingNose) {
         return false;
       }
     }
@@ -65,12 +66,12 @@ export function sortProducts(products: FeaturedProduct[], sortBy: string): Featu
 export function getFilterOptions(products: FeaturedProduct[]) {
   const categories = new Set(products.map(p => p.category));
   const vibes = new Set(products.map(p => p.vibe));
-  const textures = new Set(products.flatMap(p => p.texture));
+  const noses = new Set(products.flatMap(p => p.nose || []));
   
   return {
     categories: Array.from(categories),
     vibes: Array.from(vibes),
-    textures: Array.from(textures)
+    noses: Array.from(noses)
   };
 }
 

@@ -201,7 +201,7 @@ export default function FlowerCarousel({
                       {/* Price and Add to Cart */}
                       <div className="flex items-center justify-between pt-2">
                         <div className="text-2xl font-light text-white">
-                          ${price}
+                          <span className="text-green-400">$</span>{price}
                         </div>
                         <button
                           onClick={(e) => handleAddToCart(product, e)}

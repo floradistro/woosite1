@@ -84,8 +84,59 @@ export interface FilterState {
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
-// Transform WooCommerce products to moonwater format
-export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
+// Enhanced moonwater product interface with variations
+export interface MoonwaterVariation {
+  id: number;
+  flavor: string;
+  packSize: string;
+  price: number;
+  image?: string;
+  stockQuantity?: number;
+  inStock: boolean;
+}
+
+export interface MoonwaterProductWithVariations extends FeaturedProduct {
+  variations: MoonwaterVariation[];
+  isVariable: boolean;
+  baseProductId: number;
+}
+
+// Server-side function to fetch product variations
+async function getProductVariations(productId: number): Promise<any[]> {
+  try {
+    const storeUrl = process.env.WOOCOMMERCE_STORE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
+    const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
+    const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
+
+    if (!storeUrl || !consumerKey || !consumerSecret) {
+      console.error('Missing WooCommerce credentials');
+      return [];
+    }
+
+    const url = `${storeUrl}/wp-json/wc/v3/products/${productId}/variations?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}&per_page=100`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch variations for product ${productId}: ${response.status}`);
+      return [];
+    }
+
+    const variations = await response.json();
+    return variations || [];
+  } catch (error) {
+    console.error(`Error fetching variations for product ${productId}:`, error);
+    return [];
+  }
+}
+
+// Transform WooCommerce products to moonwater format with variations
+export async function getMoonwaterProducts(): Promise<MoonwaterProductWithVariations[]> {
   try {
     // Transform WooCommerce products to moonwater format
     // Try multiple category names to match WooCommerce categories
@@ -108,7 +159,8 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
       return [];
     }
     
-    return moonwaterProducts.map((product, index) => {
+         // Process each product and fetch variations if it's a variable product
+     const processedProducts = await Promise.all(moonwaterProducts.map(async (product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
       const acf = product.acf || {};
@@ -157,15 +209,43 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
         return 'balance';
       };
 
-      // Extract THC from ACF strength_mg field (specific to moonwater)
+      // Extract THC from product name for variable products (5MG, 10MG, 30MG, 60MG)
       const getThc = (): number => {
-        // Check ACF strength_mg field (primary field for moonwater)
+        // First check ACF strength_mg field (most reliable)
         const strengthMg = getACFValue('strength_mg');
         if (strengthMg) {
           const thcValue = parseFloat(strengthMg.replace(/[^0-9.]/g, ''));
           if (!isNaN(thcValue)) {
+            console.log(`💧 Moonwater ${product.name} - Using ACF strength_mg: ${thcValue}mg`);
             return thcValue;
           }
+        }
+        
+        // For variable products, extract from product name
+        const nameMatch = product.name.match(/(\d+)MG/i);
+        if (nameMatch) {
+          const thcValue = parseInt(nameMatch[1]);
+          console.log(`💧 Moonwater ${product.name} - Using name extraction: ${thcValue}mg`);
+          return thcValue;
+        }
+        
+        // Product-specific hardcoded values based on your specification
+        const productName = product.name.toLowerCase();
+        if (productName.includes('day drinker')) {
+          console.log(`💧 Moonwater ${product.name} - Using hardcoded Day Drinker: 5mg`);
+          return 5;
+        }
+        if (productName.includes('golden hour')) {
+          console.log(`💧 Moonwater ${product.name} - Using hardcoded Golden Hour: 10mg`);
+          return 10;
+        }
+        if (productName.includes('darkside')) {
+          console.log(`💧 Moonwater ${product.name} - Using hardcoded Darkside: 30mg`);
+          return 30;
+        }
+        if (productName.includes('riptide')) {
+          console.log(`💧 Moonwater ${product.name} - Using hardcoded Riptide: 60mg`);
+          return 60;
         }
         
         // Fallback to description parsing
@@ -173,7 +253,7 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
         const match = description.match(/(\d+\.?\d*)\s*mg/i);
         const fallbackValue = match ? parseFloat(match[1]) : 10.0;
         
-        console.log(`💧 Moonwater ${product.name} - No strength_mg found, using fallback: ${fallbackValue}mg`);
+        console.log(`💧 Moonwater ${product.name} - No strength found, using fallback: ${fallbackValue}mg`);
         return fallbackValue;
       };
 
@@ -203,12 +283,89 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
         return "Refreshing cannabis-infused beverage";
       };
 
-      // Get the actual product description (not the mock one)
+      // Helper function to decode HTML entities and clean description
+      const cleanDescription = (htmlString: string): string => {
+        if (!htmlString || !htmlString.trim()) return '';
+        
+        // First remove HTML tags but preserve content
+        let cleaned = htmlString.replace(/<[^>]*>/g, '');
+        
+        // Decode ALL common HTML entities (comprehensive list)
+        cleaned = cleaned
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;/g, "'")
+          .replace(/&#8217;/g, "'")  // Right single quotation mark
+          .replace(/&#8216;/g, "'")  // Left single quotation mark
+          .replace(/&#8220;/g, '"')  // Left double quotation mark
+          .replace(/&#8221;/g, '"')  // Right double quotation mark
+          .replace(/&#8230;/g, '...') // Horizontal ellipsis
+          .replace(/&#8211;/g, '–')  // En dash
+          .replace(/&#8212;/g, '—')  // Em dash
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&hellip;/g, '...')
+          .replace(/&ndash;/g, '–')
+          .replace(/&mdash;/g, '—')
+          .replace(/&lsquo;/g, "'")
+          .replace(/&rsquo;/g, "'")
+          .replace(/&ldquo;/g, '"')
+          .replace(/&rdquo;/g, '"');
+        
+        // Clean up extra whitespace but preserve the full text
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        
+        return cleaned;
+      };
+
+      // Get the actual product description - prioritize full description over short
       let productDescription = '';
-      if (product.short_description && product.short_description.trim()) {
-        productDescription = product.short_description.replace(/<[^>]*>/g, '').trim();
-      } else if (product.description && product.description.trim()) {
-        productDescription = product.description.replace(/<[^>]*>/g, '').trim();
+      
+      // Debug log to see what we're getting from WooCommerce
+      if (index < 3) {
+        console.log(`💧 Moonwater ${product.name} - Description fields:`, {
+          hasDescription: !!product.description,
+          descriptionLength: product.description?.length || 0,
+          descriptionPreview: product.description?.substring(0, 100) + '...',
+          hasShortDescription: !!product.short_description,
+          shortDescriptionLength: product.short_description?.length || 0,
+          shortDescriptionPreview: product.short_description?.substring(0, 100) + '...'
+        });
+      }
+      
+      // Prioritize full description over short description
+      if (product.description && product.description.trim()) {
+        productDescription = cleanDescription(product.description);
+      } else if (product.short_description && product.short_description.trim()) {
+        productDescription = cleanDescription(product.short_description);
+      }
+
+      // Fetch variations if this is a variable product
+      let variations: MoonwaterVariation[] = [];
+      const isVariable = product.type === 'variable';
+      
+      if (isVariable) {
+        try {
+          const variationData = await getProductVariations(product.id);
+          variations = variationData.map((variation: any) => {
+            // Extract flavor and pack size from variation attributes
+            const flavorAttr = variation.attributes?.find((attr: any) => attr.name === 'Flavor');
+            const packSizeAttr = variation.attributes?.find((attr: any) => attr.name === 'Pack Size');
+            
+            return {
+              id: variation.id,
+              flavor: flavorAttr?.option || 'Original',
+              packSize: packSizeAttr?.option || 'Single',
+              price: parseFloat(variation.price) || parseFloat(product.price) || 15,
+              image: variation.image?.src || product.images?.[0]?.src || "/icons/Moonwater.png",
+              stockQuantity: variation.stock_quantity,
+              inStock: variation.stock_status === 'instock'
+            };
+          });
+        } catch (error) {
+          console.error(`Error processing variations for ${product.name}:`, error);
+        }
       }
 
       // Debug log for first few moonwater products
@@ -216,6 +373,9 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
         console.log(`💧 Moonwater product mapping:`, {
           name: product.name,
           id: product.id,
+          type: product.type,
+          isVariable,
+          variationCount: variations.length,
           categories: categories,
           acf_fields: {
             strength_mg: getACFValue('strength_mg'),
@@ -236,7 +396,8 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
 
       return {
         id: product.id,
-        title: product.name.toLowerCase(),
+        baseProductId: product.id,
+        title: product.name,
         description: productDescription || 'Premium cannabis beverage', // Show actual product description
         price: parseFloat(product.price) || 15,
         image: product.images?.[0]?.src || "/icons/Moonwater.png",
@@ -245,9 +406,13 @@ export async function getMoonwaterProducts(): Promise<FeaturedProduct[]> {
         thc: getThc(),
         flavor: getFlavor(),
         spotlight: displayEffects, // Show ACF effects field here - same as edibles
-        featured: index < 4
-      };
-    });
+        featured: index < 4,
+        variations,
+        isVariable
+      } as MoonwaterProductWithVariations;
+    }));
+
+    return processedProducts;
     } catch (error) {
     console.error('Error fetching moonwater products from WooCommerce:', error);
     return [];

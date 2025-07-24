@@ -416,8 +416,8 @@ export const concentrateConfig: ProductCollectionConfig = {
     secondary: { '0.5g': 30, '1g': 55, '2g': 100 } // GRAM_PRICING for live resin
   },
   filters: {
-    secondaryFilterName: 'texture',
-    secondaryFilterOptions: ['all', 'shatter', 'budder', 'sauce', 'diamonds', 'rosin']
+    secondaryFilterName: 'nose',
+    secondaryFilterOptions: ['all', 'candy', 'gas', 'cake', 'funk', 'sherb']
   },
   content: {
     hero: {

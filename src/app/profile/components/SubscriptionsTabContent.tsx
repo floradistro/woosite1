@@ -112,10 +112,10 @@ export default function SubscriptionsTabContent({
                   </div>
                   <div className="text-right">
                     <div className={`text-white ${isMobile ? 'text-lg' : 'text-base'} font-semibold`}>
-                      ${subscription.price.toFixed(2)}
+                      <span className="text-green-400">$</span>{subscription.price.toFixed(2)}
                     </div>
                     <div className={`text-emerald-400 ${isMobile ? 'text-sm' : 'text-xs'}`}>
-                      Save ${subscription.savings.toFixed(2)}
+                      Save <span className="text-green-400">$</span>{subscription.savings.toFixed(2)}
                     </div>
                   </div>
                 </div>

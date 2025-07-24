@@ -219,7 +219,7 @@ const ProductInfo = ({
   };
 
   const getThcValue = () => {
-    return productType === 'edible' || productType === 'moonwater' ? `${product.thc}mg` : `${product.thc}%`;
+    return productType === 'edible' ? `${product.thc}mg` : `${product.thc}%`;
   };
 
   const formatCategory = (category: string) => {
@@ -256,8 +256,8 @@ const ProductInfo = ({
         </p>
       )}
       
-      {/* For edibles and moonwater, show the same 2-field layout */}
-      {(productType === 'edible' || productType === 'moonwater') ? (
+      {/* For edibles, show the 2-field layout */}
+      {productType === 'edible' ? (
         <>
           {/* Strength and Effects side by side */}
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -265,8 +265,8 @@ const ProductInfo = ({
             <div className="p-2 rounded-md bg-gradient-to-r from-white/5 to-white/2 border border-white/10">
               <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Strength</span>
               <div className="flex items-baseline gap-1">
-                <span className={`text-lg font-light ${productType === 'edible' ? 'text-red-400' : 'text-blue-400'}`}>{product.thc}</span>
-                <span className={`text-xs font-light ${productType === 'edible' ? 'text-red-400/70' : 'text-blue-400/70'}`}>mg</span>
+                <span className="text-lg font-light text-red-400">{product.thc}</span>
+                <span className="text-xs font-light text-red-400/70">mg</span>
               </div>
             </div>
             
@@ -362,8 +362,8 @@ const ProductInfo = ({
         </div>
       )}
       
-      {/* Description - Desktop only for edibles/moonwater, desktop only for others */}
-      {(productType === 'edible' || productType === 'moonwater') ? (
+      {/* Description - Desktop only for edibles, desktop only for others */}
+      {productType === 'edible' ? (
         <div className="hidden md:block mb-2">
           <p className={`text-xs leading-relaxed transition-colors duration-300 ${
             isExpanded ? 'text-white/80' : 'text-white/70'
@@ -466,7 +466,15 @@ export default function DenseView<T extends BaseFeaturedProduct>({
     if (productType === 'edible') return format === 'single' ? '1-piece' : '10-pack';
     if (productType === 'vape') return '0.5g';
     if (productType === 'wax' || productType === 'concentrate') return '1g';
-    if (productType === 'moonwater') return '1-bottle';
+    if (productType === 'moonwater') {
+      // For variable moonwater products, set default flavor and pack size
+      const product = products.find(p => p.id === productId);
+      if (product && (product as any).isVariable && (product as any).variations?.length > 0) {
+        const firstVariation = (product as any).variations[0];
+        return `flavor-${firstVariation.flavor} pack-${firstVariation.packSize}`;
+      }
+      return '1-bottle';
+    }
     return sizes[0];
   };
 
@@ -543,10 +551,13 @@ export default function DenseView<T extends BaseFeaturedProduct>({
       boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07)'
     }}>
       <div className="w-full relative z-10">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-2">
+        <div className="w-full grid grid-cols-1 gap-1 md:gap-2 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product, index) => {
             const selectedOption = selectedOptions[product.id] || getDefaultSelection(product.id);
-            const price = pricing[selectedOption as keyof typeof pricing];
+            
+            // Use static pricing for products
+            const price = pricing[selectedOption as keyof typeof pricing] || product.price || 15;
+            
             const isImageLoaded = loadedImages.has(product.id);
             const isExpanded = expandedProducts.has(product.id);
 
@@ -617,13 +628,23 @@ export default function DenseView<T extends BaseFeaturedProduct>({
 
                   <div className="flex justify-end">
                     <div className="text-white/95 font-light text-lg md:text-xl group-hover:text-white transition-colors duration-300">
-                      ${price} <span className="text-xs text-white/60">
-                        /{productType === 'edible' ? selectedOption.replace('-piece', '') : selectedOption}
-                      </span>
+                      <span className="text-green-400">$</span>{price.toFixed(2)} 
+                      {productType === 'moonwater' && (product as any).isVariable ? (
+                        <span className="text-xs text-white/60">
+                          {selectedOption?.includes('pack-') ? 
+                            `/${selectedOption.split('pack-')[1]}` : 
+                            '/each'
+                          }
+                        </span>
+                      ) : (
+                        <span className="text-xs text-white/60">
+                          /{productType === 'edible' ? selectedOption.replace('-piece', '') : selectedOption}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 pt-1">
+                                        <div className="flex flex-col gap-3 pt-1">
                     <div 
                       className={`overflow-hidden transition-all duration-200 ease-out ${
                         isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
@@ -632,29 +653,30 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                       <div className={`flex flex-col gap-3 pt-2 transition-all duration-150 ${
                         isExpanded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                       }`}>
+                        {/* Default Size/Qty Selector for products */}
                         <div className="flex flex-col gap-2">
-                          <span className="text-white/70 text-sm font-medium">
-                            {productType === 'edible' ? 'Qty:' : 'Size:'}
-                          </span>
-                          <div className="grid grid-cols-5 gap-2 w-full">
-                            {sizes.map((size, idx) => (
-                              <button
-                                key={size}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onOptionSelect(product.id, size);
-                                }}
-                                className={`px-2 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[36px] ${
-                                  selectedOption === size
-                                    ? 'bg-white/20 text-white border border-white/30'
-                                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90'
-                                }`}
-                              >
-                                {productType === 'edible' ? size.replace('-piece', '') : size}
-                              </button>
-                            ))}
+                            <span className="text-white/70 text-sm font-medium">
+                              {productType === 'edible' ? 'Qty:' : 'Size:'}
+                            </span>
+                            <div className="grid grid-cols-5 gap-2 w-full">
+                              {sizes.map((size, idx) => (
+                                <button
+                                  key={size}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOptionSelect(product.id, size);
+                                  }}
+                                  className={`px-2 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[36px] ${
+                                    selectedOption === size
+                                      ? 'bg-white/20 text-white border border-white/30'
+                                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90'
+                                  }`}
+                                >
+                                  {productType === 'edible' ? size.replace('-piece', '') : size}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
 
                         <div className="flex gap-2">
                           <button

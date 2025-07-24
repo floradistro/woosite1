@@ -1,17 +1,12 @@
 // Server Component - no "use client" directive
-import { getMoonwaterProducts } from './constants';
-import { moonwaterConfig } from '../components/ProductCollectionConfig';
-import ProductPageClientWrapper from '../components/ProductPageClientWrapper';
+import { getMoonwaterProducts, type MoonwaterProductWithVariations } from './constants';
+import MoonwaterPage from './components/MoonwaterPage';
 
 export default async function MoonwaterCollectionPage() {
-  // Fetch products server-side
-  const moonwaterProducts = await getMoonwaterProducts();
+  // Fetch products server-side with variations
+  const moonwaterProducts: MoonwaterProductWithVariations[] = await getMoonwaterProducts();
 
   return (
-    <ProductPageClientWrapper 
-      config={moonwaterConfig}
-      products={moonwaterProducts}
-      productType="moonwater"
-    />
+    <MoonwaterPage products={moonwaterProducts} />
   );
 }

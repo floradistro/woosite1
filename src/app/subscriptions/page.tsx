@@ -321,12 +321,12 @@ export default function SubscriptionsPage() {
                   {/* Price Section */}
                   <div className="mb-4">
                     <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-2xl font-extralight text-white/95">${plan.price}</span>
+                      <span className="text-2xl font-extralight text-white/95"><span className="text-green-400">$</span>{plan.price}</span>
                       <span className="text-white/60 text-xs">/mo</span>
                     </div>
                     <div className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs font-medium">
                       <span className="text-xs">💸</span>
-                      <span>Save ${plan.save}</span>
+                      <span>Save <span className="text-green-400">$</span>{plan.save}</span>
                     </div>
                   </div>
 

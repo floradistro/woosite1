@@ -34,14 +34,6 @@ export const VIBE_COLORS = {
   balance: "bg-teal-600 border-teal-700"
 } as const;
 
-export const TEXTURE_COLORS = {
-  shatter: "bg-amber-500 border-amber-600",
-  budder: "bg-yellow-400 border-yellow-500 text-black",
-  sauce: "bg-orange-500 border-orange-600",
-  diamonds: "bg-cyan-400 border-cyan-500 text-black",
-  rosin: "bg-emerald-500 border-emerald-600"
-} as const;
-
 // Common styling
 export const GLASS_CARD_STYLE = {
   background: '#4a4a4a',
@@ -65,9 +57,9 @@ export interface Product {
   category: 'indica' | 'sativa' | 'hybrid';
   vibe: 'relax' | 'energize' | 'balance';
   thc: number;
-  texture: Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'>;
   lineage?: string;
   terpenes?: string[];
+  nose?: string[];
 }
 
 export interface FeaturedProduct extends Product {
@@ -78,7 +70,7 @@ export interface FeaturedProduct extends Product {
 export interface FilterState {
   category: string[];
   vibe: string[];
-  texture: string[];
+  nose?: string[];
 }
 
 // Import products from WooCommerce service
@@ -97,53 +89,26 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
     });
 
     if (concentrateProducts.length === 0) {
-
       return [];
     }
 
     return concentrateProducts.map((product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
-      const acf = product.acf;
 
-      console.log(`🧪 Concentrate Product Debug - ${product.name}:`, {
-        id: product.id,
-        acf_object: acf || {},
-        acf_keys: acf ? Object.keys(acf) : [],
-        meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
-        extracted_values: {},
-        final_mapped: {}
-      });
-
-      // Helper function to get ACF value with multiple fallback strategies
-      const getACFValue = (acfKey: string, metaKeys: string[] = []): string | undefined => {
-        // First try the acf object
-        if (acf && typeof acf === 'object' && acfKey in acf) {
-          const acfValue = (acf as any)[acfKey];
-          if (acfValue && typeof acfValue === 'string' && acfValue.trim()) {
-            return acfValue.trim();
-          }
-        }
-        
-        // Then try meta_data with various key variations
-        const keysToTry = [acfKey, ...metaKeys];
-        for (const key of keysToTry) {
-          const metaValue = product.meta_data?.find((m: any) => m.key === key);
-          if (metaValue?.value && typeof metaValue.value === 'string' && metaValue.value.trim()) {
-            return metaValue.value.trim();
-          }
-        }
-        
-        return undefined;
+      // Helper function to get ACF value from meta_data
+      const getACFValue = (key: string): string | undefined => {
+        const metaItem = product.meta_data?.find((meta: any) => meta.key === key);
+        return metaItem?.value && typeof metaItem.value === 'string' ? metaItem.value.trim() : undefined;
       };
 
-      // Extract ACF values
-      const thcaValue = getACFValue('thca_%', ['thca', '_thca']);
-      const strainType = getACFValue('strain_type', ['type', '_type']);
-      const nose = getACFValue('nose', ['_nose']);
-      const effects = getACFValue('effects', ['_effects']);
-      const dominentTerpene = getACFValue('dominent_terpene', ['terpenes', '_terpenes']);
-      const lineage = getACFValue('lineage', ['_lineage']);
+      // Extract ACF values from meta_data
+      const thcaValue = getACFValue('thca_%');
+      const strainType = getACFValue('strain_type');
+      const nose = getACFValue('nose');
+      const effects = getACFValue('effects');
+      const dominentTerpene = getACFValue('dominent_terpene');
+      const lineage = getACFValue('lineage');
 
       // Map strain type to category
       const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
@@ -173,23 +138,6 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         return 'balance';
       };
 
-      // Extract texture from product title/description/tags
-      const getTexture = (): Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'> => {
-        const title = product.name?.toLowerCase() || '';
-        const description = product.description?.toLowerCase() || product.short_description?.toLowerCase() || '';
-        const allText = `${title} ${description} ${tags.join(' ')}`;
-        
-        const textures: Array<'shatter' | 'budder' | 'sauce' | 'diamonds' | 'rosin'> = [];
-        
-        if (allText.includes('shatter')) textures.push('shatter');
-        if (allText.includes('budder')) textures.push('budder');
-        if (allText.includes('sauce')) textures.push('sauce');
-        if (allText.includes('diamonds')) textures.push('diamonds');
-        if (allText.includes('rosin')) textures.push('rosin');
-        
-        return textures.length > 0 ? textures : ['shatter']; // Default to shatter
-      };
-
       // Parse THC percentage
       const getThc = (): number => {
         if (thcaValue) {
@@ -205,7 +153,6 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
       const category = getCategory();
       const vibe = getVibe();
       const thc = getThc();
-      const texture = getTexture();
       const spotlight = effects || `Premium ${product.name} concentrate`;
 
       // Build terpenes array
@@ -214,35 +161,6 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         category === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
         category === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
         ['limonene', 'caryophyllene', 'myrcene'];
-
-      const extractedValues = {
-        thca: thcaValue,
-        strain_type: strainType,
-        nose: nose,
-        effects: effects,
-        dominent_terpene: dominentTerpene,
-        lineage: lineage
-      };
-
-      const finalMapped = {
-        category,
-        thc,
-        lineage: lineage || 'Premium concentrate extraction',
-        nose: nose ? [nose.toLowerCase()] : ['concentrate'],
-        vibe,
-        spotlight,
-        terpenes
-      };
-
-      // Update the debug log with actual values
-      console.log(`🧪 Concentrate Product Debug - ${product.name}:`, {
-        id: product.id,
-        acf_object: acf || {},
-        acf_keys: acf ? Object.keys(acf) : [],
-        meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
-        extracted_values: extractedValues,
-        final_mapped: finalMapped
-      });
 
       return {
         id: product.id,
@@ -253,7 +171,6 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         category,
         vibe,
         thc,
-        texture,
         spotlight,
         featured: index < 4,
         lineage: lineage || 'Premium concentrate extraction',
