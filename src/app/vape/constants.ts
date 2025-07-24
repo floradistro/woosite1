@@ -89,7 +89,7 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
     // Try multiple category names since vape products might be in Concentrate category
     const vapeCategories = ['vape', 'Vape', 'concentrate', 'Concentrate'];
     
-    let vapeProducts = await wooCommerceServerAPI.getProductsByCategories(vapeCategories);
+    const vapeProducts = await wooCommerceServerAPI.getProductsByCategories(vapeCategories);
     
     if (vapeProducts.length === 0) {
       console.log('No vape products found in WooCommerce categories:', vapeCategories);
