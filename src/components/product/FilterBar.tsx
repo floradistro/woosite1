@@ -164,11 +164,11 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <div className="hidden lg:flex items-center justify-between px-4 py-1">
             {/* Left side filters */}
             <div className="flex items-center gap-2 flex-1">
-              {/* Format Toggle - show for flower and moonwater collections */}
-              {formats?.secondary && (formats.primary === 'flower' || formats.primary === 'bottle') && (
+              {/* Format Toggle - show for flower collections only */}
+              {formats?.secondary && formats.primary === 'flower' && (
                 <div className="flex items-center gap-5">
                   <span className="text-white/60 text-lg font-normal">
-                    {formats.primary === 'flower' ? 'Need pre rolls?' : 'Want multi-packs?'}
+                    Need pre rolls?
                   </span>
                   <div 
                     className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${
@@ -280,11 +280,11 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 {productCount} of {totalCount}
               </div>
 
-              {/* Center: Format toggle (if flower or moonwater collection) */}
-              {formats?.secondary && (formats.primary === 'flower' || formats.primary === 'bottle') && (
+              {/* Center: Format toggle (if flower collection) */}
+              {formats?.secondary && formats.primary === 'flower' && (
                 <div className="flex items-center gap-3">
                   <span className="text-white/60 text-base font-normal">
-                    {formats.primary === 'flower' ? 'Need pre rolls?' : 'Want multi-packs?'}
+                    Need pre rolls?
                   </span>
                   <div 
                     className={`relative inline-flex items-center rounded-full cursor-pointer transition-colors duration-200 ${

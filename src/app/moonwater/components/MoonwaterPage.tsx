@@ -157,25 +157,25 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
 
   return (
     <div className="min-h-screen bg-[#4a4a4a] text-white">
-      {/* Custom Moonwater Hero Section with wave_reversed.png */}
-      <section className="relative h-64 md:h-72 lg:h-80 overflow-hidden bg-[#4a4a4a] animate-fadeIn">
-        {/* Wave Background */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: 'url(/icons/wave_reversed.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        ></div>
+      {/* Extended dot grid background that flows behind header nav and banner */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-[-1] opacity-22"
+        style={{
+          height: 'calc(100vh * 0.4)', // Cover top 40% of viewport
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.45) 1.2px, transparent 1.2px)`,
+          backgroundSize: '24px 24px',
+          backgroundPosition: '0 0',
+          pointerEvents: 'none'
+        }}
+      ></div>
 
+      <section className="relative h-48 md:h-56 lg:h-64 overflow-hidden bg-[#4a4a4a] animate-fadeIn">
         {/* Subtle colorful gradient spots for moonwater theme */}
-        <div className="absolute inset-0 opacity-60">
+        <div className="absolute inset-0 opacity-85">
           <div 
             className="absolute w-48 h-48 md:w-80 md:h-80 rounded-full blur-xl animate-pulse"
             style={{
-              background: `radial-gradient(circle, rgba(59, 130, 246, 0.35), rgba(37, 99, 235, 0.20) 0%, transparent 70%)`,
+              background: 'radial-gradient(circle, rgba(14, 165, 233, 0.45) 0%, transparent 70%)',
               top: '10%',
               left: '5%',
               animationDuration: '4s',
@@ -185,7 +185,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           <div 
             className="absolute w-40 h-40 md:w-64 md:h-64 rounded-full blur-lg animate-pulse"
             style={{
-              background: `radial-gradient(circle, rgba(14, 165, 233, 0.30), rgba(2, 132, 199, 0.15) 0%, transparent 70%)`,
+              background: 'radial-gradient(circle, rgba(6, 182, 212, 0.40) 0%, transparent 70%)',
               top: '50%',
               right: '10%',
               animationDuration: '5s',
@@ -195,37 +195,73 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           <div 
             className="absolute w-36 h-36 md:w-56 md:h-56 rounded-full blur-lg animate-pulse"
             style={{
-              background: `radial-gradient(circle, rgba(6, 182, 212, 0.25), rgba(8, 145, 178, 0.12) 0%, transparent 70%)`,
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.38) 0%, transparent 70%)',
               top: '0%',
               right: '15%',
               animationDuration: '6s',
               animationDelay: '2s'
             }}
           ></div>
+          <div 
+            className="absolute w-32 h-32 md:w-48 md:h-48 rounded-full blur-md animate-pulse"
+            style={{
+              background: 'radial-gradient(circle, rgba(125, 211, 252, 0.35) 0%, transparent 70%)',
+              bottom: '15%',
+              left: '15%',
+              animationDuration: '7s',
+              animationDelay: '3s'
+            }}
+          ></div>
+          <div 
+            className="absolute w-44 h-44 md:w-72 md:h-72 rounded-full blur-xl animate-pulse"
+            style={{
+              background: 'radial-gradient(circle, rgba(34, 211, 238, 0.32) 0%, transparent 70%)',
+              top: '35%',
+              left: '50%',
+              animationDuration: '8s',
+              animationDelay: '4s'
+            }}
+          ></div>
+          <div 
+            className="absolute w-28 h-28 md:w-44 md:h-44 rounded-full blur-md animate-pulse"
+            style={{
+              background: 'radial-gradient(circle, rgba(147, 197, 253, 0.34) 0%, transparent 70%)',
+              top: '20%',
+              right: '40%',
+              animationDuration: '5.5s',
+              animationDelay: '1.5s'
+            }}
+          ></div>
         </div>
 
+        {/* Local dot grid background for fallback */}
+        <div className="absolute inset-0 opacity-22" style={{
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.45) 1.2px, transparent 1.2px)`,
+          backgroundSize: '24px 24px',
+          backgroundPosition: '0 0'
+        }}></div>
+        
         {/* Hero Content */}
-        <div className="absolute inset-0 flex items-center justify-center pb-16 md:pb-12">
+        <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center space-y-3 animate-fadeInUp px-6">
-            <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light tracking-wide transform hover:scale-105 transition-transform duration-200 uppercase">
-              <span className="block mb-2">Moonwater</span>
+            <h1 className="text-white font-bold text-4xl md:text-5xl lg:text-6xl leading-tight transform transition-all duration-700" 
+                style={{ 
+                  fontFamily: 'Nunito Sans, Varela Round, sans-serif',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                  animation: 'fadeInUp 0.8s ease-out'
+                }}>
+              [shop moonwater]
             </h1>
-            <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide drop-shadow-lg opacity-0 animate-fadeInUp" 
+            <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide opacity-0 animate-fadeInUp" 
                 style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
               Pop, sip, float.
             </h2>
             
-            {/* Features */}
-            <div className="flex justify-center gap-4 mt-4 opacity-0 animate-fadeInUp" 
-                 style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
-              <span className="text-white/80 text-sm">✓ THC</span>
-              <span className="text-white/40">•</span>
-              <span className="text-white/80 text-sm">✓ Fast-acting</span>
-            </div>
+
           </div>
         </div>
 
-        {/* Quality Banner */}
+        {/* Quality Banner - matches other collection pages */}
         <div 
           className="absolute bottom-0 left-0 right-0 px-4 py-3 md:bottom-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 md:px-6 md:rounded-full z-50 w-full md:w-auto"
           style={{
@@ -237,7 +273,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           }}
         >
           <div className="flex items-center justify-center gap-2 md:gap-4 text-center">
-            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Nano-enhanced</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ All Natural Ingredients</span>
             <span className="text-white/40">•</span>
             <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Fast-acting</span>
             <span className="text-white/40">•</span>
