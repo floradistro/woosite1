@@ -241,7 +241,7 @@ function HeaderContent() {
           const filterBarElement = filterBar as HTMLElement;
           // Temporarily force a style recalculation
           filterBarElement.style.position = 'relative';
-          filterBarElement.offsetHeight; // Force reflow
+          void filterBarElement.offsetHeight; // Force reflow
           filterBarElement.style.position = '';
         }
         

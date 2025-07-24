@@ -69,7 +69,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         const filterBarElement = document.querySelector('[data-filter-bar]') as HTMLElement;
         if (filterBarElement) {
           filterBarElement.style.transform = 'translateZ(0)';
-          filterBarElement.offsetHeight; // Force reflow
+          void filterBarElement.offsetHeight; // Force reflow
         }
       }, 50);
     };
