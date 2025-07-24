@@ -113,23 +113,36 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
       const acf = product.acf || {};
       
-      // Extract category from ACF strain_type or fallback to categories/tags
-      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
-        // Check ACF field
-        if (acf.strain_type) {
-          const strainType = acf.strain_type.toLowerCase();
-          if (strainType.includes('indica')) return 'indica';
-          if (strainType.includes('sativa')) return 'sativa';
-          if (strainType.includes('hybrid')) return 'hybrid';
+      // Helper function to get ACF value with multiple fallback strategies
+      const getACFValue = (acfKey: string, metaKeys: string[] = []): string | undefined => {
+        // First try the acf object
+        if (acf && typeof acf === 'object' && acfKey in acf) {
+          const acfValue = (acf as any)[acfKey];
+          if (acfValue && typeof acfValue === 'string' && acfValue.trim()) {
+            return acfValue.trim();
+          }
         }
         
-        // Check meta_data for strain_type
-        const strainTypeMeta = product.meta_data?.find((m: any) => m.key === 'strain_type');
-        if (strainTypeMeta?.value) {
-          const strainType = strainTypeMeta.value.toLowerCase();
-          if (strainType.includes('indica')) return 'indica';
-          if (strainType.includes('sativa')) return 'sativa';
-          if (strainType.includes('hybrid')) return 'hybrid';
+        // Then try meta_data with various key variations
+        const keysToTry = [acfKey, ...metaKeys];
+        for (const key of keysToTry) {
+          const metaValue = product.meta_data?.find((m: any) => m.key === key);
+          if (metaValue?.value && typeof metaValue.value === 'string' && metaValue.value.trim()) {
+            return metaValue.value.trim();
+          }
+        }
+        
+        return undefined;
+      };
+
+      // Extract category from ACF strain_type or fallback to categories/tags
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        const strainType = getACFValue('strain_type', ['strain_type']);
+        if (strainType) {
+          const type = strainType.toLowerCase();
+          if (type.includes('indica')) return 'indica';
+          if (type.includes('sativa')) return 'sativa';
+          if (type.includes('hybrid')) return 'hybrid';
         }
         
         // Fallback to existing logic
@@ -140,19 +153,12 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
 
       // Extract vibe from ACF effects or fallback to tags
       const getVibe = (): 'relax' | 'energize' | 'balance' => {
-        // Check ACF field
-        if (acf.effects) {
-          const effects = acf.effects.toLowerCase();
-          if (effects.includes('relax') || effects.includes('calm') || effects.includes('sleep')) return 'relax';
-          if (effects.includes('energiz') || effects.includes('uplifting') || effects.includes('focus')) return 'energize';
-        }
-        
-        // Check meta_data for effects
-        const effectsMeta = product.meta_data?.find((m: any) => m.key === 'effects');
-        if (effectsMeta?.value) {
-          const effects = effectsMeta.value.toLowerCase();
-          if (effects.includes('relax') || effects.includes('calm') || effects.includes('sleep')) return 'relax';
-          if (effects.includes('energiz') || effects.includes('uplifting') || effects.includes('focus')) return 'energize';
+        const effects = getACFValue('effects', ['effects']);
+        if (effects) {
+          const effectsLower = effects.toLowerCase();
+          if (effectsLower.includes('relax') || effectsLower.includes('calm') || effectsLower.includes('sleep')) return 'relax';
+          if (effectsLower.includes('energiz') || effectsLower.includes('uplifting') || effectsLower.includes('focus')) return 'energize';
+          if (effectsLower.includes('balance') || effectsLower.includes('balanced')) return 'balance';
         }
         
         // Fallback to existing logic
@@ -165,26 +171,10 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
       const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
         const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
         
-        // Check ACF field
-        if (acf.nose) {
-          const noseText = acf.nose.toLowerCase();
+        const noseValue = getACFValue('nose', ['nose']);
+        if (noseValue) {
+          const noseText = noseValue.toLowerCase();
           
-          if (noseText.includes('candy') || noseText.includes('sweet')) noseOptions.push('candy');
-          if (noseText.includes('gas') || noseText.includes('fuel') || noseText.includes('diesel')) noseOptions.push('gas');
-          if (noseText.includes('cake') || noseText.includes('vanilla') || noseText.includes('cream')) noseOptions.push('cake');
-          if (noseText.includes('funk') || noseText.includes('cheese') || noseText.includes('earthy')) noseOptions.push('funk');
-          if (noseText.includes('sherb') || noseText.includes('citrus') || noseText.includes('lemon')) noseOptions.push('sherb');
-          
-          if (noseOptions.length > 0) return noseOptions;
-        }
-        
-        // Check meta_data for nose
-        const noseMeta = product.meta_data?.find((m: any) => m.key === 'nose');
-        if (noseMeta?.value) {
-          const noseText = noseMeta.value.toLowerCase();
-          
-          // Map specific values to our categories
-          if (noseText === 'glue' || noseText.includes('glue')) noseOptions.push('gas');
           if (noseText.includes('candy') || noseText.includes('sweet')) noseOptions.push('candy');
           if (noseText.includes('gas') || noseText.includes('fuel') || noseText.includes('diesel')) noseOptions.push('gas');
           if (noseText.includes('cake') || noseText.includes('vanilla') || noseText.includes('cream')) noseOptions.push('cake');
@@ -195,7 +185,6 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
         }
         
         // Fallback to existing tag-based logic
-        
         tags.forEach(tag => {
           if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
           if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
@@ -217,16 +206,9 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
 
       // Extract THC percentage from ACF thca_% field or fallback to description
       const getThc = (): number => {
-        // Check ACF fields
-        if (acf['thca_%']) {
-          const thcValue = parseFloat(acf['thca_%'].replace('%', ''));
-          if (!isNaN(thcValue)) return thcValue;
-        }
-        
-        // Check meta_data for thca field
-        const thcaMeta = product.meta_data?.find((m: any) => m.key === 'thca');
-        if (thcaMeta?.value && thcaMeta.value.trim() !== '') {
-          const thcValue = parseFloat(thcaMeta.value.replace('%', ''));
+        const thcaValue = getACFValue('thca_%', ['thca_%', 'thca']);
+        if (thcaValue) {
+          const thcValue = parseFloat(thcaValue.replace('%', ''));
           if (!isNaN(thcValue)) return thcValue;
         }
         
@@ -238,27 +220,17 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
 
       // Get lineage from ACF field or generate default
       const getLineage = (): string => {
-        // Check ACF lineage field
-        if (acf.lineage) return acf.lineage;
+        const lineage = getACFValue('lineage', ['lineage', 'taglinelineage']);
+        if (lineage) return lineage;
         
-        // Check meta_data for taglinelineage field
-        const lineageMeta = product.meta_data?.find((m: any) => m.key === 'taglinelineage');
-        if (lineageMeta?.value) return lineageMeta.value;
-        
-        return `strain ${index + 1} lineage`;
+        return `Premium ${getCategory()} strain`;
       };
 
       // Get terpenes from ACF dominant terpene or generate defaults
       const getTerpenes = (): string[] => {
-        // Check ACF dominent_terpene field
-        if (acf.dominent_terpene) {
-          return [acf.dominent_terpene.toLowerCase(), "limonene", "caryophyllene"];
-        }
-        
-        // Check meta_data for terpenes field
-        const terpenesMeta = product.meta_data?.find((m: any) => m.key === 'terpenes');
-        if (terpenesMeta?.value) {
-          return [terpenesMeta.value.toLowerCase(), "limonene", "caryophyllene"];
+        const dominentTerpene = getACFValue('dominent_terpene', ['dominent_terpene', 'terpenes']);
+        if (dominentTerpene) {
+          return [dominentTerpene.toLowerCase(), "limonene", "caryophyllene"];
         }
         
         // Default terpenes based on category
@@ -268,31 +240,57 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
         return ["limonene", "myrcene", "caryophyllene"];
       };
 
+      // Get effects for spotlight
+      const getSpotlight = (): string => {
+        const effects = getACFValue('effects', ['effects']);
+        if (effects) return effects;
+        
+        // Generate based on vibe
+        const vibe = getVibe();
+        if (vibe === 'relax') return 'Relaxed Sleepy Calm';
+        if (vibe === 'energize') return 'Energetic Focused Creative';
+        return 'Balanced Euphoric Uplifted';
+      };
+
       const transformedProduct = {
         id: product.id,
         title: product.name,
-        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || '',
-        price: parseFloat(product.price) || 0,
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || `Premium ${getCategory()} strain with exceptional quality`,
+        price: parseFloat(product.price) || 40,
         image: product.images?.[0]?.src || '/icons/FLOWER.png',
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         nose: getNose(),
-        spotlight: `Premium flower strain with exceptional quality`,
+        spotlight: getSpotlight(),
         featured: index < 4, // First 4 products are featured
         lineage: getLineage(),
         terpenes: getTerpenes()
       };
       
-      // Debug log for first few products
+      // Enhanced debug log for first few products
       if (index < 3) {
-        console.log(`🌿 Transformed flower product:`, {
-          name: transformedProduct.title,
-          category: transformedProduct.category,
-          thc: transformedProduct.thc,
-          lineage: transformedProduct.lineage,
-          nose: transformedProduct.nose,
-          vibe: transformedProduct.vibe
+        console.log(`🌿 Flower Product Debug - ${transformedProduct.title}:`, {
+          id: product.id,
+          acf_object: acf,
+          acf_keys: Object.keys(acf),
+          meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
+          extracted_values: {
+            thca: getACFValue('thca_%', ['thca_%', 'thca']),
+            strain_type: getACFValue('strain_type', ['strain_type']),
+            nose: getACFValue('nose', ['nose']),
+            effects: getACFValue('effects', ['effects']),
+            dominent_terpene: getACFValue('dominent_terpene', ['dominent_terpene', 'terpenes']),
+            lineage: getACFValue('lineage', ['lineage', 'taglinelineage'])
+          },
+          final_mapped: {
+            category: transformedProduct.category,
+            thc: transformedProduct.thc,
+            lineage: transformedProduct.lineage,
+            nose: transformedProduct.nose,
+            vibe: transformedProduct.vibe,
+            spotlight: transformedProduct.spotlight
+          }
         });
       }
       

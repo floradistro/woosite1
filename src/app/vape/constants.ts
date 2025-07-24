@@ -86,8 +86,8 @@ import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 // Transform WooCommerce products to vape format
 export async function getVapeProducts(): Promise<FeaturedProduct[]> {
   try {
-    // Try multiple category names since vape products might be in Concentrate category
-    const vapeCategories = ['vape', 'Vape', 'concentrate', 'Concentrate'];
+    // Only fetch vape products, not concentrate products
+    const vapeCategories = ['vape', 'Vape'];
     
     const vapeProducts = await wooCommerceServerAPI.getProductsByCategories(vapeCategories);
     
@@ -101,88 +101,191 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
       const acf = product.acf || {};
       
-      // Extract category from ACF strain_type or fallback to categories/tags
-      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
-        if (acf.strain_type) {
-          const strainType = acf.strain_type.toLowerCase();
-          if (strainType.includes('indica')) return 'indica';
-          if (strainType.includes('sativa')) return 'sativa';
-          if (strainType.includes('hybrid')) return 'hybrid';
+      // Helper function to get ACF value with multiple fallback strategies (same as flower)
+      const getACFValue = (acfKey: string, metaKeys: string[] = []): string | undefined => {
+        // First try the acf object
+        if (acf && typeof acf === 'object' && acfKey in acf) {
+          const acfValue = (acf as any)[acfKey];
+          if (acfValue && typeof acfValue === 'string' && acfValue.trim()) {
+            return acfValue.trim();
+          }
         }
+        
+        // Then try meta_data with various key variations
+        const keysToTry = [acfKey, ...metaKeys];
+        for (const key of keysToTry) {
+          const metaValue = product.meta_data?.find((m: any) => m.key === key);
+          if (metaValue?.value && typeof metaValue.value === 'string' && metaValue.value.trim()) {
+            return metaValue.value.trim();
+          }
+        }
+        
+        return undefined;
+      };
+
+      // Extract category from ACF strain_type or fallback to categories/tags (same as flower)
+      const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
+        const strainType = getACFValue('strain_type', ['strain_type']);
+        if (strainType) {
+          const type = strainType.toLowerCase();
+          if (type.includes('indica')) return 'indica';
+          if (type.includes('sativa')) return 'sativa';
+          if (type.includes('hybrid')) return 'hybrid';
+        }
+        
+        // Fallback to existing logic
         if (categories.includes('indica') || tags.includes('indica')) return 'indica';
         if (categories.includes('sativa') || tags.includes('sativa')) return 'sativa';
         return 'hybrid';
       };
 
-      // Extract vibe from ACF effects or fallback to tags
+      // Extract vibe from ACF effects or fallback to tags (same as flower)
       const getVibe = (): 'relax' | 'energize' | 'balance' => {
-        if (acf.effects) {
-          const effects = acf.effects.toLowerCase();
-          if (effects.includes('relax') || effects.includes('calm') || effects.includes('sleep')) return 'relax';
-          if (effects.includes('energiz') || effects.includes('uplifting') || effects.includes('focus')) return 'energize';
+        const effects = getACFValue('effects', ['effects']);
+        if (effects) {
+          const effectsLower = effects.toLowerCase();
+          if (effectsLower.includes('relax') || effectsLower.includes('calm') || effectsLower.includes('sleep')) return 'relax';
+          if (effectsLower.includes('energiz') || effectsLower.includes('uplifting') || effectsLower.includes('focus')) return 'energize';
+          if (effectsLower.includes('balance') || effectsLower.includes('balanced')) return 'balance';
         }
+        
+        // Fallback to existing logic
         if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
         if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
         return 'balance';
       };
 
-      // Extract nose from ACF or fallback to tags
+      // Extract nose characteristics from ACF nose field or fallback to tags (same as flower)
       const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
-        if (acf.nose) {
-          const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
-          const noseText = acf.nose.toLowerCase();
+        const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
+        
+        const noseValue = getACFValue('nose', ['nose']);
+        if (noseValue) {
+          const noseText = noseValue.toLowerCase();
           
           if (noseText.includes('candy') || noseText.includes('sweet')) noseOptions.push('candy');
-          if (noseText.includes('gas') || noseText.includes('fuel')) noseOptions.push('gas');
-          if (noseText.includes('cake') || noseText.includes('vanilla')) noseOptions.push('cake');
-          if (noseText.includes('funk') || noseText.includes('cheese')) noseOptions.push('funk');
-          if (noseText.includes('sherb') || noseText.includes('citrus')) noseOptions.push('sherb');
+          if (noseText.includes('gas') || noseText.includes('fuel') || noseText.includes('diesel')) noseOptions.push('gas');
+          if (noseText.includes('cake') || noseText.includes('vanilla') || noseText.includes('cream')) noseOptions.push('cake');
+          if (noseText.includes('funk') || noseText.includes('cheese') || noseText.includes('earthy')) noseOptions.push('funk');
+          if (noseText.includes('sherb') || noseText.includes('citrus') || noseText.includes('lemon')) noseOptions.push('sherb');
           
           if (noseOptions.length > 0) return noseOptions;
         }
         
-        const category = getCategory();
-        if (category === 'indica') return ['cake', 'sherb'];
-        if (category === 'sativa') return ['gas', 'candy'];
-        return ['gas', 'sherb'];
+        // Fallback to existing tag-based logic
+        tags.forEach(tag => {
+          if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
+          if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
+          if (tag.includes('cake') || tag.includes('vanilla')) noseOptions.push('cake');
+          if (tag.includes('funk') || tag.includes('cheese')) noseOptions.push('funk');
+          if (tag.includes('sherb') || tag.includes('citrus')) noseOptions.push('sherb');
+        });
+
+        // Default nose profiles if none found
+        if (noseOptions.length === 0) {
+          const category = getCategory();
+          if (category === 'indica') return ['sherb', 'cake'];
+          if (category === 'sativa') return ['gas', 'candy'];
+          return ['gas', 'sherb'];
+        }
+
+        return noseOptions;
       };
 
-      // Extract THC from ACF thca_% field
+      // Extract THC percentage from ACF thca_% field or fallback to description (same as flower)
       const getThc = (): number => {
-        // Check ACF fields
-        if (acf['thca_%']) {
-          const thcValue = parseFloat(acf['thca_%'].replace('%', ''));
+        const thcaValue = getACFValue('thca_%', ['thca_%', 'thca']);
+        if (thcaValue) {
+          const thcValue = parseFloat(thcaValue.replace('%', ''));
           if (!isNaN(thcValue)) return thcValue;
         }
         
-        // Check meta_data for thca field
-        const thcaMeta = product.meta_data?.find((m: any) => m.key === 'thca');
-        if (thcaMeta?.value) {
-          const thcValue = parseFloat(thcaMeta.value.replace('%', ''));
-          if (!isNaN(thcValue)) return thcValue;
-        }
-        
-        return 85.0; // Default for vape
+        // Fallback to existing logic
+        const description = product.description || product.short_description || '';
+        const match = description.match(/(\d+\.?\d*)%?\s*thc/i);
+        return match ? parseFloat(match[1]) : 85.0; // Default for vape
       };
 
-      return {
+      // Get lineage from ACF field or generate default (same as flower)
+      const getLineage = (): string => {
+        const lineage = getACFValue('lineage', ['lineage', 'taglinelineage']);
+        if (lineage) return lineage;
+        
+        return `Premium ${getCategory()} strain`;
+      };
+
+      // Get terpenes from ACF dominant terpene or generate defaults (same as flower)
+      const getTerpenes = (): string[] => {
+        const dominentTerpene = getACFValue('dominent_terpene', ['dominent_terpene', 'terpenes']);
+        if (dominentTerpene) {
+          return [dominentTerpene.toLowerCase(), "limonene", "caryophyllene"];
+        }
+        
+        // Default terpenes based on category
+        const category = getCategory();
+        if (category === 'indica') return ["myrcene", "limonene", "caryophyllene"];
+        if (category === 'sativa') return ["pinene", "limonene", "terpinolene"];
+        return ["limonene", "myrcene", "caryophyllene"];
+      };
+
+      // Get effects for spotlight (same as flower)
+      const getSpotlight = (): string => {
+        const effects = getACFValue('effects', ['effects']);
+        if (effects) return effects;
+        
+        // Generate based on vibe
+        const vibe = getVibe();
+        if (vibe === 'relax') return 'Relaxed Sleepy Calm';
+        if (vibe === 'energize') return 'Energetic Focused Creative';
+        return 'Balanced Euphoric Uplifted';
+      };
+
+      const transformedProduct = {
         id: product.id,
-        title: product.name.toLowerCase(),
-        description: product.short_description || product.description || 'Premium vape cartridge',
-        price: parseFloat(product.price) || 45,
+        title: product.name,
+        description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || `Premium ${getCategory()} vape cartridge with exceptional quality`,
+        price: parseFloat(product.price) || 35,
         image: product.images?.[0]?.src || "/icons/vapeicon2.png",
         category: getCategory(),
         vibe: getVibe(),
         thc: getThc(),
         nose: getNose(),
-        spotlight: acf.effects || "Premium live resin extraction",
-        featured: index < 4,
-        lineage: acf.lineage || "premium genetics",
-        terpenes: acf.dominent_terpene ? [acf.dominent_terpene.toLowerCase(), "limonene", "caryophyllene"] : ["myrcene", "limonene", "caryophyllene"]
+        spotlight: getSpotlight(),
+        featured: index < 4, // First 4 products are featured
+        lineage: getLineage(),
+        terpenes: getTerpenes()
       };
+      
+      // Enhanced debug log for first few products (same as flower)
+      if (index < 3) {
+        console.log(`💨 Vape Product Debug - ${transformedProduct.title}:`, {
+          id: product.id,
+          acf_object: acf,
+          acf_keys: Object.keys(acf),
+          meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],
+          extracted_values: {
+            thca: getACFValue('thca_%', ['thca_%', 'thca']),
+            strain_type: getACFValue('strain_type', ['strain_type']),
+            nose: getACFValue('nose', ['nose']),
+            effects: getACFValue('effects', ['effects']),
+            dominent_terpene: getACFValue('dominent_terpene', ['dominent_terpene', 'terpenes']),
+            lineage: getACFValue('lineage', ['lineage', 'taglinelineage'])
+          },
+          final_mapped: {
+            category: transformedProduct.category,
+            thc: transformedProduct.thc,
+            lineage: transformedProduct.lineage,
+            nose: transformedProduct.nose,
+            vibe: transformedProduct.vibe,
+            spotlight: transformedProduct.spotlight
+          }
+        });
+      }
+      
+      return transformedProduct;
     });
   } catch (error) {
-    console.error('Error fetching vape products from WooCommerce:', error);
+    console.error('❌ Error fetching vape products:', error);
     return [];
   }
 }

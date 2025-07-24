@@ -315,6 +315,15 @@ const ProductInfo = ({
         </div>
       )}
       
+      {(productType === 'flower' || productType === 'vape') && product.terpenes && product.terpenes.length > 0 && (
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-white/70 text-sm md:text-xs">Dominant Terpene:</span>
+          <span className="text-amber-400 text-base md:text-xs hover:text-amber-300 transition-colors duration-300 capitalize">
+            {product.terpenes[0]}
+          </span>
+        </div>
+      )}
+      
 
       
       {productType === 'vape' && product.nose && (
