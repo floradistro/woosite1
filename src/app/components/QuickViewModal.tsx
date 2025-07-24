@@ -48,6 +48,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   // Refs for performance optimization
   const magnifierRef = React.useRef<HTMLDivElement>(null);
   const containerRectRef = React.useRef<DOMRect | null>(null);
+  const backgroundPositionRef = React.useRef('50% 50%');
+  const lastUpdateTime = React.useRef(0);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -259,6 +261,22 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     }
   };
 
+  // Calculate background position - memoized for performance
+  const calculateBackgroundPosition = React.useCallback((magnifierX: number, magnifierY: number) => {
+    const rect = containerRectRef.current;
+    if (!rect) return '50% 50%';
+    
+    // Convert screen coordinates to container-relative coordinates
+    const containerX = magnifierX - rect.left;
+    const containerY = magnifierY - rect.top;
+    
+    // Calculate background position with proper edge handling
+    const bgX = (containerX / rect.width) * 100;
+    const bgY = (containerY / rect.height) * 100;
+    
+    return `${bgX}% ${bgY}%`;
+  }, []);
+
   // Optimize magnifier positioning - now follows fingers freely anywhere
   const getOptimalMagnifierPosition = React.useCallback((center: { x: number, y: number }, rect: DOMRect) => {
     const halfSize = magnifierSize / 2;
@@ -292,8 +310,11 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     x = Math.max(halfSize + screenPadding, Math.min(x, screenWidth - halfSize - screenPadding));
     y = Math.max(halfSize + screenPadding, Math.min(y, screenHeight - halfSize - screenPadding));
     
+    // Update background position ref for performance
+    backgroundPositionRef.current = calculateBackgroundPosition(x, y);
+    
     return { x, y };
-  }, [magnifierSize, handPreference]);
+  }, [magnifierSize, handPreference, calculateBackgroundPosition]);
 
   const handleMobileTouchStart = React.useCallback((e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -335,6 +356,11 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     
     e.preventDefault();
     e.stopPropagation();
+    
+    // Throttle updates for better performance
+    const now = performance.now();
+    if (now - lastUpdateTime.current < 16) return; // ~60fps max
+    lastUpdateTime.current = now;
     
     const rect = containerRectRef.current || e.currentTarget.getBoundingClientRect();
     
@@ -530,19 +556,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
-                  backgroundPosition: `${(() => {
-                    const rect = containerRectRef.current;
-                    if (!rect) return '50% 50%';
-                    
-                    // Convert screen coordinates back to container-relative coordinates for background positioning
-                    const containerX = mobileMagnifierCenter.x - rect.left;
-                    const containerY = mobileMagnifierCenter.y - rect.top;
-                    
-                    const bgX = (containerX / rect.width) * 100;
-                    const bgY = (containerY / rect.height) * 100;
-                    
-                    return `${Math.max(0, Math.min(100, bgX))}% ${Math.max(0, Math.min(100, bgY))}%`;
-                  })()}`,
+                  backgroundPosition: backgroundPositionRef.current,
                   backgroundRepeat: 'no-repeat',
                   filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
                   willChange: 'background-size, background-position',
