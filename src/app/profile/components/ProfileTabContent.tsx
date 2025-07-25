@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, ChevronRight, Coins, Shield, Bell, Smartphone, Mail, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import { User as UserType, EditableProfile, ToggleStates } from '../types';
 import { useProfileData } from '../hooks/useProfileData';
 import ToggleSwitch from './ToggleSwitch';
@@ -82,9 +83,11 @@ export default function ProfileTabContent({ user, isMobile, onTabChange, onBackC
       {isMobile && (
         <div className="px-6 py-4 bg-gradient-to-br from-white/8 to-white/4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <img 
+            <Image 
               src="/flora_chip_no_background.png" 
               alt="Flora Chip" 
+              width={64}
+              height={64}
               className="w-16 h-16 flex-shrink-0"
             />
             <div className="flex-1">
@@ -433,9 +436,11 @@ export default function ProfileTabContent({ user, isMobile, onTabChange, onBackC
               {/* Flora Chip Section - Desktop Only */}
               <div className="border-t border-white/10 pt-4 mt-auto">
                 <div className="flex items-center gap-3">
-                  <img 
+                  <Image 
                     src="/flora_chip_no_background.png" 
                     alt="Flora Chip" 
+                    width={64}
+                    height={64}
                     className="w-16 h-16 flex-shrink-0"
                   />
                   <div className="flex-1">
