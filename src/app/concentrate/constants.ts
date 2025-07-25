@@ -117,6 +117,8 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         const dominentTerpene = getACFValue('dominent_terpene');
         const lineage = getACFValue('lineage');
 
+
+
         // Map strain type to category
         const getCategory = (): 'indica' | 'sativa' | 'hybrid' => {
           if (strainType) {
@@ -143,6 +145,43 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
           if (tags.includes('relax') || tags.includes('relaxing')) return 'relax';
           if (tags.includes('energize') || tags.includes('energizing')) return 'energize';
           return 'balance';
+        };
+
+        // Extract nose characteristics from ACF nose field (exactly like flower page)
+        const getNose = (): Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> => {
+          const noseOptions: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'> = [];
+          
+          const noseValue = nose; // Use the already extracted nose value
+          if (noseValue) {
+            const noseText = noseValue.toLowerCase();
+            
+            if (noseText.includes('candy') || noseText.includes('sweet')) noseOptions.push('candy');
+            if (noseText.includes('gas') || noseText.includes('fuel') || noseText.includes('diesel')) noseOptions.push('gas');
+            if (noseText.includes('cake') || noseText.includes('vanilla') || noseText.includes('cream')) noseOptions.push('cake');
+            if (noseText.includes('funk') || noseText.includes('cheese') || noseText.includes('earthy')) noseOptions.push('funk');
+            if (noseText.includes('sherb') || noseText.includes('citrus') || noseText.includes('lemon')) noseOptions.push('sherb');
+            
+            if (noseOptions.length > 0) return noseOptions;
+          }
+          
+          // Fallback to tags
+          tags.forEach(tag => {
+            if (tag.includes('candy') || tag.includes('sweet')) noseOptions.push('candy');
+            if (tag.includes('gas') || tag.includes('fuel')) noseOptions.push('gas');
+            if (tag.includes('cake') || tag.includes('vanilla')) noseOptions.push('cake');
+            if (tag.includes('funk') || tag.includes('cheese')) noseOptions.push('funk');
+            if (tag.includes('sherb') || tag.includes('citrus')) noseOptions.push('sherb');
+          });
+
+          // Default nose profiles if none found
+          if (noseOptions.length === 0) {
+            const category = getCategory();
+            if (category === 'indica') return ['sherb', 'cake'];
+            if (category === 'sativa') return ['gas', 'candy'];
+            return ['gas', 'sherb'];
+          }
+
+          return noseOptions;
         };
 
         // Parse THC percentage
@@ -279,7 +318,7 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
           featured: index < 4,
           lineage: lineage || 'Premium concentrate extraction',
           terpenes,
-          nose: nose ? [nose.toLowerCase()] : ['concentrate'],
+          nose: nose ? [nose.toLowerCase()] : ['concentrate'], // Use the extracted nose value
           type: strainType || category, // Add type field for display
           stockQuantity: product.stock_quantity,
           stockStatus: product.stock_status,

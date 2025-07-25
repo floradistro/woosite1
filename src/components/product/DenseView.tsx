@@ -231,16 +231,18 @@ const ProductInfo = ({
             </span>
           )}
         </span>
-        <span className="hidden md:flex md:items-center md:gap-1">
-          <span>{product.title}</span>
-          {format === 'preroll' && (
-            <span className="text-emerald-400 text-xs font-light whitespace-nowrap">pre-rolls</span>
-          )}
-          {format === 'bulk' && (
-            <span className="text-orange-400 text-xs font-light whitespace-nowrap">bulk pack</span>
-          )}
-          {product.lineage && (
-            <span className="text-white/60 text-xs italic font-light ml-2">
+        <span className="hidden md:flex md:flex-col">
+          <div className="flex items-center gap-1">
+            <span>{product.title}</span>
+            {format === 'preroll' && (
+              <span className="text-emerald-400 text-xs font-light whitespace-nowrap">pre-rolls</span>
+            )}
+            {format === 'bulk' && (
+              <span className="text-orange-400 text-xs font-light whitespace-nowrap">bulk pack</span>
+            )}
+          </div>
+          {product.lineage && (productType === 'flower' || productType === 'concentrate' || productType === 'vape') && (
+            <span className="text-white/60 text-xs italic font-light mt-0.5">
               {product.lineage}
             </span>
           )}
@@ -329,6 +331,8 @@ const ProductInfo = ({
               </div>
             </div>
           )}
+
+
 
           {/* Nose for Vape/Concentrate/Wax (single value) */}
           {(productType === 'vape' || productType === 'concentrate' || productType === 'wax') && product.nose && !Array.isArray(product.nose) && (
@@ -705,9 +709,9 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                         {productType !== 'edible' && (
                           <div className="flex flex-col gap-2">
                             <span className="text-white/70 text-sm font-medium">
-                              {productType === 'vape' ? 'Quantity:' : 'Size:'}
+                              {productType === 'vape' ? 'Quantity:' : 'Weight:'}
                             </span>
-                            <div className="grid grid-cols-4 gap-1.5 w-full">
+                            <div className="grid grid-cols-5 gap-1.5 w-full">
                               {sizes.map((size, idx) => {
                                 return (
                                   <button
@@ -726,7 +730,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                                       {size}
                                     </span>
                                     <span className="text-[10px] opacity-70">
-                                      {size === '1' ? 'Vape' : 'Vapes'}
+                                      {productType === 'vape' ? (size === '1' ? 'Vape' : 'Vapes') : 'Grams'}
                                     </span>
                                   </button>
                                 );

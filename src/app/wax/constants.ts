@@ -60,6 +60,7 @@ export interface Product {
   lineage?: string;
   terpenes?: string[];
   nose?: string[];
+  type?: string;
 }
 
 export interface FeaturedProduct extends Product {
@@ -156,7 +157,9 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
         spotlight: effects || "Premium concentrate with exceptional potency",
         featured: index < 4,
         lineage: lineage || "premium genetics",
-        terpenes: dominentTerpene ? [dominentTerpene.toLowerCase(), "limonene", "caryophyllene"] : ["myrcene", "limonene", "caryophyllene"]
+        terpenes: dominentTerpene ? [dominentTerpene.toLowerCase(), "limonene", "caryophyllene"] : ["myrcene", "limonene", "caryophyllene"],
+        nose: nose ? [nose.toLowerCase()] : ['concentrate'], // Add nose field
+        type: strainType || getCategory() // Add type field for display
       };
     });
     } catch (error) {
