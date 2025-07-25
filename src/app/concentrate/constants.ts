@@ -44,6 +44,7 @@ export interface Product {
   lineage?: string;
   terpenes?: string[];
   nose?: string[];
+  type?: string;
   stockQuantity?: number | null;
   stockStatus?: string;
   inStock?: boolean;
@@ -205,11 +206,23 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
           }
         }
 
+        const category = getCategory();
+        const vibe = getVibe();
+        const thc = getThc();
+        const spotlight = effects || `Premium ${product.name} concentrate`;
+
+        // Build terpenes array - ensure dominant terpene is properly included
+        const terpenes = dominentTerpene ? 
+          [dominentTerpene.toLowerCase().trim()] :
+          category === 'indica' ? ['myrcene'] : 
+          category === 'sativa' ? ['limonene'] : 
+          ['caryophyllene'];
+
         // Debug log for first few concentrate products
         if (index < 3) {
           console.log(`🧪 Concentrate Product Debug - ${product.name}:`, {
             id: product.id,
-            type: product.type,
+            wooType: product.type,
             hasVariations: variations.length > 0 || Object.keys(variationPricing).length > 0,
             variationCount: variations.length,
             variationPricing,
@@ -234,21 +247,19 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
               effects: getACFValue('effects'),
               dominent_terpene: getACFValue('dominent_terpene'),
               lineage: getACFValue('lineage')
+            },
+            final_mapped: {
+              category,
+              thc,
+              lineage: lineage || 'Premium concentrate extraction',
+              terpenes,
+              nose: nose ? [nose.toLowerCase()] : ['concentrate'],
+              type: strainType || category,
+              vibe,
+              spotlight
             }
           });
         }
-
-        const category = getCategory();
-        const vibe = getVibe();
-        const thc = getThc();
-        const spotlight = effects || `Premium ${product.name} concentrate`;
-
-        // Build terpenes array
-        const terpenes = dominentTerpene ? 
-          [dominentTerpene.toLowerCase(), 'limonene', 'caryophyllene'] :
-          category === 'indica' ? ['myrcene', 'linalool', 'caryophyllene'] : 
-          category === 'sativa' ? ['limonene', 'pinene', 'terpinolene'] : 
-          ['limonene', 'caryophyllene', 'myrcene'];
 
         // Determine base price - use variation pricing if available, otherwise product price
         const basePrice = Object.keys(variationPricing).length > 0 
@@ -269,6 +280,7 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
           lineage: lineage || 'Premium concentrate extraction',
           terpenes,
           nose: nose ? [nose.toLowerCase()] : ['concentrate'],
+          type: strainType || category, // Add type field for display
           stockQuantity: product.stock_quantity,
           stockStatus: product.stock_status,
           inStock: product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity > 0),
@@ -276,7 +288,7 @@ export async function getConcentrateProducts(): Promise<FeaturedProduct[]> {
           hasVariations: variations.length > 0 || Object.keys(variationPricing).length > 0,
           variationPricing: Object.keys(variationPricing).length > 0 ? variationPricing : undefined,
           variations: variations.length > 0 ? variations : undefined,
-          type: product.type // Include product type for debugging
+          wooType: product.type // Include WooCommerce product type for debugging
         };
       })
     );
