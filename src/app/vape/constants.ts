@@ -282,7 +282,7 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
       };
 
       // Fetch variations for tiered pricing
-      let variationPricing: Record<string, number> = {};
+      const variationPricing: Record<string, number> = {};
       try {
         if (product.type === 'variable' && product.variations && product.variations.length > 0) {
           const variations = await getProductVariations(product.id);
