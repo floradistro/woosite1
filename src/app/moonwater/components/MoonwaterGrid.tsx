@@ -120,7 +120,7 @@ const MoonwaterCard = ({
             
             {/* Product Name Overlay - Animated */}
             <div className="absolute top-0 left-0 right-0 flex flex-col justify-start items-center text-center px-3 pt-4 pointer-events-none transform -rotate-3 transition-all duration-500 group-hover:scale-105 group-hover:-rotate-2">
-              <h3 className="text-white font-bold text-lg md:text-2xl mb-1 leading-none transform transition-all duration-700 animate-pulse group-hover:scale-110" 
+              <h3 className="text-white font-bold text-3xl md:text-2xl mb-1 leading-none transform transition-all duration-700 animate-pulse group-hover:scale-110" 
                   style={{ 
                     fontFamily: 'Nunito Sans, Varela Round, sans-serif',
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
