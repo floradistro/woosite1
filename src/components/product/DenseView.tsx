@@ -214,24 +214,23 @@ const ProductInfo = ({
     }
   };
 
-  const getThcLabel = () => {
-    return productType === 'flower' || productType === 'vape' || productType === 'wax' || productType === 'concentrate' ? 'THCa:' : 'THC:';
-  };
-
-  const getThcValue = () => {
-    return productType === 'edible' ? `${product.thc}mg` : `${product.thc}%`;
-  };
-
   const formatCategory = (category: string) => {
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
   return (
     <div className="flex-1 min-w-0 relative">
-      <h3 className={`font-extralight text-2xl md:text-xl transition-colors duration-300 ${
+      <h3 className={`font-extralight text-2xl md:text-xl transition-colors duration-300 mb-2 ${
         isExpanded ? 'text-white/98' : 'text-white/95'
       }`}>
-        <span className="md:hidden">{product.title}</span>
+        <span className="md:hidden">
+          {product.title}
+          {product.lineage && (
+            <span className="block text-sm text-white/60 italic font-light mt-1">
+              {product.lineage}
+            </span>
+          )}
+        </span>
         <span className="hidden md:flex md:items-center md:gap-1">
           <span>{product.title}</span>
           {format === 'preroll' && (
@@ -240,139 +239,144 @@ const ProductInfo = ({
           {format === 'bulk' && (
             <span className="text-orange-400 text-xs font-light whitespace-nowrap">bulk pack</span>
           )}
+          {product.lineage && (
+            <span className="text-white/60 text-xs italic font-light ml-2">
+              {product.lineage}
+            </span>
+          )}
         </span>
       </h3>
       
       {/* No Artificial Dyes text for gummy products */}
       {product.title.toLowerCase().includes('gummy') && (
-        <p className="text-red-400 text-xs font-medium mb-1">
+        <p className="text-red-400 text-xs font-medium mb-2">
           **No Artificial Dyes**
         </p>
       )}
       
       {(format === 'preroll' || format === 'bulk') && (
-        <p className={`md:hidden text-${format === 'preroll' ? 'emerald' : 'orange'}-400 text-sm font-light mb-1`}>
+        <p className={`md:hidden text-${format === 'preroll' ? 'emerald' : 'orange'}-400 text-sm font-light mb-2`}>
           {format === 'preroll' ? 'pre-rolls' : 'bulk pack'}
         </p>
       )}
-      
-      {/* For edibles, show the 2-field layout */}
-      {productType === 'edible' ? (
-        <>
-          {/* Strength and Effects side by side */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            {/* Strength */}
-            <div className="p-2 rounded-md bg-gradient-to-r from-white/5 to-white/2 border border-white/10">
-              <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Strength</span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-light text-red-400">{product.thc}</span>
-                <span className="text-xs font-light text-red-400/70">mg</span>
-              </div>
+
+      {/* Compact field grid - all fields in a more condensed layout */}
+      {productType !== 'edible' && productType !== 'moonwater' && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 mb-2 auto-rows-fr">
+          {/* THC/Strength Container */}
+          <div className="p-1.5 rounded-md bg-gradient-to-r from-white/5 to-white/2 border border-white/10 flex flex-col justify-between min-h-[3.5rem]">
+            <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">
+              {productType === 'flower' || productType === 'vape' || productType === 'wax' || productType === 'concentrate' ? 'THCa' : 'THC'}
+            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-light text-emerald-400">{product.thc}</span>
+              <span className="text-xs font-light text-emerald-400/70">
+                {(productType as string) === 'edible' || (productType as string) === 'moonwater' ? 'mg' : '%'}
+              </span>
             </div>
-            
-            {/* Effects */}
-            {product.spotlight && (
-              <div className="p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
-                <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Effects</span>
-                <p className="text-white/90 text-xs font-light leading-relaxed">
-                  {product.spotlight}
-                </p>
-              </div>
+          </div>
+          
+          {/* Type/Category Container */}
+          <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
+            <div className="flex-1">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">
+                {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && 
+                 product.spotlight ? (
+                  <>
+                    <span className="md:hidden">Type/Effects</span>
+                    <span className="hidden md:inline">Type</span>
+                  </>
+                ) : 'Type'}
+              </span>
+              <span className={`px-1.5 py-0.5 rounded-full text-xs font-light tracking-wide ${getCategoryColor(product.category)}`}>
+                {formatCategory(product.category)}
+              </span>
+            </div>
+            {/* Effects on mobile only for flower, vape, concentrate */}
+            {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && 
+             product.spotlight && (
+              <span className={`md:hidden block text-xs hover:opacity-80 transition-colors duration-300 capitalize mt-1 ${
+                product.vibe === 'relax' ? 'text-purple-300' :
+                product.vibe === 'energize' ? 'text-green-300' :
+                'text-emerald-300'
+              }`}>
+                {product.spotlight}
+              </span>
             )}
           </div>
-        </>
-      ) : (
-        <>
-          {/* Non-edible product fields */}
-          {product.lineage && (
-            <p className={`text-sm md:text-xs italic mb-1 ${
-              isExpanded ? 'text-white/70' : 'text-white/60'
-            }`}>{product.lineage}</p>
+
+          {/* Terpene Container */}
+          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.terpenes && product.terpenes.length > 0 && (
+            <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Terpene</span>
+              <span className="text-amber-400 text-xs hover:text-amber-300 transition-colors duration-300 capitalize">
+                {product.terpenes[0]}
+              </span>
+            </div>
+          )}
+
+          {/* Nose Container */}
+          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.nose && Array.isArray(product.nose) && product.nose.length > 0 && (
+            <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Nose</span>
+              <div className="flex flex-wrap gap-1">
+                {product.nose.slice(0, 2).map((note, idx) => (
+                  <span key={idx} className="text-white/90 text-xs hover:text-white transition-colors duration-300 capitalize">
+                    {note}{idx < Math.min((product.nose as string[]).length, 2) - 1 && ', '}
+                  </span>
+                ))}
+                {(product.nose as string[]).length > 2 && <span className="text-white/60 text-xs">+{(product.nose as string[]).length - 2}</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Nose for Vape (single value) */}
+          {productType === 'vape' && product.nose && !Array.isArray(product.nose) && (
+            <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Nose</span>
+              <span className="text-white/90 text-xs hover:text-white transition-colors duration-300 capitalize">
+                {product.nose}
+              </span>
+            </div>
           )}
           
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-white/70 text-sm md:text-xs">Type:</span>
-            <span className={`px-2 py-0.5 rounded-full text-sm md:text-xs font-light tracking-wide flex-shrink-0 ${getCategoryColor(product.category)}`}>
-              {formatCategory(product.category)}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-white/70 text-sm md:text-xs">{getThcLabel()}</span>
-            <span className="text-emerald-400 text-sm md:text-xs font-medium">{getThcValue()}</span>
-          </div>
-        </>
-      )}
-      
-      {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.nose && Array.isArray(product.nose) && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          <span className="text-white/70 text-sm md:text-xs mr-1">Nose:</span>
-          {product.nose.map((note, idx) => (
-            <span key={idx} className="text-white/70 text-base md:text-xs hover:text-white transition-colors duration-300 capitalize">
-              {note}
-            </span>
-          ))}
-        </div>
-      )}
-      
-      {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.terpenes && product.terpenes.length > 0 && (
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-white/70 text-sm md:text-xs">Dominant Terpene:</span>
-          <span className="text-amber-400 text-base md:text-xs hover:text-amber-300 transition-colors duration-300 capitalize">
-            {product.terpenes[0]}
-          </span>
-        </div>
-      )}
-      
+          {/* Texture Container */}
+          {(productType === 'wax' || productType === 'concentrate') && product.texture && Array.isArray(product.texture) && product.texture.length > 0 && (
+            <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Texture</span>
+              <div className="flex flex-wrap gap-1">
+                {product.texture.slice(0, 2).map((tex, idx) => (
+                  <span key={idx} className="text-white/90 text-xs hover:text-white transition-colors duration-300 capitalize">
+                    {tex}{idx < Math.min((product.texture as string[]).length, 2) - 1 && ', '}
+                  </span>
+                ))}
+                {(product.texture as string[]).length > 2 && <span className="text-white/60 text-xs">+{(product.texture as string[]).length - 2}</span>}
+              </div>
+            </div>
+          )}
 
-      
-      {productType === 'vape' && product.nose && (
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-white/70 text-sm md:text-xs">Nose:</span>
-          <span className="text-white/70 text-base md:text-xs hover:text-white transition-colors duration-300 capitalize">
-            {Array.isArray(product.nose) ? product.nose.join(', ') : product.nose}
-          </span>
+          {/* Effects Container */}
+          {(productType as string) !== 'edible' && (productType as string) !== 'moonwater' && product.spotlight && (
+            <div className={`p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem] ${
+              (productType === 'flower' || productType === 'vape' || productType === 'concentrate') ? 'hidden md:block' : ''
+            }`}>
+              <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Effects</span>
+              <span className={`text-xs hover:opacity-80 transition-colors duration-300 capitalize ${
+                product.vibe === 'relax' ? 'text-purple-300' :
+                product.vibe === 'energize' ? 'text-green-300' :
+                'text-emerald-300'
+              }`}>
+                {product.spotlight}
+              </span>
+            </div>
+          )}
         </div>
       )}
-      
-                      {(productType === 'wax' || productType === 'concentrate') && product.texture && Array.isArray(product.texture) && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          <span className="text-white/70 text-sm md:text-xs mr-1">Texture:</span>
-          {product.texture.map((tex, idx) => (
-            <span key={idx} className="text-white/70 text-base md:text-xs hover:text-white transition-colors duration-300 capitalize">
-              {tex}
-            </span>
-          ))}
-        </div>
-      )}
-      
 
-      
-      {/* Effects - Show real ACF effects data */}
-      {productType !== 'edible' && productType !== 'moonwater' && product.spotlight && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          <span className="text-white/70 text-sm md:text-xs mr-1">Effects:</span>
-          <span className={`text-base md:text-xs hover:opacity-80 transition-colors duration-300 capitalize ${
-            product.vibe === 'relax' ? 'text-purple-300' :
-            product.vibe === 'energize' ? 'text-green-300' :
-            'text-emerald-300'
-          }`}>
-            {product.spotlight}
-          </span>
-        </div>
-      )}
-      
-      {/* Description - Desktop only for edibles, desktop only for others */}
-      {productType === 'edible' ? (
-        <div className="hidden md:block mb-2">
-          <p className={`text-xs leading-relaxed transition-colors duration-300 ${
-            isExpanded ? 'text-white/80' : 'text-white/70'
-          }`}>
-            {product.description}
-          </p>
-        </div>
-      ) : (
-        <div className="hidden md:block">
+      {/* Description Container - Full width at bottom */}
+      {product.description && (
+        <div className="hidden md:block mb-3 p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+          <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Description</span>
           <p className={`text-xs leading-relaxed transition-colors duration-300 ${
             isExpanded ? 'text-white/80' : 'text-white/70'
           }`}>
@@ -464,7 +468,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
   const getDefaultSelection = (productId: number) => {
     if (productType === 'flower') return format === 'flower' ? '3.5g' : '1-pack';
     if (productType === 'edible') return format === 'single' ? '1-piece' : '10-pack';
-    if (productType === 'vape') return '0.5g';
+    if (productType === 'vape') return '1';
     if (productType === 'wax' || productType === 'concentrate') return '1g';
     if (productType === 'moonwater') {
       // For variable moonwater products, set default flavor and pack size
@@ -551,12 +555,34 @@ export default function DenseView<T extends BaseFeaturedProduct>({
       boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07)'
     }}>
       <div className="w-full relative z-10">
-        <div className="w-full grid grid-cols-1 gap-1 md:gap-2 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`w-full grid grid-cols-1 gap-1 md:gap-2 md:grid-cols-2 ${['vape', 'edible', 'concentrate', 'wax', 'flower'].includes(productType) ? '' : 'lg:grid-cols-3'}`}>
           {products.map((product, index) => {
+
             const selectedOption = selectedOptions[product.id] || getDefaultSelection(product.id);
             
-            // Use static pricing for products
-            const price = pricing[selectedOption as keyof typeof pricing] || product.price || 15;
+            // Determine pricing based on product type and available data
+            let price: number;
+            
+            // For concentrates/wax/vapes, always prioritize variation pricing from WooCommerce
+            if (productType === 'concentrate' || productType === 'wax' || productType === 'vape') {
+              const productWithVariations = product as any;
+              const variationPricing = productWithVariations.variationPricing;
+              
+              // Check if we have valid variation pricing
+              if (variationPricing && 
+                  typeof variationPricing === 'object' && 
+                  Object.keys(variationPricing).length > 0) {
+                // Use the variation price for the selected option, fallback to '1' for vapes
+                const priceKey = variationPricing[selectedOption] ? selectedOption : '1';
+                price = variationPricing[priceKey] || (productType === 'vape' ? 49.99 : 35);
+              } else {
+                // Fallback to product base price or default pricing
+                price = product.price || (productType === 'vape' ? 49.99 : 35);
+              }
+            } else {
+              // Use config pricing for all other product types (flower, edibles, etc.)
+              price = pricing[selectedOption as keyof typeof pricing] || product.price || 15;
+            }
             
             const isImageLoaded = loadedImages.has(product.id);
             const isExpanded = expandedProducts.has(product.id);
@@ -608,11 +634,13 @@ export default function DenseView<T extends BaseFeaturedProduct>({
 
                   {/* Description - Full width under everything for mobile */}
                   <div className="md:hidden mb-3">
-                    <p className={`text-sm leading-relaxed transition-colors duration-300 ${
-                      isExpanded ? 'text-white/80' : 'text-white/70'
-                    }`}>
-                      {product.description}
-                    </p>
+                    <div className="p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+                      <p className={`text-sm leading-relaxed transition-colors duration-300 ${
+                        isExpanded ? 'text-white/80' : 'text-white/70'
+                      }`}>
+                        {product.description}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Text indicator for expanding options - Mobile only */}
@@ -626,9 +654,27 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-between items-end">
+                    <div className="flex flex-col">
+                      {/* Stock Status */}
+                      {(product as any).stockQuantity !== undefined && (
+                        <div className="text-xs mb-1">
+                          {(product as any).inStock ? (
+                            <span className="text-green-400">
+                              {(product as any).stockQuantity === null ? 'In Stock' : 
+                               (product as any).stockQuantity > 10 ? 'In Stock' :
+                               (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
+                            </span>
+                          ) : (
+                            <span className="text-red-400">Out of Stock</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <div className="text-white/95 font-light text-lg md:text-xl group-hover:text-white transition-colors duration-300">
-                      <span className="text-green-400">$</span>{price.toFixed(2)} 
+
+                                              <span className="text-green-400">$</span>
+                        <span key={`${product.id}-${selectedOption}-${price}`}>{price.toFixed(2)}</span> 
                       {productType === 'moonwater' && (product as any).isVariable ? (
                         <span className="text-xs text-white/60">
                           {selectedOption?.includes('pack-') ? 
@@ -638,7 +684,9 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                         </span>
                       ) : (
                         <span className="text-xs text-white/60">
-                          /{productType === 'edible' ? selectedOption.replace('-piece', '') : selectedOption}
+                          /{productType === 'edible' ? selectedOption.replace('-piece', '') : 
+                            productType === 'vape' ? (selectedOption === '1' ? 'vape' : 'vapes') :
+                            selectedOption}
                         </span>
                       )}
                     </div>
@@ -653,37 +701,51 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                       <div className={`flex flex-col gap-3 pt-2 transition-all duration-150 ${
                         isExpanded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                       }`}>
-                        {/* Default Size/Qty Selector for products */}
-                        <div className="flex flex-col gap-2">
+                        {/* Default Size Selector for non-edible products */}
+                        {productType !== 'edible' && (
+                          <div className="flex flex-col gap-2">
                             <span className="text-white/70 text-sm font-medium">
-                              {productType === 'edible' ? 'Qty:' : 'Size:'}
+                              {productType === 'vape' ? 'Quantity:' : 'Size:'}
                             </span>
-                            <div className="grid grid-cols-5 gap-2 w-full">
-                              {sizes.map((size, idx) => (
-                                <button
-                                  key={size}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onOptionSelect(product.id, size);
-                                  }}
-                                  className={`px-2 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[36px] ${
-                                    selectedOption === size
-                                      ? 'bg-white/20 text-white border border-white/30'
-                                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90'
-                                  }`}
-                                >
-                                  {productType === 'edible' ? size.replace('-piece', '') : size}
-                                </button>
-                              ))}
+                            <div className="grid grid-cols-4 gap-1.5 w-full">
+                              {sizes.map((size, idx) => {
+                                return (
+                                  <button
+                                    key={size}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOptionSelect(product.id, size);
+                                    }}
+                                    className={`px-1.5 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[40px] flex flex-col items-center justify-center ${
+                                      selectedOption === size
+                                        ? 'bg-white/20 text-white border border-white/30'
+                                        : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-medium">
+                                      {size}
+                                    </span>
+                                    <span className="text-[10px] opacity-70">
+                                      {size === '1' ? 'Vape' : 'Vapes'}
+                                    </span>
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
+                        )}
 
                         <div className="flex gap-2">
                           <button
                             onClick={(e) => onAddToCart(product, e)}
-                            className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-sm text-white/80 hover:text-white font-light transition-all duration-300 hover:scale-[1.02] active:scale-95 min-h-[40px]"
+                            disabled={!(product as any).inStock}
+                            className={`flex-1 px-4 py-2 border rounded-lg text-sm font-light transition-all duration-300 min-h-[40px] ${
+                              (product as any).inStock === false 
+                                ? 'bg-gray-600 border-gray-600 text-gray-400 cursor-not-allowed' 
+                                : 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-white/80 hover:text-white hover:scale-[1.02] active:scale-95'
+                            }`}
                           >
-                            Add to Cart
+                            {(product as any).inStock === false ? 'Out of Stock' : 'Add to Cart'}
                           </button>
                           <button
                             onClick={(e) => {

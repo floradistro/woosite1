@@ -2,9 +2,9 @@ import { VAPE_PRICING, type FilterState, type FeaturedProduct } from './constant
 // Utility functions only - hooks moved to custom hook files
 
 // Utility functions for vape page
-export const getProductPrice = (productId: number, selectedWeights: Record<number, string>): number => {
-  const selectedWeight = selectedWeights[productId] || '0.5g';
-  return VAPE_PRICING[selectedWeight as keyof typeof VAPE_PRICING];
+export const getProductPrice = (productId: number, selectedQuantities: Record<number, string>): number => {
+  const selectedQuantity = selectedQuantities[productId] || '1';
+  return VAPE_PRICING[selectedQuantity as keyof typeof VAPE_PRICING];
 };
 
 export const getHandle = (title: string): string => 

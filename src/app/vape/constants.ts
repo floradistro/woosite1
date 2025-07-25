@@ -1,7 +1,9 @@
 // Shared constants for vape page
 export const VAPE_PRICING = {
-  '0.5g': 35,
-  '1g': 60
+  '1': 49.99,
+  '2': 79.99,
+  '3': 104.99,
+  '4': 124.99
 } as const;
 
 // Legacy exports for backward compatibility
@@ -12,7 +14,7 @@ export const DISPOSABLE_PRICING = {
   '3-pack': 65
 } as const;
 
-export const VAPE_SIZES = ['0.5g', '1g'] as const;
+export const VAPE_SIZES = ['1', '2', '3', '4'] as const;
 export const WEIGHTS = VAPE_SIZES;
 export const DISPOSABLE_SIZES = ['1-pack', '2-pack', '3-pack'] as const;
 
@@ -83,6 +85,44 @@ export interface FilterState {
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
 
+// Helper function to get product variations
+async function getProductVariations(productId: number): Promise<any[]> {
+  try {
+    const storeUrl = process.env.WOOCOMMERCE_STORE_URL || 
+                    process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL || 
+                    'https://distropass.wpcomstaging.com';
+    
+    const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY || 
+                       process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
+    
+    const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET || 
+                          process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
+
+    if (!consumerKey || !consumerSecret) {
+      return [];
+    }
+
+    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+    const url = `${storeUrl}/wp-json/wc/v3/products/${productId}/variations`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`Error fetching variations for product ${productId}:`, error);
+    return [];
+  }
+}
+
 // Transform WooCommerce products to vape format
 export async function getVapeProducts(): Promise<FeaturedProduct[]> {
   try {
@@ -96,7 +136,8 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
       return [];
     }
     
-    return vapeProducts.map((product, index) => {
+    // Process products with variation pricing support
+    const processedProducts = await Promise.all(vapeProducts.map(async (product, index) => {
       const categories = product.categories?.map(cat => cat.name.toLowerCase()) || [];
       const tags = product.tags?.map(tag => tag.name.toLowerCase()) || [];
       const acf = product.acf || {};
@@ -240,11 +281,31 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
         return 'Balanced Euphoric Uplifted';
       };
 
+      // Fetch variations for tiered pricing
+      let variationPricing: Record<string, number> = {};
+      try {
+        if (product.type === 'variable' && product.variations && product.variations.length > 0) {
+          const variations = await getProductVariations(product.id);
+          
+          // Extract quantity-based pricing from variations
+          variations.forEach((variation: any) => {
+            const quantityAttr = variation.attributes?.find((attr: any) => 
+              attr.name === 'Quantity' || attr.slug === 'pa_edible-quantity'
+            );
+            if (quantityAttr && quantityAttr.option && variation.price) {
+              variationPricing[quantityAttr.option] = parseFloat(variation.price);
+            }
+          });
+        }
+      } catch (error) {
+        console.log(`⚠️ Could not fetch variations for ${product.name}:`, error);
+      }
+
       const transformedProduct = {
         id: product.id,
         title: product.name,
         description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || `Premium ${getCategory()} vape cartridge with exceptional quality`,
-        price: parseFloat(product.price) || 35,
+        price: parseFloat(product.price) || VAPE_PRICING['1'],
         image: product.images?.[0]?.src || "/icons/vapeicon2.png",
         category: getCategory(),
         vibe: getVibe(),
@@ -253,7 +314,8 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
         spotlight: getSpotlight(),
         featured: index < 4, // First 4 products are featured
         lineage: getLineage(),
-        terpenes: getTerpenes()
+        terpenes: getTerpenes(),
+        variationPricing: Object.keys(variationPricing).length > 0 ? variationPricing : VAPE_PRICING
       };
       
       // Enhanced debug log for first few products (same as flower)
@@ -283,7 +345,9 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
       }
       
       return transformedProduct;
-    });
+    }));
+    
+    return processedProducts;
   } catch (error) {
     console.error('❌ Error fetching vape products:', error);
     return [];
@@ -292,3 +356,10 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
 
 // For backward compatibility during transition
 export const VAPE_PRODUCTS: FeaturedProduct[] = []; 
+
+export const VAPE_FORMAT_LABELS = {
+  '1': '1 Vape',
+  '2': '2 Vapes',
+  '3': '3 Vapes', 
+  '4': '4 Vapes'
+} as const; 

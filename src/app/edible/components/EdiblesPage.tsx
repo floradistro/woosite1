@@ -3,33 +3,31 @@
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
-import { MoonwaterProductWithVariations } from '../constants';
-import MoonwaterGrid from './MoonwaterGrid';
+import { FeaturedProduct, SINGLE_PRICING, PACK_PRICING, SINGLE_SIZES, PACK_SIZES } from '../constants';
+import EdiblesGrid from './EdiblesGrid';
 
 import ReviewsSection from '@/components/product/ReviewsSection';
 import Section from '../../components/Section';
 
-
-
-interface MoonwaterPageProps {
-  products: MoonwaterProductWithVariations[];
+interface EdiblesPageProps {
+  products: FeaturedProduct[];
 }
 
-function MoonwaterPageContent({ products }: MoonwaterPageProps) {
+function EdiblesPageContent({ products }: EdiblesPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { addToCart } = useCart();
   
-  // State management - simplified without filters
+  // State management
   const [selectedOptions, setSelectedOptions] = useState<Record<number, string>>({});
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const [format, setFormat] = useState<string>('bottle');
+  const [format, setFormat] = useState<string>('single');
   const [isLoading, setIsLoading] = useState(true);
 
   // Handle URL parameters for format
   useEffect(() => {
     const formatParam = searchParams.get('format');
-    if (formatParam && ['bottle', 'pack'].includes(formatParam)) {
+    if (formatParam && ['single', 'bulk'].includes(formatParam)) {
       setFormat(formatParam);
     }
   }, [searchParams]);
@@ -42,52 +40,40 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
 
   // Use products directly without filtering
   const displayedProducts = useMemo(() => {
-    return products as MoonwaterProductWithVariations[];
+    return products as FeaturedProduct[];
   }, [products]);
 
+  // Get pricing and sizes based on format
+  const pricing = format === 'single' ? SINGLE_PRICING : PACK_PRICING;
+  const sizes = format === 'single' ? [...SINGLE_SIZES] : [...PACK_SIZES];
+
   // Handle product click
-  const handleProductClick = (product: MoonwaterProductWithVariations) => {
+  const handleProductClick = (product: FeaturedProduct) => {
     // Navigate to product detail or open modal
     console.log('Product clicked:', product.title);
   };
 
-  // Handle option selection (flavor, pack size)
+  // Handle option selection (quantity/size)
   const handleOptionSelect = (productId: number, option: string) => {
     setSelectedOptions(prev => ({ ...prev, [productId]: option }));
   };
 
   // Handle add to cart
-  const handleAddToCart = async (product: MoonwaterProductWithVariations, e: React.MouseEvent) => {
+  const handleAddToCart = async (product: FeaturedProduct, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Get selected variation details
-    const selectedOption = selectedOptions[product.id];
+    const selectedOption = selectedOptions[product.id] || sizes[0];
+    const price = pricing[selectedOption as keyof typeof pricing] || product.price;
+    
     const cartItem = {
       id: product.id,
       title: product.title,
-      price: product.price,
+      price: price,
       image: product.image,
-      weight: 'bottle', // Default weight for moonwater
+      weight: selectedOption,
       quantity: 1,
       variation: null as any
     };
-
-    // If product has variations, get the selected variation
-    if (product.isVariable && product.variations?.length > 0) {
-      const selectedFlavor = selectedOption?.includes('flavor-') ? selectedOption.split('flavor-')[1] : null;
-      const selectedPackSize = selectedOption?.includes('pack-') ? selectedOption.split('pack-')[1] : null;
-      
-      const matchingVariation = product.variations.find((v: any) => 
-        (!selectedFlavor || v.flavor === selectedFlavor) && 
-        (!selectedPackSize || v.packSize === selectedPackSize)
-      ) || product.variations[0];
-
-      cartItem.price = matchingVariation.price;
-      cartItem.variation = {
-        flavor: matchingVariation.flavor,
-        packSize: matchingVariation.packSize
-      };
-    }
 
     try {
       await addToCart(cartItem);
@@ -105,7 +91,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#4a4a4a] flex items-center justify-center">
-        <div className="text-white/60 text-lg">Loading moonwater collection...</div>
+        <div className="text-white/60 text-lg">Loading edible collection...</div>
       </div>
     );
   }
@@ -130,7 +116,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           <div 
             className="absolute w-32 h-32 md:w-52 md:h-52 rounded-full blur-xl animate-pulse"
             style={{
-              background: 'radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)',
               top: '10%',
               left: '10%',
               animationDuration: '4s'
@@ -140,7 +126,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           <div 
             className="absolute w-24 h-24 md:w-36 md:h-36 rounded-full blur-lg animate-pulse"
             style={{
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, transparent 70%)',
               bottom: '15%',
               right: '15%',
               animationDuration: '6s',
@@ -151,7 +137,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           <div 
             className="absolute w-28 h-28 md:w-44 md:h-44 rounded-full blur-md animate-pulse"
             style={{
-              background: 'radial-gradient(circle, rgba(147, 197, 253, 0.34) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(168, 85, 247, 0.34) 0%, transparent 70%)',
               top: '20%',
               right: '40%',
               animationDuration: '5.5s',
@@ -170,17 +156,12 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
         {/* Hero Content */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center space-y-3 animate-fadeInUp px-6">
-            <h1 className="text-white font-bold text-4xl md:text-5xl lg:text-6xl leading-tight transform transition-all duration-700" 
-                style={{ 
-                  fontFamily: 'Nunito Sans, Varela Round, sans-serif',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                  animation: 'fadeInUp 0.8s ease-out'
-                }}>
-              [shop moonwater]
+            <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light tracking-wide transform hover:scale-105 transition-transform duration-200 uppercase">
+              Sweet. Then serious.
             </h1>
-            <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide opacity-0 animate-fadeInUp" 
+            <h2 className="text-white/90 text-base md:text-lg lg:text-xl font-light tracking-wide max-w-2xl mx-auto drop-shadow-lg opacity-0 animate-fadeInUp" 
                 style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-              Pop, sip, float.
+              Flavor first. Effect guaranteed.
             </h2>
           </div>
         </div>
@@ -197,21 +178,23 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           }}
         >
           <div className="flex items-center justify-center gap-2 md:gap-4 text-center">
-            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ All Natural Ingredients</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Precisely Dosed</span>
             <span className="text-white/40">•</span>
-            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Fast-acting</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Artisan Quality</span>
             <span className="text-white/40">•</span>
-            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Refreshing</span>
+            <span className="text-white/90 font-medium text-xs md:text-sm lg:text-base">✓ Delicious</span>
           </div>
         </div>
       </section>
 
       {/* Products Grid */}
-      <MoonwaterGrid
+      <EdiblesGrid
         products={displayedProducts}
         selectedOptions={selectedOptions}
         loadedImages={loadedImages}
         format={format}
+        pricing={pricing}
+        sizes={sizes}
         onProductClick={handleProductClick}
         onOptionSelect={handleOptionSelect}
         onAddToCart={handleAddToCart}
@@ -220,35 +203,35 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
       />
 
       {/* Reviews Section */}
-      <ReviewsSection productType="moonwater" />
+      <ReviewsSection productType="edible" />
 
       {/* Quality Section */}
       <Section className="bg-gradient-to-br from-[#4a4a4a] to-[#464646] py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
-              {format === 'bottle' ? 'Liquid Elevation. Pure Hydration.' : 'Stock Up. Stay Lifted.'}
+              {format === 'single' ? 'Precision Dosed. Deliciously Crafted.' : 'Stock Up. Save More.'}
             </h2>
             <p className="text-xl text-white/80 font-light opacity-0 animate-[fadeInUp_1s_ease-out_0.4s_forwards]">
-              {format === 'bottle' 
-                ? 'Every bottle is crafted for smooth effects and incredible taste.'
-                : 'Multi-packs for those who know what they like and want more of it.'
+              {format === 'single' 
+                ? 'Every edible is precisely dosed for consistent, reliable effects.'
+                : 'Bulk packs for those who know what works and want to save.'
               }
             </p>
           </div>
 
           {/* Quality Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-            {format === 'bottle' ? (
+            {format === 'single' ? (
               <>
                 <div className="space-y-6">
                   <div className="group">
                     <div className="flex items-start gap-4">
-                      <div className="w-1 h-16 bg-gradient-to-b from-green-400 to-green-400/20 rounded-full"></div>
+                      <div className="w-1 h-16 bg-gradient-to-b from-pink-400 to-pink-400/20 rounded-full"></div>
                       <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Natural Ingredients</h3>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Artisan Quality</h3>
                         <p className="text-white/70 font-light leading-relaxed">
-                          Pure water infused with premium hemp extract. No artificial flavors, just natural refreshment.
+                          Small-batch production with premium ingredients. Real fruit, real chocolate, real flavor—no artificial nonsense.
                         </p>
                       </div>
                     </div>
@@ -257,11 +240,11 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
                 <div className="space-y-6">
                   <div className="group">
                     <div className="flex items-start gap-4">
-                      <div className="w-1 h-16 bg-gradient-to-b from-blue-400 to-blue-400/20 rounded-full"></div>
+                      <div className="w-1 h-16 bg-gradient-to-b from-orange-400 to-orange-400/20 rounded-full"></div>
                       <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Fast-Acting Formula</h3>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Lab-Tested Consistency</h3>
                         <p className="text-white/70 font-light leading-relaxed">
-                          Advanced nano-emulsion technology for rapid onset. Feel the effects within 15-30 minutes.
+                          Every batch tested for potency and purity. Consistent dosing in every piece, guaranteed.
                         </p>
                       </div>
                     </div>
@@ -272,9 +255,9 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
                     <div className="flex items-start gap-4">
                       <div className="w-1 h-16 bg-gradient-to-b from-purple-400 to-purple-400/20 rounded-full"></div>
                       <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Precise Dosing</h3>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Onset You Can Trust</h3>
                         <p className="text-white/70 font-light leading-relaxed">
-                          Consistent 10mg THC per bottle. Perfect for micro-dosing or sharing with friends.
+                          Feel it in 30-60 minutes. Effects last 4-6 hours. Predictable, reliable, enjoyable.
                         </p>
                       </div>
                     </div>
@@ -286,11 +269,24 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
                 <div className="space-y-6">
                   <div className="group">
                     <div className="flex items-start gap-4">
-                      <div className="w-1 h-16 bg-gradient-to-b from-green-400 to-green-400/20 rounded-full"></div>
+                      <div className="w-1 h-16 bg-gradient-to-b from-pink-400 to-pink-400/20 rounded-full"></div>
                       <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Bulk Savings</h3>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Value Pricing</h3>
                         <p className="text-white/70 font-light leading-relaxed">
-                          Save more when you buy in bulk. Perfect for regular users who want the best value.
+                          The more you buy, the more you save. Stock up on your favorites without breaking the bank.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <div className="group">
+                    <div className="flex items-start gap-4">
+                      <div className="w-1 h-16 bg-gradient-to-b from-orange-400 to-orange-400/20 rounded-full"></div>
+                      <div>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Freshness Guaranteed</h3>
+                        <p className="text-white/70 font-light leading-relaxed">
+                          Individually wrapped for freshness. Long shelf life means you can stock up worry-free.
                         </p>
                       </div>
                     </div>
@@ -301,22 +297,9 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
                     <div className="flex items-start gap-4">
                       <div className="w-1 h-16 bg-gradient-to-b from-purple-400 to-purple-400/20 rounded-full"></div>
                       <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Party-Ready Packs</h3>
+                        <h3 className="text-white/90 font-medium text-lg mb-2">Perfect for Sharing</h3>
                         <p className="text-white/70 font-light leading-relaxed">
-                          Perfect for gatherings, events, or just keeping your fridge stocked. Shareable sizes for any occasion.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="group">
-                    <div className="flex items-start gap-4">
-                      <div className="w-1 h-16 bg-gradient-to-b from-cyan-400 to-cyan-400/20 rounded-full"></div>
-                      <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">Mix & Match Flavors</h3>
-                        <p className="text-white/70 font-light leading-relaxed">
-                          Build your own variety pack. Try different flavors and effects to find your perfect rotation.
+                          Great for parties, events, or just having plenty on hand. Share the experience.
                         </p>
                       </div>
                     </div>
@@ -329,9 +312,9 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
           {/* Bottom Statement */}
           <div className="text-center mt-16 opacity-0 animate-[fadeInUp_1s_ease-out_0.8s_forwards]">
             <p className="text-lg text-white/70 font-light max-w-2xl mx-auto leading-relaxed">
-              {format === 'bottle' 
-                ? 'Experience cannabis in its most refreshing form. Moonwater delivers consistent effects with unmatched taste and quality.'
-                : 'Stock up on your favorites and never run out. Moonwater packs offer convenience, value, and variety in every order.'
+              {format === 'single' 
+                ? 'You won\'t find chalky, bitter edibles here. You get delicious, precisely-dosed treats that actually taste good.'
+                : 'You won\'t find overpriced single servings here. You get bulk value without compromising on quality.'
               }
             </p>
           </div>
@@ -365,14 +348,14 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
   );
 }
 
-export default function MoonwaterPage({ products }: MoonwaterPageProps) {
+export default function EdiblesPage({ products }: EdiblesPageProps) {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#4a4a4a] flex items-center justify-center">
-        <div className="text-white/60 text-lg">Loading moonwater collection...</div>
+        <div className="text-white/60 text-lg">Loading edible collection...</div>
       </div>
     }>
-      <MoonwaterPageContent products={products} />
+      <EdiblesPageContent products={products} />
     </Suspense>
   );
 } 

@@ -164,9 +164,9 @@ const MoonwaterCard = ({
               )}
             </div>
 
-            {/* Description */}
+            {/* Description - Desktop only, shown inline */}
             {product.description && (
-              <div className="mb-3 p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+              <div className="hidden md:block mb-3 p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
                 <p className="text-white/90 text-xs font-light leading-relaxed">
                   {product.description}
                 </p>
@@ -195,6 +195,17 @@ const MoonwaterCard = ({
             </div>
           </div>
         </div>
+
+        {/* Description - Mobile only, full width below */}
+        {product.description && (
+          <div className="md:hidden mb-3">
+            <div className="p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+              <p className="text-white/90 text-xs font-light leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Variations Selection - Only show if product has variations and is expanded */}
         {product.isVariable && product.variations?.length > 0 && (

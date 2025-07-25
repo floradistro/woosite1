@@ -1,8 +1,9 @@
 // Shared constants for edibles page
 export const SINGLE_PRICING = {
-  '1-piece': 8,
-  '2-piece': 15,
-  '3-piece': 22
+  '1-pack': 29.99,
+  '2-pack': 49.99,
+  '3-pack': 64.99,
+  '4-pack': 74.99
 } as const;
 
 // Bulk pack pricing
@@ -12,7 +13,7 @@ export const PACK_PRICING = {
   '50-pack': 250
 } as const;
 
-export const SINGLE_SIZES = ['1-piece', '2-piece', '3-piece'] as const;
+export const SINGLE_SIZES = ['1-pack', '2-pack', '3-pack', '4-pack'] as const;
 export const PACK_SIZES = ['10-pack', '20-pack', '50-pack'] as const;
 
 // Format types

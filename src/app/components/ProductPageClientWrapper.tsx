@@ -66,6 +66,8 @@ export default function ProductPageClientWrapper({
     const pricing = isPrimary ? config.pricing.primary : config.pricing.secondary!;
     const sizes = Object.keys(pricing);
     
+
+    
     return (
       <DenseView 
         {...props}

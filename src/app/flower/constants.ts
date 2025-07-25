@@ -68,11 +68,14 @@ export interface Product {
   nose: Array<'candy' | 'gas' | 'cake' | 'funk' | 'sherb'>;
   lineage?: string;
   terpenes?: string[];
+  stockQuantity?: number | null;
+  stockStatus?: string;
+  inStock?: boolean;
 }
 
 export interface FeaturedProduct extends Product {
   spotlight: string;
-  featured: boolean;
+  featured?: boolean;
 }
 
 export interface FilterState {
@@ -256,7 +259,7 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
         id: product.id,
         title: product.name,
         description: product.short_description?.replace(/<[^>]*>/g, '') || product.description?.replace(/<[^>]*>/g, '') || `Premium ${getCategory()} strain with exceptional quality`,
-        price: parseFloat(product.price) || 40,
+        price: parseFloat(product.price) || parseFloat(product.regular_price) || 0, // Use actual WooCommerce price, don't fallback to hardcoded 40
         image: product.images?.[0]?.src || '/icons/FLOWER.png',
         category: getCategory(),
         vibe: getVibe(),
@@ -265,13 +268,30 @@ export async function getFlowerProducts(): Promise<FeaturedProduct[]> {
         spotlight: getSpotlight(),
         featured: index < 4, // First 4 products are featured
         lineage: getLineage(),
-        terpenes: getTerpenes()
+        terpenes: getTerpenes(),
+        stockQuantity: product.stock_quantity,
+        stockStatus: product.stock_status,
+        inStock: product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity > 0)
       };
       
       // Enhanced debug log for first few products
       if (index < 3) {
         console.log(`🌿 Flower Product Debug - ${transformedProduct.title}:`, {
           id: product.id,
+          woocommerce_pricing: {
+            price: product.price,
+            regular_price: product.regular_price,
+            sale_price: product.sale_price,
+            parsed_price: parseFloat(product.price),
+            parsed_regular_price: parseFloat(product.regular_price),
+            final_price: transformedProduct.price
+          },
+          stock_info: {
+            stock_quantity: product.stock_quantity,
+            stock_status: product.stock_status,
+            manage_stock: product.manage_stock,
+            inStock: transformedProduct.inStock
+          },
           acf_object: acf,
           acf_keys: Object.keys(acf),
           meta_data_keys: product.meta_data?.map((m: any) => m.key) || [],

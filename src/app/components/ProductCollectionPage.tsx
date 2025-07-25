@@ -155,7 +155,20 @@ function ProductCollectionContent({
       ? config.pricing.primary 
       : config.pricing.secondary!;
     
-    const price = pricing[selectedWeight];
+    // Determine pricing based on product type and available data
+    let price: number;
+    
+    // For concentrates and vapes with custom pricing, use that directly
+    if ((config.productType === 'concentrate' || config.productType === 'wax' || config.productType === 'vape') && 
+        (product as any).variationPricing && 
+        Object.keys((product as any).variationPricing).length > 0) {
+      // Use real WooCommerce tiered pricing from variations
+      const variationPricing = (product as any).variationPricing;
+      price = variationPricing[selectedWeight] || pricing[selectedWeight] || product.price || (config.productType === 'vape' ? 49.99 : 55);
+    } else {
+      // Use config pricing for all other cases (like flower does)
+      price = pricing[selectedWeight] || product.price || (config.productType === 'vape' ? 49.99 : 15);
+    }
     
     // Customize title based on format
     let title = product.title;
@@ -216,6 +229,18 @@ function ProductCollectionContent({
 
   return (
     <div className="min-h-screen bg-[#4a4a4a] text-white">
+      {/* Extended dot grid background that flows behind header nav and banner */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-[-1] opacity-22"
+        style={{
+          height: 'calc(100vh * 0.4)', // Cover top 40% of viewport
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.45) 1.2px, transparent 1.2px)`,
+          backgroundSize: '24px 24px',
+          backgroundPosition: '0 0',
+          pointerEvents: 'none'
+        }}
+      ></div>
+
       {/* Hero Section */}
       <HeroSection format={format} />
 
@@ -239,6 +264,7 @@ function ProductCollectionContent({
         onFormatChange={handleFormatChange}
         productCount={filteredProducts.length}
         totalCount={products.length}
+        formats={config.formats}
       />
 
       {/* Products Section */}
@@ -251,106 +277,121 @@ function ProductCollectionContent({
       <ReviewsSection />
 
       {/* Quality Section */}
-      <section className="relative bg-[#4a4a4a] overflow-hidden -mt-px" style={{ 
-        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07)'
-      }}>
-        <div className="relative z-10 py-16 px-8">
-          <div className="max-w-4xl mx-auto">
-            
-            {/* Section Header */}
-            <div className="text-center mb-12 opacity-0 animate-[fadeInUp_1s_ease-out_0.3s_forwards]">
-              <h2 className="text-4xl md:text-5xl font-extralight tracking-wide mb-4">
-                {format === config.formats.secondary && config.content.qualitySection.title.secondary
-                  ? config.content.qualitySection.title.secondary
-                  : config.content.qualitySection.title.primary}
-              </h2>
-              <p className="text-xl text-white/80 font-light">
-                {format === config.formats.secondary && config.content.qualitySection.subtitle.secondary
-                  ? config.content.qualitySection.subtitle.secondary
-                  : config.content.qualitySection.subtitle.primary}
-              </p>
-            </div>
+      <Section className="bg-gradient-to-br from-[#4a4a4a] to-[#464646] py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
+              {format === config.formats.secondary && config.content.qualitySection.title.secondary
+                ? config.content.qualitySection.title.secondary
+                : config.content.qualitySection.title.primary}
+            </h2>
+            <p className="text-xl text-white/80 font-light opacity-0 animate-[fadeInUp_1s_ease-out_0.4s_forwards]">
+              {format === config.formats.secondary && config.content.qualitySection.subtitle.secondary
+                ? config.content.qualitySection.subtitle.secondary
+                : config.content.qualitySection.subtitle.primary}
+            </p>
+          </div>
 
-            {/* Content Grid */}
-            <div className="grid md:grid-cols-3 gap-8 opacity-0 animate-[fadeInUp_1s_ease-out_0.5s_forwards]">
-              {config.content.qualitySection.columns.map((column, index) => (
-                <div key={index} className="space-y-6">
-                  <div className="group">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-1 h-16 bg-gradient-to-b from-${column.color}-400 to-${column.color}-400/20 rounded-full`}></div>
-                      <div>
-                        <h3 className="text-white/90 font-medium text-lg mb-2">
-                          {format === config.formats.secondary && column.title.secondary
-                            ? column.title.secondary
-                            : column.title.primary}
-                        </h3>
-                        <p className="text-white/70 font-light leading-relaxed">
-                          {format === config.formats.secondary && column.description.secondary
-                            ? column.description.secondary
-                            : column.description.primary}
-                        </p>
-                      </div>
+          {/* Quality Features Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+            {config.content.qualitySection.columns.map((column, index) => (
+              <div key={index} className="space-y-6">
+                <div className="group">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-1 h-16 bg-gradient-to-b from-${column.color}-400 to-${column.color}-400/20 rounded-full`}></div>
+                    <div>
+                      <h3 className="text-white/90 font-medium text-lg mb-2">
+                        {format === config.formats.secondary && column.title.secondary
+                          ? column.title.secondary
+                          : column.title.primary}
+                      </h3>
+                      <p className="text-white/70 font-light leading-relaxed">
+                        {format === config.formats.secondary && column.description.secondary
+                          ? column.description.secondary
+                          : column.description.primary}
+                      </p>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Bottom Statement */}
-            <div className="mt-12 text-center opacity-0 animate-[fadeInUp_1s_ease-out_0.7s_forwards]">
-              <div className="inline-block">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="h-px w-16 bg-gradient-to-r from-transparent to-white/30"></div>
-                  <div className={`w-2 h-2 bg-${config.content.qualitySection.bottomStatement.highlightColor}-400 rounded-full animate-pulse`}></div>
-                  <div className="h-px w-16 bg-gradient-to-l from-transparent to-white/30"></div>
-                </div>
-                <p className="text-xl text-white/85 font-light leading-relaxed">
-                  {format === config.formats.secondary && config.content.qualitySection.bottomStatement.text.secondary
-                    ? config.content.qualitySection.bottomStatement.text.secondary
-                    : config.content.qualitySection.bottomStatement.text.primary}
-                </p>
-                <p className={`text-lg text-${config.content.qualitySection.bottomStatement.highlightColor}-400 font-medium mt-2`}>
-                  {format === config.formats.secondary && config.content.qualitySection.bottomStatement.highlight.secondary
-                    ? config.content.qualitySection.bottomStatement.highlight.secondary
-                    : config.content.qualitySection.bottomStatement.highlight.primary}
-                </p>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Visual Elements */}
-            <div className="absolute top-1/4 -left-20 w-40 h-40 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/4 -right-20 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full blur-3xl"></div>
+          {/* Bottom Statement */}
+          <div className="text-center mt-16 opacity-0 animate-[fadeInUp_1s_ease-out_0.8s_forwards]">
+            <p className="text-lg text-white/70 font-light max-w-2xl mx-auto leading-relaxed">
+              {format === config.formats.secondary && config.content.qualitySection.bottomStatement.text.secondary
+                ? config.content.qualitySection.bottomStatement.text.secondary
+                : config.content.qualitySection.bottomStatement.text.primary}
+            </p>
+            <p className={`text-lg text-${config.content.qualitySection.bottomStatement.highlightColor}-400 font-medium mt-2`}>
+              {format === config.formats.secondary && config.content.qualitySection.bottomStatement.highlight.secondary
+                ? config.content.qualitySection.bottomStatement.highlight.secondary
+                : config.content.qualitySection.bottomStatement.highlight.primary}
+            </p>
           </div>
         </div>
-      </section>
+      </Section>
 
       {/* Experience Section */}
-      <Section id={`${config.productType}-experience-section`}>
-        <div className="relative z-10 py-8 w-full">
-          <SectionHeader 
-            title={config.content.experienceSection.title}
-            subtitle={config.content.experienceSection.subtitle}
-            delay="0.3s"
-          />
-        </div>
-        
-        <div className="max-w-4xl mx-auto px-6 pb-8">
-          <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-3 md:gap-6 opacity-0 animate-[fadeInUp_1s_ease-out_0.5s_forwards]">
+      <Section className="bg-gradient-to-br from-[#4a4a4a] to-[#464646] py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
+              {config.content.experienceSection.title}
+            </h2>
+            <p className="text-xl text-white/80 font-light opacity-0 animate-[fadeInUp_1s_ease-out_0.4s_forwards]">
+              {config.content.experienceSection.subtitle}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
             {config.content.experienceSection.columns.map((column, index) => (
-              <div key={index} className="text-center">
-                <h3 className="text-xl md:text-2xl font-light text-white mb-2">
-                  {column.title} <span className={`text-${column.highlightColor}-400`}>{column.highlight}</span>
-                </h3>
-                <p className="text-white/70 font-light">
-                  {format === config.formats.secondary && column.description.secondary
-                    ? column.description.secondary
-                    : column.description.primary}
-                </p>
+              <div key={index} className="space-y-6">
+                <div className="group">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-1 h-16 bg-gradient-to-b from-${column.highlightColor}-400 to-${column.highlightColor}-400/20 rounded-full`}></div>
+                    <div>
+                      <h3 className="text-white/90 font-medium text-lg mb-2">
+                        {column.title} <span className={`text-${column.highlightColor}-400`}>{column.highlight}</span>
+                      </h3>
+                      <p className="text-white/70 font-light leading-relaxed">
+                        {format === config.formats.secondary && column.description.secondary
+                          ? column.description.secondary
+                          : column.description.primary}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </Section>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 1.5s ease-out;
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 1.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

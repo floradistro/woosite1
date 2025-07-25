@@ -76,8 +76,8 @@ export const flowerConfig: ProductCollectionConfig = {
     secondary: 'preroll'
   },
   pricing: {
-    primary: { '3.5g': 40, '7g': 70, '14g': 130, '28g': 240 }, // WEIGHT_PRICING
-    secondary: { '1-pack': 15, '3-pack': 40, '5-pack': 60 } // PREROLL_PRICING
+    primary: { '1g': 15, '3.5g': 40, '7g': 60, '14g': 110, '28g': 200 }, // WEIGHT_PRICING
+    secondary: { '1-pack': 12, '3-pack': 30, '5-pack': 45, '10-pack': 85 } // PREROLL_PRICING
   },
   filters: {
     secondaryFilterName: 'nose',
@@ -311,7 +311,7 @@ export const vapeConfig: ProductCollectionConfig = {
     primary: 'cartridge'
   },
   pricing: {
-    primary: { '0.5g': 35, '1g': 60 } // WEIGHT_PRICING for vapes
+    primary: { '1': 49.99, '2': 79.99, '3': 104.99, '4': 124.99 } // QUANTITY_PRICING for vapes
   },
   filters: {
     secondaryFilterName: 'nose',
@@ -322,8 +322,8 @@ export const vapeConfig: ProductCollectionConfig = {
       primary: {
         title: "Big hits. Bigger flavor.",
         subtitle: "Vapes that hit like fresh flower.",
-        description: "Lab-tested cartridges with strain-specific profiles. No cutting agents.",
-        features: ["Lab-tested", "Strain-specific profiles"],
+        description: "Lab-tested cartridges with strain-specific profiles. No cutting agents. Better pricing on bulk orders.",
+        features: ["Lab-tested", "Strain-specific profiles", "Bulk discounts"],
         qualityBadges: ["Premium", "Pure potency"]
       }
     },
@@ -335,7 +335,7 @@ export const vapeConfig: ProductCollectionConfig = {
         primary: 'Every cartridge is crafted for maximum impact.'
       },
       description: {
-        primary: 'If it doesn\'t hit clean, it\'s out. No compromises.'
+        primary: 'If it doesn\'t hit clean, it\'s out. No compromises. Better pricing when you buy more.'
       },
       columns: [
         {
@@ -398,7 +398,7 @@ export const vapeConfig: ProductCollectionConfig = {
     }
   },
   defaultValues: {
-    weight: { primary: '0.5g' },
+    weight: { primary: '1' },
     sortBy: 'featured'
   },
   loadingText: 'Loading vape collection...'
@@ -412,8 +412,8 @@ export const concentrateConfig: ProductCollectionConfig = {
     secondary: 'live-resin'
   },
   pricing: {
-    primary: { '1g': 45, '2g': 85, '3.5g': 150 }, // WEIGHT_PRICING for wax
-    secondary: { '0.5g': 30, '1g': 55, '2g': 100 } // GRAM_PRICING for live resin
+    primary: { '1g': 55, '3.5g': 170, '7g': 320, '14g': 600, '28g': 1100 }, // WEIGHT_PRICING - same weights as flower but concentrate prices
+    secondary: { '1g': 65, '3.5g': 200, '7g': 380, '14g': 720, '28g': 1300 } // GRAM_PRICING for live resin
   },
   filters: {
     secondaryFilterName: 'nose',
@@ -516,7 +516,7 @@ export const concentrateConfig: ProductCollectionConfig = {
     }
   },
   defaultValues: {
-    weight: { primary: '1g', secondary: '0.5g' },
+    weight: { primary: '3.5g', secondary: '1g' },
     sortBy: 'featured'
   },
   loadingText: 'Loading concentrate collection...'

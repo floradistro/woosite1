@@ -288,4 +288,42 @@ export const wooCommerceServerAPI = {
       return [];
     }
   },
+
+  // Update product (for stock management)
+  async updateProduct(productId: number, data: any): Promise<WooCommerceProduct> {
+    try {
+      const storeUrl = process.env.WOOCOMMERCE_STORE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
+      const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
+      const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET || process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
+
+      if (!storeUrl || !consumerKey || !consumerSecret) {
+        throw new Error('Missing WooCommerce credentials');
+      }
+
+      const url = `${storeUrl}/wp-json/wc/v3/products/${productId}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
+      
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update product: ${response.status} - ${errorText}`);
+      }
+
+      const updatedProduct = await response.json();
+      
+      // Clear related cache entries
+      cache.clear();
+      
+      return updatedProduct;
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+  },
 }; 
