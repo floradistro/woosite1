@@ -20,7 +20,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       {/* Main scrollable content */}
       <main 
-        className="w-full pt-[60px] pb-[calc(60px+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-0"
+        className="w-full pt-[60px] pb-[calc(90px+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-0"
         style={{
           minHeight: '100vh'
         }}

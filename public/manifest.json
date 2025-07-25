@@ -3,7 +3,7 @@
   "short_name": "Flora",
   "description": "Premium cannabis delivery with same-day shipping",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#4a4a4a",
   "theme_color": "#4a4a4a",
   "orientation": "portrait",

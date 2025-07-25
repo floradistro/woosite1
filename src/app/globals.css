@@ -65,6 +65,21 @@ html {
   }
 }
 
+/* Fullscreen PWA mode */
+@media (display-mode: fullscreen) {
+  body {
+    padding-top: 0 !important;
+  }
+  
+  header {
+    display: none !important;
+  }
+  
+  main {
+    padding-top: 0 !important;
+  }
+}
+
 /* Glass morphism helper classes */
 .glass-blur {
   backdrop-filter: blur(20px) saturate(180%);
