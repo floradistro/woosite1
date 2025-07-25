@@ -239,7 +239,7 @@ export default function SubscriptionsTabContent({
                   const bulletRegex = /[•\-\*]\s*([^\n\r]+)/g;
                   const numberedRegex = /\d+[\.\)]\s*([^\n\r]+)/g;
                   
-                  let features = [];
+                  let features: string[] = [];
                   let match;
                   
                   while ((match = bulletRegex.exec(description)) !== null) {
