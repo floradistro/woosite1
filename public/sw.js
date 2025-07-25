@@ -1,74 +1,114 @@
-const CACHE_NAME = 'flora-v1';
-const OFFLINE_URL = '/offline.html';
+const CACHE_NAME = 'flora-distro-v1';
+const STATIC_CACHE = 'flora-static-v1';
+const DYNAMIC_CACHE = 'flora-dynamic-v1';
 
-// Files to cache for offline use
-const urlsToCache = [
+const STATIC_ASSETS = [
   '/',
+  '/flower',
+  '/vape',
+  '/edible',
+  '/concentrate',
+  '/cart',
+  '/profile',
   '/offline.html',
-  '/logo.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
   '/fonts/SF-Pro-Display-Regular.otf',
   '/fonts/SF-Pro-Display-Medium.otf',
-  '/fonts/SF-Pro-Display-Bold.otf',
+  '/fonts/SF-Pro-Display-Bold.otf'
 ];
 
-// Install Service Worker
+// Install event
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        return self.skipWaiting();
+      })
   );
 });
 
-// Activate Service Worker
+// Activate event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
   );
 });
 
-// Fetch Event - Network First, Cache Fallback
+// Fetch event with network-first strategy for API calls and cache-first for static assets
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Handle API calls with network-first strategy
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.open(CACHE_NAME)
-            .then((cache) => cache.match(OFFLINE_URL));
-        })
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request)
+      fetch(request)
         .then((response) => {
-          if (response) {
-            return response;
-          }
-          return fetch(event.request).then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          });
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then((cache) => {
+              cache.put(request, responseClone);
+            });
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request);
         })
     );
+    return;
   }
+
+  // Handle static assets with cache-first strategy
+  if (STATIC_ASSETS.includes(url.pathname) || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/fonts/')) {
+    event.respondWith(
+      caches.match(request)
+        .then((cachedResponse) => {
+          return cachedResponse || fetch(request);
+        })
+    );
+    return;
+  }
+
+  // Handle navigation requests
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then((cache) => {
+              cache.put(request, responseClone);
+            });
+          return response;
+        })
+        .catch(() => {
+          return caches.match('/offline.html');
+        })
+    );
+    return;
+  }
+
+  // Default: try network first, fallback to cache
+  event.respondWith(
+    fetch(request)
+      .catch(() => {
+        return caches.match(request);
+      })
+  );
 }); 

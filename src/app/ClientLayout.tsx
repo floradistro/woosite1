@@ -3,8 +3,13 @@
 import { usePathname } from "next/navigation";
 import Footer from "./Footer";
 import Header from "./components/Header";
-import BottomNavigation from "@/components/BottomNavigation";
 import { useMobilePerformance } from "@/hooks/useMobilePerformance";
+import { usePWA } from "@/hooks/usePWA";
+import PWABottomNav from "@/components/PWABottomNav";
+import PWAHeader from "@/components/PWAHeader";
+import PWAServiceWorker from "@/components/PWAServiceWorker";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { useEffect } from "react";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,29 +17,55 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   
   // Initialize mobile performance optimizations
   useMobilePerformance();
+  
+  // PWA functionality
+  const { isPWA, isStandalone } = usePWA();
+
+  // Adjust body padding for PWA mode
+  useEffect(() => {
+    if (isPWA) {
+      document.body.style.paddingTop = 'env(safe-area-inset-top)';
+      document.body.style.paddingBottom = 'env(safe-area-inset-bottom)';
+    }
+  }, [isPWA]);
 
   return (
-    <div className="min-h-screen bg-[#4a4a4a] relative">
-      {/* Header with glass blur */}
-      <Header />
+    <>
+      {/* PWA Service Worker Registration */}
+      <PWAServiceWorker />
       
-      {/* Main scrollable content */}
-      <main 
-        className="w-full pt-[60px] pb-[calc(90px+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-0"
-        style={{
-          minHeight: '100vh'
-        }}
-      >
-        {children}
-      </main>
-      
-      {/* Bottom Navigation - only show on mobile */}
-      <BottomNavigation />
-      
-      {/* Footer - only show on desktop and not on profile pages */}
-      <div className="hidden md:block">
-        {!isProfilePage && <Footer />}
+      <div className="min-h-screen bg-[#4a4a4a] relative">
+        {/* Conditional Header - PWA vs Regular */}
+        {isPWA ? (
+          <PWAHeader 
+            showBack={pathname !== '/'}
+            showSearch={['/flower', '/vape', '/edible', '/concentrate'].includes(pathname)}
+          />
+        ) : (
+          <Header />
+        )}
+        
+        {/* Main scrollable content with PWA adjustments */}
+        <main 
+          className="w-full"
+          style={{
+            minHeight: '100vh',
+            paddingTop: isPWA ? 'calc(env(safe-area-inset-top) + 3.5rem)' : undefined,
+            paddingBottom: isPWA ? 'calc(env(safe-area-inset-bottom) + 4rem)' : undefined,
+          }}
+        >
+          {children}
+        </main>
+        
+        {/* Footer - only show on desktop and not on profile pages and not in PWA */}
+        {!isProfilePage && !isPWA && <Footer />}
+        
+        {/* PWA Bottom Navigation */}
+        {isPWA && <PWABottomNav />}
+        
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
       </div>
-    </div>
+    </>
   );
 } 
