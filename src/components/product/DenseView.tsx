@@ -711,7 +711,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                             <span className="text-white/70 text-sm font-medium">
                               {productType === 'vape' ? 'Quantity:' : 'Weight:'}
                             </span>
-                            <div className="grid grid-cols-5 gap-1.5 w-full">
+                            <div className="grid grid-cols-5 md:grid-cols-5 gap-0.5 w-full">
                               {sizes.map((size, idx) => {
                                 return (
                                   <button
@@ -720,7 +720,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                                       e.stopPropagation();
                                       onOptionSelect(product.id, size);
                                     }}
-                                    className={`px-1.5 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[40px] flex flex-col items-center justify-center ${
+                                    className={`px-1 py-2 rounded-md text-xs font-light transition-all duration-150 hover:scale-105 active:scale-95 min-h-[40px] flex flex-col items-center justify-center ${
                                       selectedOption === size
                                         ? 'bg-white/20 text-white border border-white/30'
                                         : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90'
