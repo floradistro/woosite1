@@ -711,7 +711,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                             <span className="text-white/70 text-sm font-medium">
                               {productType === 'vape' ? 'Quantity:' : 'Weight:'}
                             </span>
-                            <div className="grid grid-cols-5 md:grid-cols-5 gap-0.5 w-full">
+                            <div className={`grid gap-0.5 w-full ${sizes.length === 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
                               {sizes.map((size, idx) => {
                                 return (
                                   <button
