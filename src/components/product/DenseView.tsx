@@ -280,7 +280,7 @@ const ProductInfo = ({
           <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
             <div className="flex-1">
               <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">
-                {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && 
+                {(productType === 'flower' || productType === 'vape' || productType === 'concentrate' || productType === 'wax') && 
                  product.spotlight ? (
                   <>
                     <span className="md:hidden">Type/Effects</span>
@@ -292,8 +292,8 @@ const ProductInfo = ({
                 {formatCategory(product.category)}
               </span>
             </div>
-            {/* Effects on mobile only for flower, vape, concentrate */}
-            {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && 
+            {/* Effects on mobile only for flower, vape, concentrate, wax */}
+            {(productType === 'flower' || productType === 'vape' || productType === 'concentrate' || productType === 'wax') && 
              product.spotlight && (
               <span className={`md:hidden block text-xs hover:opacity-80 transition-colors duration-300 capitalize mt-1 ${
                 product.vibe === 'relax' ? 'text-purple-300' :
@@ -306,7 +306,7 @@ const ProductInfo = ({
           </div>
 
           {/* Terpene Container */}
-          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.terpenes && product.terpenes.length > 0 && (
+          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate' || productType === 'wax') && product.terpenes && product.terpenes.length > 0 && (
             <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
               <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Terpene</span>
               <span className="text-amber-400 text-xs hover:text-amber-300 transition-colors duration-300 capitalize">
@@ -316,7 +316,7 @@ const ProductInfo = ({
           )}
 
           {/* Nose Container */}
-          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate') && product.nose && Array.isArray(product.nose) && product.nose.length > 0 && (
+          {(productType === 'flower' || productType === 'vape' || productType === 'concentrate' || productType === 'wax') && product.nose && Array.isArray(product.nose) && product.nose.length > 0 && (
             <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
               <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Nose</span>
               <div className="flex flex-wrap gap-1">
@@ -330,8 +330,8 @@ const ProductInfo = ({
             </div>
           )}
 
-          {/* Nose for Vape (single value) */}
-          {productType === 'vape' && product.nose && !Array.isArray(product.nose) && (
+          {/* Nose for Vape/Concentrate/Wax (single value) */}
+          {(productType === 'vape' || productType === 'concentrate' || productType === 'wax') && product.nose && !Array.isArray(product.nose) && (
             <div className="p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem]">
               <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Nose</span>
               <span className="text-white/90 text-xs hover:text-white transition-colors duration-300 capitalize">
@@ -358,7 +358,7 @@ const ProductInfo = ({
           {/* Effects Container */}
           {(productType as string) !== 'edible' && (productType as string) !== 'moonwater' && product.spotlight && (
             <div className={`p-1.5 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8 flex flex-col justify-between min-h-[3.5rem] ${
-              (productType === 'flower' || productType === 'vape' || productType === 'concentrate') ? 'hidden md:block' : ''
+              (productType === 'flower' || productType === 'vape' || productType === 'concentrate' || productType === 'wax') ? 'hidden md:block' : ''
             }`}>
               <span className="text-white/70 text-xs font-light tracking-wide block mb-0.5">Effects</span>
               <span className={`text-xs hover:opacity-80 transition-colors duration-300 capitalize ${
