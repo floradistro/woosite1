@@ -42,7 +42,7 @@ function HeaderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isShopMenuOpen, setIsShopMenuOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -122,7 +122,6 @@ function HeaderContent() {
     // Close other dropdowns
     setIsConciergeOpen(false);
     setIsCartOpen(false);
-    setIsMobileMenuOpen(false);
     if (cartHoverTimeout) {
       clearTimeout(cartHoverTimeout);
       setCartHoverTimeout(null);
@@ -181,7 +180,6 @@ function HeaderContent() {
     setIsShopMenuOpen(false);
     setIsCartOpen(false);
     setIsSearchOpen(false);
-    setIsMobileMenuOpen(false);
     setShowUserMenu(false);
     setIsCheckoutOpen(false);
     setOpenDropdown(null);
@@ -197,54 +195,7 @@ function HeaderContent() {
                          pathname === '/moonwater' || 
                          pathname === '/apparel';
 
-  // Remove blur for mobile menu
-  useEffect(() => {
-    let scrollPosition = 0;
-    
-    if (isMobileMenuOpen) {
-      // Save current scroll position
-      scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollPosition}px`;
-      document.body.style.width = '100%';
-      
-      // Add class to identify when mobile menu is open
-      document.body.classList.add('mobile-menu-open');
-    } else {
-      // Get the saved scroll position from the body's top style
-      const bodyTop = document.body.style.top;
-      const savedScrollPosition = bodyTop ? parseInt(bodyTop.replace('-', '').replace('px', '')) : 0;
-      
-      // Reset body styles
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.classList.remove('mobile-menu-open');
-      
-      // Restore scroll position immediately
-      if (savedScrollPosition > 0) {
-        window.scrollTo(0, savedScrollPosition);
-      }
-      
-             // Force a comprehensive layout fix after a short delay
-       setTimeout(() => {
-         // Dispatch resize event to recalculate layout
-         window.dispatchEvent(new Event('resize'));
-       }, 100);
-    }
-    
-    return () => { 
-      document.body.style.overflow = ''; 
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.classList.remove('mobile-menu-open');
-    };
-  }, [isMobileMenuOpen]);
+
 
   // Add blur effect to page when cart OR shop menu OR concierge are open (but NOT mobile menu)
   useEffect(() => {
@@ -629,19 +580,19 @@ function HeaderContent() {
 
 
 
-  // Memoize header styles for better performance
+  // Memoize header styles for better performance - optimized for iPhone 15 Pro
   const headerStyles = useMemo(() => {
-    const isTransparent = pathname === '/' && !isShopMenuOpen && !isConciergeOpen && !isCartOpen && !showUserMenu && !isMobileMenuOpen;
+    const isTransparent = pathname === '/' && !isShopMenuOpen && !isConciergeOpen && !isCartOpen && !showUserMenu;
     const isProfilePage = pathname === '/profile' || pathname.startsWith('/profile');
     
     return {
       background: 'transparent',
-      backdropFilter: 'blur(12px) saturate(200%)',
-      WebkitBackdropFilter: 'blur(12px) saturate(200%)',
-      backgroundColor: 'rgba(74, 74, 74, 0.6)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+      backdropFilter: 'blur(20px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      backgroundColor: 'rgba(74, 74, 74, 0.8)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
     };
-  }, [pathname, isShopMenuOpen, isConciergeOpen, isCartOpen, showUserMenu, isMobileMenuOpen]);
+  }, [pathname, isShopMenuOpen, isConciergeOpen, isCartOpen, showUserMenu]);
 
   // Helper function to determine if a nav link is active
   const isActiveLink = (href: string) => {
@@ -667,17 +618,19 @@ function HeaderContent() {
       {(
         <header 
           className="fixed top-0 left-0 right-0 z-[100] w-full"
-          style={{ ...headerStyles }}
+          style={{ 
+            ...headerStyles,
+            paddingTop: 'env(safe-area-inset-top)'
+          }}
           data-header="true"
         >
           <div className="w-full flex flex-col">
             {/* Main Header Bar */}
-            <div className={`w-full flex items-center justify-between px-4 md:px-6 py-1 md:py-2 gap-2 md:gap-4`}>
-              {/* Logo */}
-              <Link href="/" className="flex items-center shrink-0 p-1 md:p-2" onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push('/');
-              }}>
+            <div className={`w-full flex items-center justify-between px-4 md:px-6 py-3 gap-2 md:gap-4`}>
+                          {/* Logo */}
+            <Link href="/" className="flex items-center shrink-0 p-1 md:p-2"  onClick={() => {
+              router.push('/');
+            }}>
                 <Image 
                   src="/logo.png" 
                   alt="flora distro" 
@@ -828,82 +781,29 @@ function HeaderContent() {
                 </div>
               </div>
 
-              {/* Mobile Cart and Menu */}
-              <div className="md:hidden flex items-center gap-1">
-                {/* Mobile Cart Icon */}
-                <button 
-                  onClick={() => {
-                    closeAllModals();
-                    setIsCartOpen(!isCartOpen);
-                  }}
-                  className="relative text-white/90 hover:text-white transition-colors p-2 flex items-center justify-center"
-                >
-                  <svg 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="1.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className="transition-colors"
-                  >
-                    <path d="M6 9h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z"></path>
-                    <path d="M9 9V7a3 3 0 0 1 6 0v2"></path>
-                  </svg>
-                  {cartItemsCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartItemsCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Mobile Menu Button */}
+              {/* Mobile Concierge Button */}
+              <div className="md:hidden flex items-center gap-2 ml-auto">
                 <button
                   onClick={() => {
-                    if (isMobileMenuOpen) {
-                      setIsMobileMenuOpen(false);
-                    } else {
-                      closeAllModals();
-                      setIsMobileMenuOpen(true);
-                    }
+                    setIsCartOpen(false);
+                    setIsConciergeOpen(!isConciergeOpen);
                   }}
-                  className="text-white/90 hover:text-white transition-colors p-2 flex items-center justify-center"
-                  aria-label="Toggle menu"
+                  className={`flex items-center gap-2 transition-colors text-xs font-medium px-3 py-2 rounded-full ${
+                    isConciergeOpen 
+                      ? 'text-emerald-400 bg-white/10' 
+                      : 'text-white/80 bg-white/5'
+                  }`}
+                  type="button"
                 >
-                  {isMobileMenuOpen ? (
-                    <svg 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="1.5" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className="transition-colors"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  ) : (
-                    <svg 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="1.5" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className="transition-colors"
-                    >
-                      <line x1="3" y1="6" x2="21" y2="6"></line>
-                      <line x1="3" y1="12" x2="21" y2="12"></line>
-                      <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                  )}
+                  <span className="relative flex h-2 w-2">
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                      isConciergeOpen ? 'bg-emerald-400' : 'bg-white'
+                    }`}></span>
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                      isConciergeOpen ? 'bg-emerald-400' : 'bg-white'
+                    }`}></span>
+                  </span>
+                  Concierge
                 </button>
               </div>
             </div>
@@ -1288,152 +1188,7 @@ function HeaderContent() {
       {/* Mobile Filters Overlay - Now used for both mobile and desktop */}
       {/* Removed mobile filter overlay popup */}
 
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ 
-              type: "tween",
-              duration: 0.2,
-              ease: "easeInOut"
-            }}
-            className="fixed inset-0 z-[200] md:hidden"
-            style={{ 
-              background: '#4a4a4a',
-              willChange: 'transform'
-            }}
-            data-mobile-menu
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors text-3xl font-light z-10"
-            >
-              ✕
-            </button>
 
-            {/* Menu Content */}
-            <div className="h-full overflow-y-auto pt-14 pb-6 px-8">
-              <div className="max-w-md mx-auto">
-                {/* Header - Removed profile button to match Apple's design */}
-                <div className="mb-8">
-                  <h2 className="text-4xl font-semibold text-white">Shop</h2>
-                </div>
-
-                {/* Shop Section - Always Expanded */}
-                <div>
-                  <div>
-                    {/* Main Menu Items */}
-                    <div>
-                      <Link
-                        href="/flower"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/flower') && !searchParams.get('format')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Flower
-                        {isActiveLink('/flower') && !searchParams.get('format') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/flower?format=preroll"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/flower?format=preroll')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Pre Roll
-                        {isActiveLink('/flower?format=preroll') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/vape"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/vape')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Vape
-                        {isActiveLink('/vape') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/wax"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/wax')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Concentrates
-                        {isActiveLink('/wax') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/edible"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/edible')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Edibles
-                        {isActiveLink('/edible') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/moonwater"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/moonwater')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Moonwater
-                        {isActiveLink('/moonwater') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                      <Link
-                        href="/apparel"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block transition-colors text-2xl font-normal py-2.5 relative pl-4 ${
-                          isActiveLink('/apparel')
-                            ? 'text-white' 
-                            : 'text-white/90 hover:text-white'
-                        }`}
-                      >
-                        Apparel
-                        {isActiveLink('/apparel') && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                        )}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* CSS Animations for background effects */}
       <style jsx>{`

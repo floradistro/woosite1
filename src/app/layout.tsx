@@ -99,12 +99,10 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#10b981' },
-    { media: '(prefers-color-scheme: dark)', color: '#4a4a4a' }
-  ],
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#4a4a4a',
 };
 
 export default function RootLayout({
@@ -115,6 +113,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sfPro.variable} ${donGraffiti.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
+        {/* PWA Meta Tags */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Flora" />
+        
+        {/* iOS Splash Screens for iPhone 15 Pro */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+        
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -146,8 +155,19 @@ export default function RootLayout({
           type="font/otf" 
           crossOrigin="anonymous" 
         />
+        
+        {/* Service Worker Registration */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+              });
+            }
+          `
+        }} />
       </head>
-      <body className={`${sfPro.variable} ${donGraffiti.variable} font-sans min-h-screen pt-[60px]`}>
+      <body className={`${sfPro.variable} ${donGraffiti.variable} font-sans min-h-screen`}>
         <AuthProvider>
           <CartProvider>
             <ClientLayout>
