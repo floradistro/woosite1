@@ -29,16 +29,43 @@ export function useUserProfile(userId?: string) {
         setError(null);
 
         // Get WordPress user data
-        const wpUser = await getCurrentUser();
-        setUser(wpUser);
-
-        // Get WooCommerce customer data
-        const numericUserId = parseInt(userId, 10);
-        if (isNaN(numericUserId)) {
-          throw new Error('Invalid user ID');
+        try {
+          const wpUser = await getCurrentUser();
+          setUser(wpUser);
+        } catch (userErr) {
+          console.warn('WordPress user API error, using fallback:', userErr);
+          // Set fallback user data to prevent blocking the UI
+          setUser({
+            id: 999999,
+            username: 'guest',
+            email: 'guest@example.com',
+            first_name: 'Guest',
+            last_name: 'User',
+            display_name: 'Guest User',
+            avatar_urls: { '24': '', '48': '', '96': '' },
+            roles: ['customer']
+          });
         }
-        const wooCustomer = await getCustomer(numericUserId);
-        setCustomer(wooCustomer);
+
+        // Get WooCommerce customer data - only if we have a valid numeric user ID
+        if (userId && userId !== 'unknown' && userId !== 'guest') {
+          const numericUserId = parseInt(userId, 10);
+          if (!isNaN(numericUserId) && numericUserId > 0) {
+            try {
+              const wooCustomer = await getCustomer(numericUserId);
+              setCustomer(wooCustomer);
+            } catch (customerErr) {
+              console.warn('WooCommerce customer API error:', customerErr);
+              setCustomer(null);
+            }
+          } else {
+            console.warn('Invalid user ID format, skipping WooCommerce customer fetch:', userId);
+            setCustomer(null);
+          }
+        } else {
+          console.warn('No valid user ID available, skipping WooCommerce customer fetch');
+          setCustomer(null);
+        }
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load user data';
@@ -58,12 +85,16 @@ export function useUserProfile(userId?: string) {
   }, [userId]);
 
   const updateProfile = async (data: Partial<WooCustomer>) => {
-    if (!userId) return false;
+    if (!userId || userId === 'unknown' || userId === 'guest') {
+      console.warn('Cannot update profile: invalid user ID');
+      return false;
+    }
 
     try {
       const numericUserId = parseInt(userId, 10);
-      if (isNaN(numericUserId)) {
-        throw new Error('Invalid user ID');
+      if (isNaN(numericUserId) || numericUserId <= 0) {
+        console.warn('Cannot update profile: user ID is not a valid number:', userId);
+        return false;
       }
       const updatedCustomer = await updateCustomer(numericUserId, data);
       setCustomer(updatedCustomer);

@@ -1,4 +1,4 @@
-import { ChevronLeft, User, Package, CreditCard, Gift, Repeat, Settings } from 'lucide-react';
+import { ChevronLeft, User, Package, CreditCard, Gift, Repeat } from 'lucide-react';
 import { User as UserType, TabType } from '../types';
 import UserInfoHeader from './UserInfoHeader';
 
@@ -16,7 +16,7 @@ const navigationItems = [
   { id: 'payment', label: 'Payment Methods', icon: CreditCard, description: 'Manage payment cards' },
   { id: 'rewards', label: 'Rewards', icon: Gift, description: 'Points and rewards' },
   { id: 'subscriptions', label: 'Subscriptions', icon: Repeat, description: 'Manage subscriptions' },
-  { id: 'settings', label: 'Settings', icon: Settings, description: 'Account preferences' },
+
 ];
 
 export default function NavigationSidebar({ 
@@ -70,7 +70,7 @@ export default function NavigationSidebar({
 
       {/* Navigation Items */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-3 space-y-2">
+        <div className="space-y-0">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -80,29 +80,18 @@ export default function NavigationSidebar({
                 key={item.id}
                 onClick={() => onTabClick(item.id)}
                 className={`
-                  w-full text-left p-3 rounded-lg transition-all duration-200 group
+                  w-full text-left p-4 transition-all duration-200 group border-b border-white/5
                   ${isActive 
-                    ? 'bg-gradient-to-r from-white/15 to-white/10 border border-white/20' 
-                    : 'hover:bg-white/5 border border-transparent'
+                    ? 'bg-gradient-to-r from-white/15 to-white/10 border-l-2 border-l-white/40' 
+                    : 'hover:bg-white/5'
                   }
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`
-                    w-10 h-10 rounded-lg flex items-center justify-center transition-colors
-                    ${isActive 
-                      ? 'bg-gradient-to-br from-white/20 to-white/10' 
-                      : 'bg-gradient-to-br from-white/8 to-white/4 group-hover:from-white/12 group-hover:to-white/8'
-                    }
-                  `}>
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white/70 group-hover:text-white'}`} />
-                  </div>
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-white/70 group-hover:text-white'}`} />
                   <div className="flex-1">
                     <div className={`${isMobile ? 'text-base' : 'text-sm'} font-medium ${isActive ? 'text-white' : 'text-white/80 group-hover:text-white'}`}>
                       {item.label}
-                    </div>
-                    <div className={`${isMobile ? 'text-sm' : 'text-xs'} ${isActive ? 'text-white/70' : 'text-white/50 group-hover:text-white/70'} mt-0.5`}>
-                      {item.description}
                     </div>
                   </div>
                 </div>

@@ -664,11 +664,7 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                       {(product as any).stockQuantity !== undefined && (
                         <div className="text-xs mb-1">
                           {(product as any).inStock ? (
-                            <span className="text-green-400">
-                              {(product as any).stockQuantity === null ? 'In Stock' : 
-                               (product as any).stockQuantity > 10 ? 'In Stock' :
-                               (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
-                            </span>
+                            <span className="text-green-400">In Stock</span>
                           ) : (
                             <span className="text-red-400">Out of Stock</span>
                           )}

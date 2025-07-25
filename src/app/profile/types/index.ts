@@ -123,4 +123,4 @@ export interface ToggleStates {
   leaveAtDoor: boolean;
 }
 
-export type TabType = 'profile' | 'orders' | 'payment' | 'rewards' | 'subscriptions' | 'settings' | null; 
+export type TabType = 'profile' | 'orders' | 'payment' | 'rewards' | 'subscriptions' | null; 

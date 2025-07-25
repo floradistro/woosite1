@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import CarouselContainer from './CarouselContainer';
 import { getFlowerProducts, type FeaturedProduct, WEIGHT_PRICING } from '../flower/constants';
-import { carouselStyles } from '@/styles/shared';
+import Section from './Section';
+import Image from 'next/image';
 
 interface FlowerCarouselProps {
   title?: string;
@@ -19,7 +19,7 @@ export default function FlowerCarousel({
 }: FlowerCarouselProps) {
   const router = useRouter();
   const [products, setProducts] = useState<FeaturedProduct[]>(initialProducts);
-  const [selectedWeights, setSelectedWeights] = useState<Record<number, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<number, string>>({});
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(!initialProducts.length);
 
@@ -47,19 +47,17 @@ export default function FlowerCarousel({
     router.push('/flower');
   };
 
-  const handleWeightSelect = (productId: number, weight: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedWeights(prev => ({ ...prev, [productId]: weight }));
+  const handleOptionSelect = (productId: number, option: string) => {
+    setSelectedOptions(prev => ({ ...prev, [productId]: option }));
   };
 
   const handleImageLoad = (productId: number) => {
     setLoadedImages(prev => new Set([...prev, productId]));
   };
 
-  const handleAddToCart = (product: FeaturedProduct, e: React.MouseEvent) => {
+  const handleExploreClick = (product: FeaturedProduct, e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add to cart logic here
-    console.log('Adding to cart:', product.title);
+    router.push('/flower');
   };
 
   if (isLoading) {
@@ -73,181 +71,230 @@ export default function FlowerCarousel({
   }
 
   if (products.length === 0) {
-    return null;
+    return (
+      <section className="relative bg-[#4a4a4a] py-16">
+        <div className="text-center">
+          <div className="text-white/60 text-lg">No flower products available</div>
+        </div>
+      </section>
+    );
   }
 
   return (
-    <section className="relative bg-[#4a4a4a] overflow-hidden -mt-px" style={{ 
-      boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07)'
-    }}>
-      {/* Section Header */}
-      <div className="relative z-10 py-12 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
-            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-8"></div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-thin text-white mb-4 tracking-wide">
+    <>
+      <style jsx>{`
+        #flower-carousel::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+            <Section className="bg-[#4a4a4a] py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Section Header */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
               {title}
             </h2>
-            <p className="text-white/70 text-lg md:text-xl font-light max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-white/80 font-light max-w-2xl mx-auto">
               {subtitle}
             </p>
-            <div className="h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
           </div>
-        </div>
-      </div>
 
-      {/* Carousel */}
-      <div className="w-full relative z-10 pb-16">
-        <CarouselContainer 
-          style={carouselStyles.enhanced}
-          arrowIdPrefix="flower-carousel"
-        >
-          {products.map((product, index) => {
-            const selectedWeight = selectedWeights[product.id] || '3.5g';
-            const price = WEIGHT_PRICING[selectedWeight as keyof typeof WEIGHT_PRICING];
-            const isImageLoaded = loadedImages.has(product.id);
+        {/* Horizontal Scrolling Carousel */}
+        <div className="relative">
+          {/* Desktop Navigation Buttons */}
+          <button
+            onClick={() => {
+              const carousel = document.getElementById('flower-carousel');
+              if (carousel) {
+                carousel.scrollBy({ left: -400, behavior: 'smooth' });
+              }
+            }}
+            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full items-center justify-center text-white hover:text-white transition-all duration-200 hover:scale-105"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={() => {
+              const carousel = document.getElementById('flower-carousel');
+              if (carousel) {
+                carousel.scrollBy({ left: 400, behavior: 'smooth' });
+              }
+            }}
+            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full items-center justify-center text-white hover:text-white transition-all duration-200 hover:scale-105"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
 
-            return (
-              <div 
-                key={product.id}
-                className="flex-none w-[85vw] md:w-[45vw] lg:w-[30vw] xl:w-[25vw] snap-center px-3 first:pl-6 last:pr-6"
-                onClick={() => handleProductClick(product)}
-              >
-                <div className="group relative cursor-pointer bg-gradient-to-br from-white/8 to-white/3 hover:from-white/12 hover:to-white/6 backdrop-blur-sm border border-white/10 hover:border-white/20 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-                  
-                  {/* Product Image */}
-                  <div className="relative w-full aspect-square mb-6 overflow-hidden rounded-xl bg-black/20">
-                    {!isImageLoaded && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 animate-pulse">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-                      </div>
-                    )}
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
-                        isImageLoaded ? 'opacity-100' : 'opacity-0'
-                      }`}
-                      onLoad={() => handleImageLoad(product.id)}
-                      loading="lazy"
-                    />
-                    
-                    {/* Category Badge */}
-                    <div className="absolute top-3 left-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        product.category === 'indica' ? 'bg-purple-600/80 border-purple-500 text-white' :
-                        product.category === 'sativa' ? 'bg-yellow-600/80 border-yellow-500 text-black' :
-                        'bg-green-600/80 border-green-500 text-white'
-                      } backdrop-blur-sm`}>
-                        {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-                      </span>
-                    </div>
+          <div 
+            id="flower-carousel"
+            className="flex gap-3 md:gap-2 overflow-x-auto pb-4 pl-0 pr-4 md:px-0" 
+            style={{
+              scrollBehavior: 'smooth',
+              scrollSnapType: 'x mandatory',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
+          >
+            {products.map((product, index) => {
+              const selectedOption = selectedOptions[product.id] || Object.keys(WEIGHT_PRICING)[0];
+              const isImageLoaded = loadedImages.has(product.id);
 
-                    {/* THC Badge */}
-                    <div className="absolute top-3 right-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/20 border border-white/30 text-white backdrop-blur-sm">
-                        {product.thc}% THC
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-medium text-white mb-2 capitalize group-hover:text-emerald-300 transition-colors duration-300">
-                        {product.title}
-                      </h3>
-                      <p className="text-white/70 text-sm leading-relaxed">
-                        {product.description}
-                      </p>
-                    </div>
-
-                    {/* Nose Profile */}
-                    <div className="flex flex-wrap gap-2">
-                      {product.nose.map((noseType) => (
-                        <span 
-                          key={noseType}
-                          className={`px-2 py-1 rounded-md text-xs font-medium border ${
-                            noseType === 'candy' ? 'bg-pink-500/20 border-pink-400/30 text-pink-200' :
-                            noseType === 'gas' ? 'bg-gray-500/20 border-gray-400/30 text-gray-200' :
-                            noseType === 'cake' ? 'bg-amber-400/20 border-amber-300/30 text-amber-200' :
-                            noseType === 'funk' ? 'bg-violet-500/20 border-violet-400/30 text-violet-200' :
-                            'bg-emerald-500/20 border-emerald-400/30 text-emerald-200'
-                          }`}
+              return (
+                <div 
+                  key={product.id}
+                  className={`flex-none w-[85vw] md:w-[calc(50vw-1rem)] lg:w-[calc(33.333vw-0.67rem)] xl:w-[calc(25vw-0.5rem)] scroll-snap-align-start ${index === 0 ? 'md:pl-0' : ''}`}
+                  style={{ 
+                    scrollSnapAlign: 'start',
+                    paddingLeft: index === 0 ? '2px' : undefined
+                  }}
+                >
+                  <div 
+                    className="group relative cursor-pointer transition-all duration-200 opacity-100 translate-y-0"
+                    style={{ transitionDelay: `${Math.min(index * 50, 600)}ms` }}
+                    onClick={() => handleProductClick(product)}
+                  >
+                    <div className="bg-gradient-to-r from-white/5 to-white/2 hover:from-white/8 hover:to-white/5 backdrop-blur-sm transition-all duration-200 p-1.5 group-hover:shadow-xl relative rounded-lg">
+                      
+                      <div className="flex items-start gap-1.5 mb-3 md:mb-4">
+                        {/* Product Image */}
+                        <div 
+                          className="relative w-50 h-50 md:w-48 md:h-48 flex-shrink-0 overflow-hidden rounded-lg cursor-pointer group/image bg-black/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductClick(product);
+                          }}
                         >
-                          {noseType}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Weight Selection */}
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {Object.keys(WEIGHT_PRICING).map((weight) => (
-                          <button
-                            key={weight}
-                            onClick={(e) => handleWeightSelect(product.id, weight, e)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                              selectedWeight === weight
-                                ? 'bg-emerald-500 text-white border-emerald-400'
-                                : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/20 hover:border-white/30'
-                            } border`}
-                          >
-                            {weight}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Stock Status */}
-                      {(product as any).stockQuantity !== undefined && (
-                        <div className="text-xs mb-2">
-                          {(product as any).inStock ? (
-                            <span className="text-green-400">
-                              {(product as any).stockQuantity === null ? 'In Stock' : 
-                               (product as any).stockQuantity > 10 ? 'In Stock' :
-                               (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
-                            </span>
-                          ) : (
-                            <span className="text-red-400">Out of Stock</span>
+                          {!isImageLoaded && (
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 animate-[shimmer_2s_ease-in-out_infinite]">
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                            </div>
                           )}
+                          
+                          <Image
+                            src={product.image}
+                            alt={product.title}
+                            fill
+                            sizes="(max-width: 768px) 200px, 192px"
+                            className={`object-cover transition-all duration-500 group-hover:scale-110 group-hover/image:scale-105 ${
+                              isImageLoaded ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onLoad={() => handleImageLoad(product.id)}
+                            quality={85}
+                            priority={index < 2}
+                          />
                         </div>
-                      )}
 
-                      {/* Price and Add to Cart */}
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="text-2xl font-light text-white">
-                          <span className="text-green-400">$</span>{price}
+                        {/* Product Info */}
+                        <div className="flex-1 min-w-0 relative">
+                          {/* Product Title */}
+                          <h3 className="text-white font-medium text-lg md:text-xl mb-2 capitalize group-hover:text-emerald-300 transition-colors duration-300">
+                            {product.title}
+                          </h3>
+
+                          {/* Category and THC */}
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            {/* Category */}
+                            <div className="p-2 rounded-md bg-gradient-to-r from-white/5 to-white/2 border border-white/10">
+                              <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Type</span>
+                              <div className={`text-sm font-medium capitalize ${
+                                product.category === 'indica' ? 'text-purple-400' :
+                                product.category === 'sativa' ? 'text-yellow-400' :
+                                'text-green-400'
+                              }`}>
+                                {product.category}
+                              </div>
+                            </div>
+                            
+                            {/* THC */}
+                            <div className="p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+                              <span className="text-white/70 text-xs font-light tracking-wide block mb-1">THC</span>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-sm font-medium text-emerald-400">{product.thc}</span>
+                                <span className="text-xs font-light text-emerald-400/70">%</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Nose Profile */}
+                          {product.nose && product.nose.length > 0 && (
+                            <div className="mb-3 p-2 rounded-md bg-gradient-to-r from-white/3 to-white/1 border border-white/8">
+                              <span className="text-white/70 text-xs font-light tracking-wide block mb-1">Profile</span>
+                              <div className="flex flex-wrap gap-1">
+                                {product.nose.slice(0, 2).map((noseType) => (
+                                  <span 
+                                    key={noseType}
+                                    className="text-white/90 text-xs font-light capitalize"
+                                  >
+                                    {noseType}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Stock Status */}
+                          {(product as any).stockQuantity !== undefined && (
+                            <div className="text-xs mb-2">
+                              {(product as any).inStock ? (
+                                <span className="text-green-400">In Stock</span>
+                              ) : (
+                                <span className="text-red-400">Out of Stock</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Explore Button - CTA Style */}
+                          <div className="flex justify-end">
+                            <button
+                              onClick={(e) => handleExploreClick(product, e)}
+                              className="px-4 py-2 bg-black/20 hover:bg-black/30 border border-black/30 hover:border-black/40 rounded-lg text-sm text-white/80 hover:text-white font-light transition-all duration-300 hover:scale-[1.02] active:scale-95"
+                            >
+                              Explore Strain
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={(e) => handleAddToCart(product, e)}
-                          disabled={!(product as any).inStock}
-                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${
-                            (product as any).inStock === false 
-                              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                              : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                          }`}
-                        >
-                          {(product as any).inStock === false ? 'Out of Stock' : 'Add to Cart'}
-                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </CarouselContainer>
+              );
+            })}
+          </div>
+
+          {/* Mobile Scroll Indicators */}
+          <div className="flex md:hidden justify-center mt-4 gap-2">
+            {products.map((_, index) => (
+              <div
+                key={index}
+                className="w-2 h-2 rounded-full bg-white/20 transition-all duration-200"
+              />
+            ))}
+          </div>
+
+          {/* Desktop Preview Cards */}
+          <div className="hidden md:flex justify-center mt-4 gap-1 text-xs text-white/60">
+            <span>Scroll to explore</span>
+            <span>•</span>
+            <span>{products.length} premium strains</span>
+          </div>
+        </div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-6">
           <button
             onClick={() => router.push('/flower')}
-            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
           >
             View All Flower Products
           </button>
         </div>
       </div>
-    </section>
+    </Section>
+    </>
   );
 } 

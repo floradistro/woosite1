@@ -1,10 +1,12 @@
 import { Order } from '../types';
+import MobileBackButton from './MobileBackButton';
 
 interface OrdersTabContentProps {
   isMobile: boolean;
   orders: Order[];
   selectedOrder: string | null;
   onOrderSelect: (orderId: string | null) => void;
+  onBackClick?: () => void;
   ordersLoading?: boolean;
 }
 
@@ -13,6 +15,7 @@ export default function OrdersTabContent({
   orders, 
   selectedOrder, 
   onOrderSelect,
+  onBackClick,
   ordersLoading = false
 }: OrdersTabContentProps) {
 
@@ -33,6 +36,11 @@ export default function OrdersTabContent({
 
   return (
     <div className={`${isMobile ? '' : ''}`}>
+      {/* Mobile Back Button */}
+      {isMobile && onBackClick && (
+        <MobileBackButton onBackClick={onBackClick} title="Orders" />
+      )}
+
       {!isMobile && (
         <div className="mb-8 px-12">
           <h1 className="text-3xl font-semibold text-white mb-1">Order History</h1>

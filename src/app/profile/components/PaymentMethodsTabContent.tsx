@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { PaymentMethod } from '../types';
+import MobileBackButton from './MobileBackButton';
 
 interface PaymentMethodsTabContentProps {
   isMobile: boolean;
@@ -7,6 +8,7 @@ interface PaymentMethodsTabContentProps {
   onAddCard: () => void;
   onDeleteCard: (id: string) => void;
   onSetDefault: (id: string) => void;
+  onBackClick?: () => void;
 }
 
 export default function PaymentMethodsTabContent({ 
@@ -14,7 +16,8 @@ export default function PaymentMethodsTabContent({
   paymentMethods, 
   onAddCard, 
   onDeleteCard, 
-  onSetDefault 
+  onSetDefault,
+  onBackClick
 }: PaymentMethodsTabContentProps) {
 
   const getCardIcon = (type: string) => {
@@ -48,6 +51,11 @@ export default function PaymentMethodsTabContent({
 
   return (
     <div className={`${isMobile ? '' : ''}`}>
+      {/* Mobile Back Button */}
+      {isMobile && onBackClick && (
+        <MobileBackButton onBackClick={onBackClick} title="Payment Methods" />
+      )}
+
       {!isMobile && (
         <div className="mb-8 px-12">
           <h1 className="text-3xl font-semibold text-white mb-1">Payment Methods</h1>

@@ -8,10 +8,10 @@ export { default as OrdersTabContent } from './OrdersTabContent';
 export { default as PaymentMethodsTabContent } from './PaymentMethodsTabContent';
 export { default as RewardsTabContent } from './RewardsTabContent';
 export { default as SubscriptionsTabContent } from './SubscriptionsTabContent';
-export { default as SettingsTabContent } from './SettingsTabContent';
 
 // Reusable components
 export { default as ToggleSwitch } from './ToggleSwitch';
+export { default as MobileBackButton } from './MobileBackButton';
 
 // Loading states
 export {

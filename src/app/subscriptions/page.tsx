@@ -5,6 +5,7 @@ import Section from '../components/Section';
 import SectionHeader from '../components/SectionHeader';
 import ReviewCard from '../components/ReviewCard';
 import CarouselContainer from '../components/CarouselContainer';
+import { useSubscriptionProducts } from '../../hooks/useSubscriptionProducts';
 
 // Subscription plan data
 const subscriptionPlans = [
@@ -221,10 +222,79 @@ const carouselStyle = {
 
 export default function SubscriptionsPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const { products: wooSubscriptionProducts, loading, error } = useSubscriptionProducts();
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
+
+  // Transform WooCommerce products to match our subscription plan format
+  const transformWooProductToSubscriptionPlan = (product: any) => {
+    const getEmojiFromName = (name: string) => {
+      const lowercaseName = name.toLowerCase();
+      if (lowercaseName.includes('flower') || lowercaseName.includes('drop')) return '🌿';
+      if (lowercaseName.includes('vape') || lowercaseName.includes('vault')) return '🔋';
+      if (lowercaseName.includes('edible') || lowercaseName.includes('gummy')) return '🍬';
+      if (lowercaseName.includes('wax') || lowercaseName.includes('concentrate')) return '🧪';
+      if (lowercaseName.includes('full') || lowercaseName.includes('spectrum')) return '🧪';
+      return '📦';
+    };
+
+    const getSubtitleFromName = (name: string) => {
+      const lowercaseName = name.toLowerCase();
+      if (lowercaseName.includes('flower')) return 'Monthly Flower Rotation';
+      if (lowercaseName.includes('vape')) return 'Monthly Disposable Drop';
+      if (lowercaseName.includes('edible')) return 'Monthly Gummy Drop';
+      if (lowercaseName.includes('wax')) return 'Monthly Concentrate Drop';
+      if (lowercaseName.includes('full')) return 'Mixed Category Subscription';
+      return 'Monthly Subscription';
+    };
+
+    // Extract features from description or use defaults
+    const extractFeatures = (description: string, name: string) => {
+      const defaultFeatures = ['Premium curated products', 'Free shipping + 10% off site', 'Cancel anytime'];
+      
+      // Try to extract bullet points or numbered lists from description
+      const bulletRegex = /[•\-\*]\s*([^\n\r]+)/g;
+      const numberedRegex = /\d+[\.\)]\s*([^\n\r]+)/g;
+      
+      let features = [];
+      let match;
+      
+      while ((match = bulletRegex.exec(description)) !== null) {
+        features.push(match[1].trim());
+      }
+      
+      while ((match = numberedRegex.exec(description)) !== null) {
+        features.push(match[1].trim());
+      }
+      
+      return features.length > 0 ? features.slice(0, 3) : defaultFeatures;
+    };
+
+    const cleanDescription = product.short_description || product.description || '';
+    const cleanedDesc = cleanDescription.replace(/<[^>]*>/g, '').trim();
+    
+    return {
+      id: `woo-${product.id}`,
+      emoji: getEmojiFromName(product.name),
+      name: product.name,
+      subtitle: getSubtitleFromName(product.name),
+      price: product.price,
+      save: product.savings || (product.regular_price - product.price),
+      features: extractFeatures(cleanedDesc, product.name),
+      description: cleanedDesc.substring(0, 100) + (cleanedDesc.length > 100 ? '...' : ''),
+      addon: 'Optional add-ons available',
+      popular: product.tags?.some((tag: any) => tag.name?.toLowerCase().includes('popular')) || false,
+      wooProduct: product // Keep reference to original product
+    };
+  };
+
+  // Combine hardcoded plans with WooCommerce products
+  const allSubscriptionPlans = [
+    ...subscriptionPlans,
+    ...wooSubscriptionProducts.map(transformWooProductToSubscriptionPlan)
+  ];
 
   return (
     <div className="min-h-screen bg-[#4a4a4a] text-white">
@@ -281,83 +351,108 @@ export default function SubscriptionsPage() {
           <p className="text-sm md:text-base text-white/70 font-light">
             Pick your vibe. We handle the rest.
           </p>
+          {wooSubscriptionProducts.length > 0 && (
+            <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-full text-sm">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span>{wooSubscriptionProducts.length} live subscription{wooSubscriptionProducts.length !== 1 ? 's' : ''} available</span>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Subscription Plans */}
       <section className="pb-16 px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {subscriptionPlans.map((plan) => (
-              <div
-                key={plan.id}
-                className="group relative cursor-pointer bg-gradient-to-r from-white/12 to-white/8 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(255,255,255,0.08)] rounded-lg transition-all duration-200 p-1 hover:shadow-xl hover:from-white/16 hover:to-white/12 hover:border-white/30"
-              >
-                {plan.popular && (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
-                    <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
-                      POPULAR
-                    </span>
-                  </div>
-                )}
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <p className="text-white/70 mt-4">Loading subscription plans...</p>
+            </div>
+          )}
 
-                <div className="p-4">
-                  {/* Header Section */}
-                  <div className="flex items-start gap-3 mb-4">
-                    {/* Emoji Icon */}
-                    <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-lg backdrop-blur-sm border border-white/20">
-                      {plan.emoji}
-                    </div>
-                    
-                    {/* Title and Subtitle */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-extralight text-base transition-colors duration-300 text-white/98 mb-0.5 leading-tight">
-                        {plan.name}
-                      </h3>
-                      <p className="text-xs text-white/70 font-light">{plan.subtitle}</p>
-                    </div>
-                  </div>
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-400 mb-4">Error loading subscription plans: {error}</p>
+              <p className="text-white/70">Showing default plans instead.</p>
+            </div>
+          )}
 
-                  {/* Price Section */}
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-2xl font-extralight text-white/95"><span className="text-green-400">$</span>{plan.price}</span>
-                      <span className="text-white/60 text-xs">/mo</span>
+          {/* Subscription Plans Grid */}
+          {!loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {allSubscriptionPlans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="group relative cursor-pointer bg-gradient-to-r from-white/12 to-white/8 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(255,255,255,0.08)] rounded-lg transition-all duration-200 p-1 hover:shadow-xl hover:from-white/16 hover:to-white/12 hover:border-white/30"
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+                      <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-lg">
+                        POPULAR
+                      </span>
                     </div>
-                    <div className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs font-medium">
-                      <span className="text-xs">💸</span>
-                      <span>Save <span className="text-green-400">$</span>{plan.save}</span>
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Features */}
-                  <div className="space-y-1.5 mb-4">
-                    {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-emerald-400 text-xs mt-1 flex-shrink-0">•</span>
-                        <span className="text-white/80 text-xs leading-relaxed">{feature}</span>
+                  <div className="p-4">
+                    {/* Header Section */}
+                    <div className="flex items-start gap-3 mb-4">
+                      {/* Emoji Icon */}
+                      <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-lg backdrop-blur-sm border border-white/20">
+                        {plan.emoji}
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Description */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-start gap-1">
-                      <span className="text-xs mt-0.5 flex-shrink-0">💸</span>
-                      <p className="text-white/70 text-xs leading-relaxed">{plan.description}</p>
+                      
+                      {/* Title and Subtitle */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-extralight text-base transition-colors duration-300 text-white/98 mb-0.5 leading-tight">
+                          {plan.name}
+                        </h3>
+                        <p className="text-xs text-white/70 font-light">{plan.subtitle}</p>
+                      </div>
                     </div>
-                    <p className="text-white/60 text-xs leading-relaxed">{plan.addon}</p>
-                  </div>
 
-                  {/* Subscribe Button */}
-                  <button className="w-full group relative inline-flex items-center justify-center gap-1 px-4 py-2.5 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-xs transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-0 select-none overflow-hidden">
-                    <span className="relative z-10">SUBSCRIBE NOW</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </button>
+                    {/* Price Section */}
+                    <div className="mb-4">
+                      <div className="flex items-baseline gap-1 mb-1">
+                        <span className="text-2xl font-extralight text-white/95"><span className="text-green-400">$</span>{plan.price}</span>
+                        <span className="text-white/60 text-xs">/mo</span>
+                      </div>
+                      <div className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs font-medium">
+                        <span className="text-xs">💸</span>
+                        <span>Save <span className="text-green-400">$</span>{plan.save}</span>
+                      </div>
+                    </div>
+
+                    {/* Features */}
+                    <div className="space-y-1.5 mb-4">
+                      {plan.features.map((feature, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-emerald-400 text-xs mt-1 flex-shrink-0">•</span>
+                          <span className="text-white/80 text-xs leading-relaxed">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-start gap-1">
+                        <span className="text-xs mt-0.5 flex-shrink-0">💸</span>
+                        <p className="text-white/70 text-xs leading-relaxed">{plan.description}</p>
+                      </div>
+                      <p className="text-white/60 text-xs leading-relaxed">{plan.addon}</p>
+                    </div>
+
+                    {/* Subscribe Button */}
+                    <button className="w-full group relative inline-flex items-center justify-center gap-1 px-4 py-2.5 bg-black hover:bg-gray-900 text-white rounded-lg font-medium text-xs transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-0 select-none overflow-hidden">
+                      <span className="relative z-10">SUBSCRIBE NOW</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

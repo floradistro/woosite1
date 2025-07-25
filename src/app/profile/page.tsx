@@ -15,7 +15,7 @@ import OrdersTabContent from './components/OrdersTabContent';
 import PaymentMethodsTabContent from './components/PaymentMethodsTabContent';
 import RewardsTabContent from './components/RewardsTabContent';
 import SubscriptionsTabContent from './components/SubscriptionsTabContent';
-import SettingsTabContent from './components/SettingsTabContent';
+
 import { ProfileLoadingState, AuthRequiredState, SuspenseLoadingState } from './components/LoadingStates';
 
 // Import hooks
@@ -98,7 +98,7 @@ function ProfilePageContent() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileTabContent user={user} isMobile={isMobile} />;
+        return <ProfileTabContent user={user} isMobile={isMobile} onTabChange={(tab) => setActiveTab(tab as TabType)} onBackClick={handleBackClick} toggleStates={profileData.toggleStates} onToggleChange={profileData.handleToggleChange} />;
       
       case 'orders':
         return (
@@ -107,6 +107,7 @@ function ProfilePageContent() {
             orders={profileData.orders}
             selectedOrder={profileData.selectedOrder}
             onOrderSelect={profileData.setSelectedOrder}
+            onBackClick={handleBackClick}
             ordersLoading={profileData.ordersLoading}
           />
         );
@@ -119,6 +120,7 @@ function ProfilePageContent() {
             onAddCard={profileData.handleAddCard}
             onDeleteCard={profileData.handleDeleteCard}
             onSetDefault={profileData.handleSetDefault}
+            onBackClick={handleBackClick}
           />
         );
       
@@ -130,6 +132,7 @@ function ProfilePageContent() {
             availableRewards={profileData.availableRewards}
             rewardsHistory={profileData.rewardsHistory}
             onRewardRedeem={profileData.handleRewardRedeem}
+            onBackClick={handleBackClick}
           />
         );
       
@@ -139,17 +142,10 @@ function ProfilePageContent() {
             isMobile={isMobile}
             activeSubscriptions={profileData.activeSubscriptions}
             onSubscriptionAction={profileData.handleSubscriptionAction}
+            onBackClick={handleBackClick}
           />
         );
       
-      case 'settings':
-        return (
-          <SettingsTabContent 
-            isMobile={isMobile}
-            toggleStates={profileData.toggleStates}
-            onToggleChange={profileData.handleToggleChange}
-          />
-        );
       
       default:
         return null;
