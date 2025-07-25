@@ -108,11 +108,12 @@ export default function RewardsTabContent({
               {/* Center Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <Image 
-                  src="/flora_chip_no_background.png" 
+                  src="/flora_chip_optimized.webp" 
                   alt="Flora Chip" 
                   width={120} 
                   height={120} 
                   className="flex-shrink-0 mb-4"
+                  priority
                 />
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white mb-2">2,847</div>
@@ -280,7 +281,7 @@ export default function RewardsTabContent({
               {rewardsHistory.length === 0 && (
                 <div className="p-6 text-center">
                   <Image 
-                    src="/flora_chip_no_background.png" 
+                    src="/flora_chip_optimized.webp" 
                     alt="Flora Chip" 
                     width={48} 
                     height={48} 

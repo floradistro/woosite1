@@ -84,11 +84,12 @@ export default function ProfileTabContent({ user, isMobile, onTabChange, onBackC
         <div className="px-6 py-4 bg-gradient-to-br from-white/8 to-white/4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <Image 
-              src="/flora_chip_no_background.png" 
+              src="/flora_chip_optimized.webp" 
               alt="Flora Chip" 
               width={64}
               height={64}
               className="w-16 h-16 flex-shrink-0"
+              priority
             />
             <div className="flex-1">
               <div className="text-sm font-medium text-white mb-0.5">Flora Chip</div>
@@ -437,11 +438,12 @@ export default function ProfileTabContent({ user, isMobile, onTabChange, onBackC
               <div className="border-t border-white/10 pt-4 mt-auto">
                 <div className="flex items-center gap-3">
                   <Image 
-                    src="/flora_chip_no_background.png" 
+                    src="/flora_chip_optimized.webp" 
                     alt="Flora Chip" 
                     width={64}
                     height={64}
                     className="w-16 h-16 flex-shrink-0"
+                    priority
                   />
                   <div className="flex-1">
                     <div className="text-sm font-medium text-white mb-0.5">Flora Chip</div>
