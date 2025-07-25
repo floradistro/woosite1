@@ -93,13 +93,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/icons/icon-180x180.png",
-  },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Flora Distro",
   },
 };
 
@@ -108,7 +101,6 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#10b981' },
     { media: '(prefers-color-scheme: dark)', color: '#4a4a4a' }
@@ -154,32 +146,6 @@ export default function RootLayout({
           type="font/otf" 
           crossOrigin="anonymous" 
         />
-        
-        {/* PWA Meta Tags */}
-        <meta name="application-name" content="Flora Distro" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Flora Distro" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#4a4a4a" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        
-        {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-180x180.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-180x180.png" />
-        
-        {/* Apple Splash Screen Meta Tags for iPhone 15 Pro */}
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-startup-image" href="/icons/icon-1024x1024.png" />
-        
-        {/* PWA Manifest */}
-        <link rel="manifest" href="/manifest.json" />
-        
-        {/* Prevent zoom on focus (iOS) */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
       </head>
       <body className={`${sfPro.variable} ${donGraffiti.variable} font-sans min-h-screen pt-[60px]`}>
         <AuthProvider>
