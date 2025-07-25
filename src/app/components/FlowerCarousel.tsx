@@ -198,6 +198,21 @@ export default function FlowerCarousel({
                         ))}
                       </div>
 
+                      {/* Stock Status */}
+                      {(product as any).stockQuantity !== undefined && (
+                        <div className="text-xs mb-2">
+                          {(product as any).inStock ? (
+                            <span className="text-green-400">
+                              {(product as any).stockQuantity === null ? 'In Stock' : 
+                               (product as any).stockQuantity > 10 ? 'In Stock' :
+                               (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
+                            </span>
+                          ) : (
+                            <span className="text-red-400">Out of Stock</span>
+                          )}
+                        </div>
+                      )}
+
                       {/* Price and Add to Cart */}
                       <div className="flex items-center justify-between pt-2">
                         <div className="text-2xl font-light text-white">
@@ -205,9 +220,14 @@ export default function FlowerCarousel({
                         </div>
                         <button
                           onClick={(e) => handleAddToCart(product, e)}
-                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+                          disabled={!(product as any).inStock}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${
+                            (product as any).inStock === false 
+                              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                              : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                          }`}
                         >
-                          Add to Cart
+                          {(product as any).inStock === false ? 'Out of Stock' : 'Add to Cart'}
                         </button>
                       </div>
                     </div>

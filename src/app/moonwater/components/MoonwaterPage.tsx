@@ -187,7 +187,7 @@ function MoonwaterPageContent({ products }: MoonwaterPageProps) {
 
         {/* Quality Banner - matches other collection pages */}
         <div 
-          className="absolute bottom-0 left-0 right-0 px-4 py-3 md:bottom-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 md:px-6 md:rounded-full z-50 w-full md:w-auto"
+          className="absolute bottom-4 left-4 right-4 px-4 py-3 md:bottom-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 md:px-6 md:rounded-full z-50 w-auto md:w-auto rounded-full"
           style={{
             background: 'transparent',
             backdropFilter: 'blur(12px) saturate(200%)',

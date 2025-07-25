@@ -224,7 +224,10 @@ export async function getEdiblesProducts(): Promise<FeaturedProduct[]> {
         thc: getThc(),
         type: getType(),
         spotlight: displayEffects, // Show ACF effects field here
-        featured: index < 4
+        featured: index < 4,
+        stockQuantity: product.stock_quantity,
+        stockStatus: product.stock_status,
+        inStock: product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity > 0)
       };
     });
   } catch (error) {

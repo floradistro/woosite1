@@ -155,6 +155,21 @@ const EdiblesCard = ({
               </div>
             )}
 
+            {/* Stock Status */}
+            {(product as any).stockQuantity !== undefined && (
+              <div className="text-xs mb-2">
+                {(product as any).inStock ? (
+                  <span className="text-green-400">
+                    {(product as any).stockQuantity === null ? 'In Stock' : 
+                     (product as any).stockQuantity > 10 ? 'In Stock' :
+                     (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
+                  </span>
+                ) : (
+                  <span className="text-red-400">Out of Stock</span>
+                )}
+              </div>
+            )}
+
             {/* Price */}
             <div className="flex justify-end">
               <div className="text-white/95 font-light text-lg md:text-xl group-hover:text-white transition-colors duration-300">
@@ -251,9 +266,14 @@ const EdiblesCard = ({
               <div className="flex gap-2">
                 <button
                   onClick={(e) => onAddToCart(product, e)}
-                  className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-sm text-white/80 hover:text-white font-light transition-all duration-300 hover:scale-[1.02] active:scale-95 min-h-[40px]"
+                  disabled={!(product as any).inStock}
+                  className={`flex-1 px-4 py-2 border rounded-lg text-sm font-light transition-all duration-300 hover:scale-[1.02] active:scale-95 min-h-[40px] ${
+                    (product as any).inStock === false 
+                      ? 'bg-gray-600 border-gray-600 text-gray-400 cursor-not-allowed' 
+                      : 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-white/80 hover:text-white'
+                  }`}
                 >
-                  Add to Cart
+                  {(product as any).inStock === false ? 'Out of Stock' : 'Add to Cart'}
                 </button>
                 <button
                   onClick={(e) => {

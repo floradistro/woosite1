@@ -315,7 +315,10 @@ export async function getVapeProducts(): Promise<FeaturedProduct[]> {
         featured: index < 4, // First 4 products are featured
         lineage: getLineage(),
         terpenes: getTerpenes(),
-        variationPricing: Object.keys(variationPricing).length > 0 ? variationPricing : VAPE_PRICING
+        variationPricing: Object.keys(variationPricing).length > 0 ? variationPricing : VAPE_PRICING,
+        stockQuantity: product.stock_quantity,
+        stockStatus: product.stock_status,
+        inStock: product.stock_status === 'instock' && (product.stock_quantity === null || product.stock_quantity > 0)
       };
       
       // Enhanced debug log for first few products (same as flower)

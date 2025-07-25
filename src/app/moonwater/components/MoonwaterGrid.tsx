@@ -173,6 +173,21 @@ const MoonwaterCard = ({
               </div>
             )}
 
+            {/* Stock Status */}
+            {(product as any).stockQuantity !== undefined && (
+              <div className="text-xs mb-2">
+                {(product as any).inStock ? (
+                  <span className="text-green-400">
+                    {(product as any).stockQuantity === null ? 'In Stock' : 
+                     (product as any).stockQuantity > 10 ? 'In Stock' :
+                     (product as any).stockQuantity > 0 ? `${(product as any).stockQuantity} left` : 'Out of Stock'}
+                  </span>
+                ) : (
+                  <span className="text-red-400">Out of Stock</span>
+                )}
+              </div>
+            )}
+
             {/* Price */}
             <div className="flex justify-end">
               <div className="text-white/95 font-light text-lg md:text-xl group-hover:text-white transition-colors duration-300">
