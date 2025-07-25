@@ -258,7 +258,7 @@ export default function SubscriptionsPage() {
       const bulletRegex = /[•\-\*]\s*([^\n\r]+)/g;
       const numberedRegex = /\d+[\.\)]\s*([^\n\r]+)/g;
       
-      let features: string[] = [];
+      const features: string[] = [];
       let match;
       
       while ((match = bulletRegex.exec(description)) !== null) {

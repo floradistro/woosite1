@@ -1,5 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+
+// Lazy import to avoid build-time issues
+let supabase: any = null;
+
+async function getSupabaseClient() {
+  if (!supabase) {
+    try {
+      const { supabase: client } = await import('@/lib/supabase');
+      supabase = client;
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error);
+      return null;
+    }
+  }
+  return supabase;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,8 +29,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const client = await getSupabaseClient();
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Storage service unavailable' },
+        { status: 503 }
+      );
+    }
+
     // Get the file from Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await client.storage
       .from('coa')
       .download(`${category}/${fileName}`);
 
