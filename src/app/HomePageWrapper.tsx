@@ -116,7 +116,7 @@ export default function HomePageWrapper({
           subtitle={`${initialFlowerProducts.length} Premium Cannabis Flower`}
           products={initialFlowerProducts}
           productType="flower"
-          itemsPerView={3}
+          itemsPerView={1}
         />
         
         <ProductCarousel 
@@ -124,7 +124,7 @@ export default function HomePageWrapper({
           subtitle={`${initialVapeProducts.length} Premium Vape Cartridges`}
           products={initialVapeProducts}
           productType="vape"
-          itemsPerView={3}
+          itemsPerView={1}
         />
         
         <ProductCarousel 
@@ -132,7 +132,7 @@ export default function HomePageWrapper({
           subtitle={`${initialConcentrateProducts.length} Premium Concentrates`}
           products={initialConcentrateProducts}
           productType="concentrate"
-          itemsPerView={3}
+          itemsPerView={1}
         />
         
         <ProductCarousel 
@@ -140,7 +140,7 @@ export default function HomePageWrapper({
           subtitle={`${initialEdibleProducts.length} Premium Cannabis Edibles`}
           products={initialEdibleProducts}
           productType="edible"
-          itemsPerView={3}
+          itemsPerView={1}
         />
         
         <ProductCarousel 
@@ -148,7 +148,7 @@ export default function HomePageWrapper({
           subtitle={`${initialMoonwaterProducts.length} Premium Cannabis Drinks`}
           products={initialMoonwaterProducts}
           productType="moonwater"
-          itemsPerView={3}
+          itemsPerView={1}
         />
         
         <THCAExplanationSection 
