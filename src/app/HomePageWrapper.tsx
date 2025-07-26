@@ -60,9 +60,9 @@ const useStoreStatus = () => {
 };
 
 interface HomePageWrapperProps {
-  initialFlowerProducts: FeaturedProduct[];
-  initialVapeProducts: FeaturedProduct[];
-  initialConcentrateProducts: FeaturedProduct[];
+  initialFlowerProducts: any[];
+  initialVapeProducts: any[];
+  initialConcentrateProducts: any[];
   initialEdibleProducts: any[];
   initialMoonwaterProducts: any[];
 }

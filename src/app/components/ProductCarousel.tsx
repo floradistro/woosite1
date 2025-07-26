@@ -3,12 +3,33 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { FeaturedProduct } from '../flower/constants';
+
+// Unified interface for carousel products that works with all product types
+interface CarouselProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  thc: string;
+  inStock?: boolean;
+  nose?: string[] | string;
+  terpenes?: string[];
+  spotlight?: string;
+  featured?: boolean;
+  hasVariations?: boolean;
+  variationPricing?: Record<string, number>;
+  variations?: any[];
+  type?: string;
+  stockQuantity?: number | null;
+  stockStatus?: string;
+}
 
 interface ProductCarouselProps {
   title: string;
   subtitle?: string;
-  products: FeaturedProduct[];
+  products: CarouselProduct[];
   productType: 'vape' | 'concentrate' | 'flower' | 'edible' | 'moonwater';
   itemsPerView?: number;
   showProductTypeIcon?: boolean;
@@ -97,7 +118,7 @@ export default function ProductCarousel({
     }
   };
 
-  const handleQuickView = (product: FeaturedProduct) => {
+  const handleQuickView = (product: CarouselProduct) => {
     // Navigate to the relevant collection page with the product highlighted
     const collectionPath = `/${productType}`;
     const productSlug = product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
