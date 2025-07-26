@@ -84,8 +84,9 @@ export interface FilterState {
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
+import { fetchWithRetry } from '../../utils/fetchWithRetry';
 
-// Helper function to get product variations
+// Helper function to get product variations with timeout and retry logic
 async function getProductVariations(productId: number): Promise<any[]> {
   try {
     const storeUrl = process.env.WOOCOMMERCE_STORE_URL || 
@@ -105,7 +106,7 @@ async function getProductVariations(productId: number): Promise<any[]> {
     const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
     const url = `${storeUrl}/wp-json/wc/v3/products/${productId}/variations`;
     
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json',
@@ -116,9 +117,9 @@ async function getProductVariations(productId: number): Promise<any[]> {
       return [];
     }
 
-    return response.json();
-  } catch (error) {
-    console.error(`Error fetching variations for product ${productId}:`, error);
+    return await response.json();
+  } catch (error: any) {
+    console.error(`Error fetching variations for product ${productId}:`, error.message || error);
     return [];
   }
 }

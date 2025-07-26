@@ -68,17 +68,21 @@ export interface FilterState {
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
+import { fetchWithRetry } from '../../utils/fetchWithRetry';
 
-// Enhanced function to fetch variations for a product
+// Enhanced function to fetch variations for a product with timeout and retry logic
 async function getProductVariations(productId: number): Promise<any[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/woo-products/${productId}/variations`);
-    if (!response.ok) return [];
+    const response = await fetchWithRetry(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/woo-products/${productId}/variations`);
+    
+    if (!response.ok) {
+      return [];
+    }
     
     const data = await response.json();
     return data.success ? data.variations : [];
-  } catch (error) {
-    console.error(`Error fetching variations for product ${productId}:`, error);
+  } catch (error: any) {
+    console.error(`Error fetching variations for product ${productId}:`, error.message || error);
     return [];
   }
 }

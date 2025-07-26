@@ -83,6 +83,7 @@ export interface FilterState {
 // Import products from WooCommerce service
 import { productService } from '../../services/productService';
 import { wooCommerceServerAPI } from '../../lib/woocommerce-server';
+import { fetchWithRetry } from '../../utils/fetchWithRetry';
 
 // Enhanced moonwater product interface with variations
 export interface MoonwaterVariation {
@@ -101,7 +102,7 @@ export interface MoonwaterProductWithVariations extends FeaturedProduct {
   baseProductId: number;
 }
 
-// Server-side function to fetch product variations
+// Server-side function to fetch product variations with timeout and retry logic
 async function getProductVariations(productId: number): Promise<any[]> {
   try {
     const storeUrl = process.env.WOOCOMMERCE_STORE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_STORE_URL;
@@ -115,7 +116,7 @@ async function getProductVariations(productId: number): Promise<any[]> {
 
     const url = `${storeUrl}/wp-json/wc/v3/products/${productId}/variations?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}&per_page=100`;
     
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -129,8 +130,8 @@ async function getProductVariations(productId: number): Promise<any[]> {
 
     const variations = await response.json();
     return variations || [];
-  } catch (error) {
-    console.error(`Error fetching variations for product ${productId}:`, error);
+  } catch (error: any) {
+    console.error(`Error fetching variations for product ${productId}:`, error.message || error);
     return [];
   }
 }

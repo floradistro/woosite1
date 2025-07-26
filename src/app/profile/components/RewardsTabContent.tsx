@@ -108,12 +108,11 @@ export default function RewardsTabContent({
               {/* Center Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <Image 
-                  src="/flora_chip_optimized.webp" 
+                  src="/flora_chip_no_background.png" 
                   alt="Flora Chip" 
                   width={120} 
                   height={120} 
                   className="flex-shrink-0 mb-4"
-                  priority
                 />
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white mb-2">2,847</div>
@@ -125,7 +124,8 @@ export default function RewardsTabContent({
           </div>
           
           {/* Middle Section - Trading Chart */}
-          <div className={`${isMobile ? 'bg-transparent border-0 rounded-none' : 'bg-black/20 rounded-lg border border-white/10'} h-full`}>
+          <div className={`${isMobile ? 'bg-transparent border-0 rounded-none' : 'bg-gradient-to-br from-white/8 to-white/4 hover:from-white/12 hover:to-white/8 rounded-lg border border-white/[0.08]'} p-6`}>
+            <div className="bg-black/20 rounded-lg border border-white/10 h-full">
               {/* Chart Header */}
               <div className="flex items-center justify-between p-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
@@ -234,6 +234,7 @@ export default function RewardsTabContent({
                 </div>
                 <span className="text-white/40 font-mono">Volume: 1,040</span>
               </div>
+            </div>
           </div>
 
           {/* Right Section - Chips Activity */}
@@ -281,7 +282,7 @@ export default function RewardsTabContent({
               {rewardsHistory.length === 0 && (
                 <div className="p-6 text-center">
                   <Image 
-                    src="/flora_chip_optimized.webp" 
+                    src="/flora_chip_no_background.png" 
                     alt="Flora Chip" 
                     width={48} 
                     height={48} 

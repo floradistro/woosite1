@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
-import { ProductType } from '@/app/components/ProductCollectionConfig';
+import { Heart, ShoppingCart, Check, X, ChevronUp, ChevronDown, Package, Truck, Sparkles } from 'lucide-react';
+import { useMobilePerformance } from '@/hooks/useMobilePerformance';
 import QuickViewModal from '@/app/components/QuickViewModal';
+import FlowerQuickView from '@/app/components/FlowerQuickView';
 
 interface QuickViewProduct {
   id: number;
@@ -47,7 +49,7 @@ interface DenseViewProps<T extends BaseFeaturedProduct> {
   selectedOptions: Record<number, string>;
   loadedImages: Set<number>;
   format: string;
-  productType: ProductType;
+  productType: string;
   pricing: Record<string, number>;
   sizes: string[];
   onProductClick: (product: T) => void;
@@ -61,22 +63,22 @@ interface DenseViewProps<T extends BaseFeaturedProduct> {
 const ProductImage = ({ 
   product, 
   isLoaded, 
-  productType, 
-  format, 
   onLoad, 
-  onClick,
+  onClick, 
   onGummyClick,
-  index 
-}: {
-  product: BaseFeaturedProduct;
-  isLoaded: boolean;
-  productType: ProductType;
-  format: string;
-  onLoad: () => void;
+  productType, 
+  format 
+}: { 
+  product: BaseFeaturedProduct; 
+  isLoaded: boolean; 
+  onLoad: () => void; 
   onClick: (e: React.MouseEvent) => void;
   onGummyClick?: (e: React.MouseEvent) => void;
-  index: number;
+  productType: string;
+  format?: string;
 }) => {
+  const [hoverPosition, setHoverPosition] = useState({ x: 50, y: 50 });
+
   const getIndicator = () => {
     if (productType === 'flower' && format === 'preroll') {
       return { type: 'image', src: '/icons/pre-roll.png', alt: 'Pre-roll indicator' };
@@ -85,6 +87,13 @@ const ProductImage = ({
       return { type: 'badge', text: 'BULK', color: 'orange' };
     }
     return null;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setHoverPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
   };
 
   const indicator = getIndicator();
@@ -96,6 +105,8 @@ const ProductImage = ({
         e.stopPropagation();
         onClick(e);
       }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHoverPosition({ x: 50, y: 50 })}
     >
       {!isLoaded && (
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 animate-[shimmer_2s_ease-in-out_infinite]">
@@ -131,7 +142,7 @@ const ProductImage = ({
         <>
           {(productType === 'wax' || productType === 'concentrate') ? (
             /* Concentrate icon for wax/concentrate products */
-            <div className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-1">
+            <div className="absolute bottom-2 right-2 w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-1">
               <Image
                 src="/icons/concentrate.png"
                 alt="Concentrate indicator"
@@ -144,8 +155,11 @@ const ProductImage = ({
           ) : product.title.toLowerCase().includes('gummy') ? (
             /* Gummy icon for products containing "gummy" */
             <div 
-              className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-0.5 cursor-pointer"
-              onClick={onGummyClick}
+              className="absolute bottom-2 right-2 w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center p-0.5 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onGummyClick) onGummyClick(e);
+              }}
             >
               <Image
                 src="/icons/newGummy.webp"
@@ -158,7 +172,7 @@ const ProductImage = ({
             </div>
           ) : productType === 'vape' ? (
             /* Vape icon for vape products */
-            <div className="absolute bottom-1 right-1 w-20 h-20 md:w-24 md:h-24 opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center">
+            <div className="absolute bottom-2 right-2 w-16 h-16 md:w-20 md:h-20 opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg flex items-center justify-center">
               <Image
                 src="/icons/vapeicon2.png"
                 alt="Vape indicator"
@@ -169,21 +183,26 @@ const ProductImage = ({
               />
             </div>
           ) : productType !== 'edible' && productType !== 'moonwater' ? (
-            /* Small magnified fisheye view for non-edible products (excluding moonwater and vape) */
-            <div className="absolute bottom-1 right-1 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-lg">
+            /* Static magnified fisheye view for non-edible products (excluding moonwater and vape) */
+            <div className="absolute bottom-2 right-2 w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/60 bg-black/40 backdrop-blur-sm opacity-80 group-hover/image:opacity-100 transition-all duration-300 transform group-hover/image:scale-110 shadow-xl cursor-zoom-in">
               <div 
-                className="w-full h-full rounded-full overflow-hidden"
+                className="w-full h-full rounded-full overflow-hidden relative"
                 style={{
                   backgroundImage: `url(${product.image})`,
-                  backgroundSize: '400%',
-                  backgroundPosition: 'center center',
+                  backgroundSize: '800%', // Much higher zoom for better preview
+                  backgroundPosition: 'center center', // Static center position
                   backgroundRepeat: 'no-repeat',
-                  filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
+                  filter: 'saturate(1.5) contrast(1.4) brightness(1.2)',
                 }}
               >
+                {/* Enhanced lens effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
               </div>
-              {/* Subtle lens effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
+              {/* Static crosshair in center */}
+              <div className="absolute inset-0 pointer-events-none opacity-70 group-hover/image:opacity-100 transition-opacity duration-300">
+                <div className="absolute w-3 h-0.5 bg-white/80 transform -translate-x-1/2 -translate-y-1/2 drop-shadow-sm top-1/2 left-1/2"></div>
+                <div className="absolute w-0.5 h-3 bg-white/80 transform -translate-x-1/2 -translate-y-1/2 drop-shadow-sm top-1/2 left-1/2"></div>
+              </div>
             </div>
           ) : null}
         </>
@@ -200,7 +219,7 @@ const ProductInfo = ({
   isExpanded 
 }: {
   product: BaseFeaturedProduct;
-  productType: ProductType;
+  productType: string;
   format: string;
   isExpanded: boolean;
 }) => {
@@ -625,7 +644,6 @@ export default function DenseView<T extends BaseFeaturedProduct>({
                       onLoad={() => onImageLoad(product.id)}
                       onClick={(e) => handleImageClick(product, e)}
                       onGummyClick={product.title.toLowerCase().includes('gummy') ? (e) => handleGummyClick(product, e) : undefined}
-                      index={index}
                     />
 
                     <ProductInfo
@@ -784,27 +802,48 @@ export default function DenseView<T extends BaseFeaturedProduct>({
         </div>
       )}
 
-      {/* Quick View Modal */}
-      <QuickViewModal
-        product={quickViewProduct ? {
-          id: quickViewProduct.id,
-          title: quickViewProduct.title,
-          description: quickViewProduct.description,
-          price: quickViewProduct.price,
-          image: quickViewProduct.image,
-          category: quickViewProduct.category,
-          vibe: quickViewProduct.vibe,
-          thc: quickViewProduct.thc,
-          nose: quickViewProduct.nose,
-          lineage: quickViewProduct.lineage,
-          terpenes: quickViewProduct.terpenes,
-          spotlight: quickViewProduct.spotlight,
-        } : null}
-        isOpen={isQuickViewOpen}
-        onClose={handleQuickViewClose}
-        onAddToCart={handleQuickViewAddToCart}
-        productType={productType}
-      />
+      {/* Quick View Modal - Use FlowerQuickView for flower products */}
+      {productType === 'flower' ? (
+        <FlowerQuickView
+          product={quickViewProduct ? {
+            id: quickViewProduct.id,
+            title: quickViewProduct.title,
+            description: quickViewProduct.description,
+            price: quickViewProduct.price,
+            image: quickViewProduct.image,
+            category: quickViewProduct.category,
+            vibe: quickViewProduct.vibe,
+            thc: quickViewProduct.thc,
+            nose: quickViewProduct.nose,
+            lineage: quickViewProduct.lineage,
+            terpenes: quickViewProduct.terpenes,
+          } : null}
+          isOpen={isQuickViewOpen}
+          onClose={handleQuickViewClose}
+          onAddToCart={handleQuickViewAddToCart}
+        />
+      ) : (
+        <QuickViewModal
+          product={quickViewProduct ? {
+            id: quickViewProduct.id,
+            title: quickViewProduct.title,
+            description: quickViewProduct.description,
+            price: quickViewProduct.price,
+            image: quickViewProduct.image,
+            category: quickViewProduct.category,
+            vibe: quickViewProduct.vibe,
+            thc: quickViewProduct.thc,
+            nose: quickViewProduct.nose,
+            lineage: quickViewProduct.lineage,
+            terpenes: quickViewProduct.terpenes,
+            spotlight: quickViewProduct.spotlight,
+          } : null}
+          isOpen={isQuickViewOpen}
+          onClose={handleQuickViewClose}
+          onAddToCart={handleQuickViewAddToCart}
+          productType={productType}
+        />
+      )}
     </section>
   );
 } 

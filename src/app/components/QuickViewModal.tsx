@@ -33,6 +33,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(6); // Default to 6x zoom
+  const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 }); // For small preview circle
   
   // Mobile pinch-to-zoom states
   const [isMobile, setIsMobile] = useState(false);
@@ -47,6 +48,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   // Refs for performance optimization
   const magnifierRef = React.useRef<HTMLDivElement>(null);
   const containerRectRef = React.useRef<DOMRect | null>(null);
+  const imageContainerRef = React.useRef<HTMLDivElement>(null);
   
   // Refs for smooth animation
   const animationFrameRef = React.useRef<number | undefined>(undefined);
@@ -57,7 +59,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   React.useEffect(() => {
     if (!isDragging) return;
 
-    const smoothingFactor = 0.2; // Higher = faster response, lower = smoother
+    const smoothingFactor = 0.3; // Higher = faster response, lower = smoother
     
     const animate = () => {
       // Interpolate between current and target position
@@ -70,11 +72,14 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       });
       
       // Calculate image position for magnification
-      const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
+      const rect = imageContainerRef.current?.getBoundingClientRect();
       if (rect) {
         const imageX = (currentPositionRef.current.x / rect.width) * 100;
         const imageY = (currentPositionRef.current.y / rect.height) * 100;
         setImagePosition({ x: imageX, y: imageY });
+        
+        // Update preview position for small circle
+        setPreviewPosition({ x: imageX, y: imageY });
       }
       
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -95,6 +100,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       setImageLoaded(false);
       // Reset zoom level when modal opens
       setZoomLevel(6);
+      setPreviewPosition({ x: 50, y: 50 });
       
       // Detect mobile and show magnifier after a delay
       const checkMobile = () => {
@@ -112,6 +118,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
       document.body.style.overflow = 'unset';
       setShowMobileMagnifier(false);
       setMobileZoom(1);
+      setIsMagnifying(false);
+      setIsDragging(false);
     }
 
     return () => {
@@ -142,8 +150,6 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
   }, [isOpen, onClose, zoomLevel]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
     const rect = e.currentTarget.getBoundingClientRect();
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
@@ -152,8 +158,15 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     x = Math.max(0, Math.min(x, rect.width));
     y = Math.max(0, Math.min(y, rect.height));
     
-    // Update target position for smooth interpolation
-    targetPositionRef.current = { x, y };
+    if (isDragging) {
+      // Update target position for smooth interpolation
+      targetPositionRef.current = { x, y };
+    } else {
+      // Update preview position even when not dragging for hover effect
+      const imageX = (x / rect.width) * 100;
+      const imageY = (y / rect.height) * 100;
+      setPreviewPosition({ x: imageX, y: imageY });
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -204,6 +217,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     const imageX = (x / rect.width) * 100;
     const imageY = (y / rect.height) * 100;
     setImagePosition({ x: imageX, y: imageY });
+    setPreviewPosition({ x: imageX, y: imageY });
   };
 
   const stopMagnifying = (e?: React.MouseEvent | React.TouchEvent) => {
@@ -250,8 +264,8 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     const containerY = magnifierY - rect.top;
     
     // Calculate background position
-    const bgX = (containerX / rect.width) * 100;
-    const bgY = (containerY / rect.height) * 100;
+    const bgX = Math.max(0, Math.min(100, (containerX / rect.width) * 100));
+    const bgY = Math.max(0, Math.min(100, (containerY / rect.height) * 100));
     
     return `${bgX}% ${bgY}%`;
   };
@@ -358,6 +372,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
         </button>
         
         <div 
+          ref={imageContainerRef}
           className="relative w-full h-full rounded-lg overflow-hidden bg-white/5 cursor-crosshair magnifier-container"
           style={{ touchAction: 'none' }}
           onClick={(e) => e.stopPropagation()}
@@ -386,7 +401,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                 setTimeout(() => {
                   setShowMobileMagnifier(true);
                   // Center the magnifier
-                  const rect = document.querySelector('.magnifier-container')?.getBoundingClientRect();
+                  const rect = imageContainerRef.current?.getBoundingClientRect();
                   if (rect) {
                     containerRectRef.current = rect;
                     setMobileMagnifierCenter({
@@ -399,36 +414,42 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
             }}
           />
 
-          {/* Small magnified fisheye view - bottom right corner */}
+          {/* Small magnified fisheye view - bottom right corner with dynamic preview */}
           {imageLoaded && (
-            <div className="absolute bottom-4 right-4 w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-white/40 bg-black/30 backdrop-blur-sm opacity-80 hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg">
+            <div className="absolute bottom-4 right-4 w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-emerald-400/60 bg-black/30 backdrop-blur-sm opacity-80 hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg">
               <div 
                 className="w-full h-full rounded-full overflow-hidden"
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: zoomConfig.size,
-                  backgroundPosition: 'center center',
+                  backgroundPosition: `${previewPosition.x}% ${previewPosition.y}%`,
                   backgroundRepeat: 'no-repeat',
                   filter: 'saturate(1.3) contrast(1.2) brightness(1.1)',
+                  transition: 'background-position 0.1s ease-out',
                 }}
               >
               </div>
               {/* Subtle lens effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-black/30 pointer-events-none"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 via-transparent to-black/30 pointer-events-none"></div>
+              {/* Crosshair indicator */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 w-3 h-0.5 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute top-1/2 left-1/2 w-0.5 h-3 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+              </div>
             </div>
           )}
           
           {/* Desktop Magnifying Glass */}
           {isMagnifying && !isMobile && (
             <>
-              {/* Magnifier positioned within image bounds */}
+              {/* Magnifier positioned relative to viewport */}
               <div
-                className="absolute pointer-events-none border-2 border-white/60 rounded-full shadow-lg z-10"
+                className="fixed pointer-events-none border-2 border-emerald-400/60 rounded-full shadow-lg z-10"
                 style={{
                   width: '300px',
                   height: '300px',
-                  left: `${Math.max(0, Math.min(magnifierPosition.x - 150, window.innerWidth - 300))}px`,
-                  top: `${Math.max(0, Math.min(magnifierPosition.y - 150, window.innerHeight - 300))}px`,
+                  left: `${Math.max(10, Math.min(magnifierPosition.x - 150 + (imageContainerRef.current?.getBoundingClientRect()?.left || 0), window.innerWidth - 310))}px`,
+                  top: `${Math.max(10, Math.min(magnifierPosition.y - 150 + (imageContainerRef.current?.getBoundingClientRect()?.top || 0), window.innerHeight - 310))}px`,
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${zoomConfig.size} ${zoomConfig.size}`,
                   backgroundPosition: `${imagePosition.x}% ${imagePosition.y}%`,
@@ -437,11 +458,16 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                   transition: 'none',
                 }}
               >
+                {/* Magnifier crosshair */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 w-8 h-0.5 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute top-1/2 left-1/2 w-0.5 h-8 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
               </div>
               
-              {/* Handle directly at finger position */}
+              {/* Handle directly at cursor position */}
               <div 
-                className="absolute w-3 h-3 bg-white/90 rounded-full shadow-lg pointer-events-none z-20 border border-white/50"
+                className="absolute w-3 h-3 bg-emerald-400/90 rounded-full shadow-lg pointer-events-none z-20 border border-emerald-400/50"
                 style={{
                   left: `${magnifierPosition.x - 6}px`,
                   top: `${magnifierPosition.y - 6}px`,
@@ -470,7 +496,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
             >
               {/* Main magnifier circle */}
               <div 
-                className="w-full h-full rounded-full border-2 border-white/60 shadow-xl overflow-hidden relative"
+                className="w-full h-full rounded-full border-2 border-emerald-400/60 shadow-xl overflow-hidden relative"
                 style={{
                   backgroundImage: `url(${product.image})`,
                   backgroundSize: `${mobileZoom * 100}%`,
@@ -482,7 +508,13 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                 }}
               >
                 {/* Subtle lens effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/10 pointer-events-none"></div>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/10 via-transparent to-black/10 pointer-events-none"></div>
+                
+                {/* Crosshair for mobile magnifier */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 w-6 h-0.5 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute top-1/2 left-1/2 w-0.5 h-6 bg-emerald-400/80 transform -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
                 
                 {/* Zoom level indicator - minimal and only when zooming */}
                 {isMultiTouch && mobileZoom > 1.2 && (
@@ -510,7 +542,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
             <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2">
               <p className="text-white/90 text-sm font-medium">
                 <span className="md:hidden">Pinch magnifier to zoom</span>
-                <span className="hidden md:inline">Drag to magnify • 5-9,0 keys</span>
+                <span className="hidden md:inline">Click & drag to magnify • 5-9,0 keys • Hover for preview</span>
               </p>
             </div>
           </div>

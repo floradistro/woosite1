@@ -10,7 +10,7 @@ export default function MobileBackButton({ onBackClick, title }: MobileBackButto
     <div className="flex items-center gap-3 px-4 py-3 bg-[#4a4a4a] border-b border-white/10">
       <button
         onClick={onBackClick}
-        className="flex items-center justify-center p-1 hover:bg-white/10 rounded transition-colors"
+        className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
       >
         <ChevronLeft className="w-5 h-5 text-white" />
       </button>

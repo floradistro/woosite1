@@ -93,6 +93,9 @@ export default function NavigationSidebar({
                     <div className={`${isMobile ? 'text-base' : 'text-sm'} font-medium ${isActive ? 'text-white' : 'text-white/80 group-hover:text-white'}`}>
                       {item.label}
                     </div>
+                    <div className={`${isMobile ? 'text-sm' : 'text-xs'} ${isActive ? 'text-white/70' : 'text-white/50 group-hover:text-white/70'} mt-0.5`}>
+                      {item.description}
+                    </div>
                   </div>
                 </div>
               </button>

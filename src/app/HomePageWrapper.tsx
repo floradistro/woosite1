@@ -9,7 +9,7 @@ import { FeaturedProduct } from './flower/constants';
 
 // Import sections
 import HeroSection from './components/HeroSection';
-import FlowerCarousel from './components/FlowerCarousel';
+import ProductCarousel from './components/ProductCarousel';
 import Section from './components/Section';
 import THCAExplanationSection from './components/THCAExplanationSection';
 import ReviewsSection from './components/ReviewsSection';
@@ -61,9 +61,19 @@ const useStoreStatus = () => {
 
 interface HomePageWrapperProps {
   initialFlowerProducts: FeaturedProduct[];
+  initialVapeProducts: FeaturedProduct[];
+  initialConcentrateProducts: FeaturedProduct[];
+  initialEdibleProducts: any[];
+  initialMoonwaterProducts: any[];
 }
 
-export default function HomePageWrapper({ initialFlowerProducts }: HomePageWrapperProps) {
+export default function HomePageWrapper({ 
+  initialFlowerProducts, 
+  initialVapeProducts, 
+  initialConcentrateProducts,
+  initialEdibleProducts,
+  initialMoonwaterProducts
+}: HomePageWrapperProps) {
   const visibleSections = useSharedIntersectionObserver();
   const [timeUntilDeadline, setTimeUntilDeadline] = useState('');
   const storeStatus = useStoreStatus();
@@ -101,7 +111,45 @@ export default function HomePageWrapper({ initialFlowerProducts }: HomePageWrapp
       <main>
         <HeroSection timeUntilDeadline={timeUntilDeadline} />
         
-        <FlowerCarousel initialProducts={initialFlowerProducts} />
+        <ProductCarousel 
+          title="Smells like trouble."
+          subtitle={`${initialFlowerProducts.length} Premium Cannabis Flower`}
+          products={initialFlowerProducts}
+          productType="flower"
+          itemsPerView={3}
+        />
+        
+        <ProductCarousel 
+          title="Big hits. Bigger flavor."
+          subtitle={`${initialVapeProducts.length} Premium Vape Cartridges`}
+          products={initialVapeProducts}
+          productType="vape"
+          itemsPerView={3}
+        />
+        
+        <ProductCarousel 
+          title="Concentrates that slap."
+          subtitle={`${initialConcentrateProducts.length} Premium Concentrates`}
+          products={initialConcentrateProducts}
+          productType="concentrate"
+          itemsPerView={3}
+        />
+        
+        <ProductCarousel 
+          title="Sweet. Then serious."
+          subtitle={`${initialEdibleProducts.length} Premium Cannabis Edibles`}
+          products={initialEdibleProducts}
+          productType="edible"
+          itemsPerView={3}
+        />
+        
+        <ProductCarousel 
+          title="[shop moonwater]"
+          subtitle={`${initialMoonwaterProducts.length} Premium Cannabis Drinks`}
+          products={initialMoonwaterProducts}
+          productType="moonwater"
+          itemsPerView={3}
+        />
         
         <THCAExplanationSection 
           visibleSections={visibleSections} 

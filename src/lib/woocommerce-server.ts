@@ -1,6 +1,8 @@
 // Server-side WooCommerce functions for SSR
 // These functions directly call WooCommerce API without going through Next.js API routes
 
+import { fetchWithRetry } from '../utils/fetchWithRetry';
+
 // ACF Field Interfaces
 export interface ACFFields {
   // Edible/Moonwater fields
@@ -171,7 +173,7 @@ export const wooCommerceServerAPI = {
       
       const url = `${storeUrl}/wp-json/wc/v3/products?${queryParams.toString()}`;
       
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -217,7 +219,7 @@ export const wooCommerceServerAPI = {
 
       const url = `${storeUrl}/wp-json/wc/v3/products/categories?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}&per_page=100`;
       
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -302,7 +304,7 @@ export const wooCommerceServerAPI = {
 
       const url = `${storeUrl}/wp-json/wc/v3/products/${productId}?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
       
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
